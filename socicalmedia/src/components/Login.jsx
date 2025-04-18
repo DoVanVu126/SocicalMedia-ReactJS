@@ -1,14 +1,12 @@
+// src/components/Login.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../style/Login.css';
 
 const Login = () => {
-  const [form, setForm] = useState({
-    email: '',
-    password: '',
-  });
-
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
   const handleChange = e => {
@@ -19,58 +17,58 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await axios.post('http://localhost:8000/api/login', form);
-      console.log(res.data.user);  // Kiểm tra response từ server
-
-      // Lưu thông tin người dùng vào localStorage
       const userData = res.data.user;
-      localStorage.setItem('user', JSON.stringify(userData));
-
-      alert('Đăng nhập thành công!');
-      navigate('/home');
+      if (userData) {
+        localStorage.setItem('user', JSON.stringify(userData));
+        setMessage(res.data.message);
+        navigate('/home');
+      } else {
+        throw new Error('Response không có user');
+      }
     } catch (err) {
-      alert('Lỗi đăng nhập! Kiểm tra lại email và mật khẩu.');
+      console.error('Login error:', err.response?.data || err.message);
+      setMessage(err.response?.data?.message || 'Đăng nhập thất bại');
     }
   };
 
   return (
-    <div className="login-container">
+    <div className="login">
+      {/* LEFT: Form */}
       <div className="login-form-container">
-        <form onSubmit={handleSubmit} className="login-form">
+        <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: '400px' }}>
           <h2 className="login-title">Đăng nhập</h2>
-
           <input
             type="email"
             name="email"
+            className="input-field"
             placeholder="Email"
             value={form.email}
             onChange={handleChange}
-            className="input-field"
             required
           />
           <input
             type="password"
             name="password"
+            className="input-field"
             placeholder="Mật khẩu"
             value={form.password}
             onChange={handleChange}
-            className="input-field"
             required
           />
-          <button
-            type="submit"
-            className="submit-btn"
-          >
-            Đăng nhập
-          </button>
+          <button type="submit" className="submit-btn">Đăng nhập</button>
+          {message && <p style={{ color: 'red', marginTop: '10px' }}>{message}</p>}
+
           <div className="signup-link">
-            <span className="signup-text">Chưa có tài khoản?</span>
-            <a href="/register" className="signup-link-text"> Đăng ký ngay</a>
+            <p className="signup-text">
+              Chưa có tài khoản? <a href="/register" className="signup-link-text">Đăng ký ngay</a>
+            </p>
           </div>
         </form>
       </div>
 
+      {/* RIGHT: Image */}
       <div className="login-image-container">
-        <img src="https://via.placeholder.com/500x500" alt="Login illustration" className="login-image" />
+        <img src="/login-image.png" alt="Login illustration" className="login-image" />
       </div>
     </div>
   );

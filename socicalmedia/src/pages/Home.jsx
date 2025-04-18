@@ -14,7 +14,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="container">
+    <div className="hhh">
       <Sidebar />
       <div className="main">
         {Array.isArray(posts) && posts.map(post => (

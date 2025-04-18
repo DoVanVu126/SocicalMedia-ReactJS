@@ -1,69 +1,73 @@
-/* Home.css */
-
-/* Container layout với sidebar cố định */
 .container {
     display: flex;
-    height: 100vh; /* Chiếm toàn bộ chiều cao màn hình */
-    overflow: hidden;
+    height: auto;
+    overflow: visible;
 }
 
-/* Main content cuộn được */
+/* Main content */
 .main {
-    margin-left: 0px; /* Để không đè lên sidebar */
+    margin-left: 0px;
     flex: 1;
-    overflow-y: auto;
-    padding: 0.5rem;
-    height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center; /* Căn giữa bài viết */
-    gap: 0rem;
+    align-items: center;
 }
 
-/* Các bài viết */
+/* Bài viết */
 .post {
     background: white;
     border-radius: 8px;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.2); /* Giảm độ mờ của bóng */
-    padding: 0.75rem; /* Giảm padding để bài viết nhỏ hơn */
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+    padding: 0.75rem;
     margin-bottom: 1rem;
-    max-width: 800px; /* Giới hạn chiều rộng của bài viết */
-    width: 100%; /* Đảm bảo bài viết chiếm hết chiều rộng nhưng không vượt qua max-width */
+    max-width: 800px;
+    width: 100%;
 }
 
-/* Đảm bảo các phần tử trong bài viết vẫn căn chỉnh hợp lý */
+/* Header bài viết (đã giảm chiều cao) */
 .post-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 0.25rem 0; /* Giảm padding để thấp hơn */
 }
 
 .user-info {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.5rem; /* Giảm khoảng cách giữa avatar và thông tin */
 }
 
 .avatar {
-    width: 35px; /* Giảm kích thước avatar */
-    height: 35px;
+    width: 30px; /* Giảm kích thước avatar */
+    height: 30px;
     border-radius: 50%;
     object-fit: cover;
 }
 
-.post-content {
-    margin: 1rem 0;
-    font-size: 0.9rem; /* Giảm kích thước font chữ */
+.user-info div {
+    line-height: 1.2; /* Giảm khoảng cách giữa tên và thời gian */
 }
 
-/* Căn giữa các hình ảnh và video trong bài viết */
+.post-header small {
+    font-size: 0.75rem; /* Làm nhỏ thời gian đăng */
+    line-height: 1;
+}
+
+/* Nội dung bài viết */
+.post-content {
+    font-size: 0.9rem;
+    margin-top: 0.25rem; /* Giảm khoảng cách với header */
+}
+
+/* Hình ảnh/video */
 .media-wrapper {
     display: flex;
-    justify-content: center; /* Căn giữa tất cả hình ảnh/video */
+    justify-content: center;
     align-items: center;
-    flex-wrap: wrap; /* Nếu có nhiều ảnh, chúng sẽ xuống dòng */
-    gap: 1rem; /* Khoảng cách giữa các hình ảnh */
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .media-wrapper img,
@@ -71,16 +75,16 @@
     max-width: 100%;
     border-radius: 6px;
     margin-bottom: 1.5rem;
-    max-height: 350px; /* Giới hạn chiều cao ảnh/video */
-    object-fit: cover; /* Giữ tỷ lệ ảnh/video */
+    max-height: 350px;
+    object-fit: cover;
 }
 
-/* Các hành động như Thích, Bình luận, Chia sẻ */
+/* Hành động: Thích, Bình luận, Chia sẻ */
 .actions {
     display: flex;
     gap: 1rem;
     margin-top: 0.5rem;
-    font-size: 0.9rem; /* Giảm kích thước font chữ của nút */
+    font-size: 0.9rem;
 }
 
 .options-btn {

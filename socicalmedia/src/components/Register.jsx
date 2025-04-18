@@ -9,31 +9,51 @@ const Register = () => {
     email: '',
     password: '',
     phone: '',
-    profilepicture: '',
-    two_factor_enabled: false
+    profilepicture: null
   });
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async e => {
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === 'profilepicture') {
+      setForm({ ...form, profilepicture: files[0] });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    const formData = new FormData();
+    formData.append('username', form.username);
+    formData.append('email', form.email);
+    formData.append('password', form.password);
+    formData.append('phone', form.phone);
+    if (form.profilepicture) {
+      formData.append('profilepicture', form.profilepicture);
+    }
+
     try {
-      const res = await axios.post('http://localhost:8000/api/register', form);
-      setMessage(res.data.message);
+      const res = await axios.post('http://localhost:8000/api/register', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       alert('Đăng ký thành công!');
-      navigate('/login'); // Chuyển hướng sang màn hình đăng nhập
+      navigate('/login');
     } catch (err) {
       setMessage('Lỗi đăng ký: ' + (err.response?.data?.message || ''));
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input placeholder="Username" onChange={e => setForm({ ...form, username: e.target.value })} />
-      <input placeholder="Email" onChange={e => setForm({ ...form, email: e.target.value })} />
-      <input type="password" placeholder="Password" onChange={e => setForm({ ...form, password: e.target.value })} />
-      <input placeholder="Phone" onChange={e => setForm({ ...form, phone: e.target.value })} />
-      <input placeholder="Profile Picture URL" onChange={e => setForm({ ...form, profilepicture: e.target.value })} />
+    <form onSubmit={handleSubmit} encType="multipart/form-data">
+      <input name="username" placeholder="Username" onChange={handleChange} />
+      <input name="email" placeholder="Email" onChange={handleChange} />
+      <input name="password" type="password" placeholder="Password" onChange={handleChange} />
+      <input name="phone" placeholder="Phone" onChange={handleChange} />
+      <input name="profilepicture" type="file" accept="image/*" onChange={handleChange} />
       <button type="submit">Đăng ký</button>
       <p>{message}</p>
     </form>
