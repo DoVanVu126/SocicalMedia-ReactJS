@@ -24,17 +24,17 @@ const Sidebar = () => {
 
   // Xây dựng URL avatar
   const avatarUrl = user.profilepicture
-    ? `http://localhost:8000/storage/images/${user.profilepicture}`
-    : '/default-avatar.png'; // đặt default-avatar.png trong public/
+  ? `http://localhost:8000/storage/images/${user.profilepicture}` //Lấy trong thư mục public\storage\images
+  : '/default-avatar.png';
 
   return (
     <div className="sidebar">
       <h2>Social App</h2>
-      <a href="/">🏠 Home</a>
+      <a href="/home">🏠 Home</a>
       <a href="#">🔍 Tìm kiếm</a>
       <a href="/add-post">➕ Thêm bài viết</a>
       <a href="#">⭐ Yêu thích</a>
-      <a href="/notifications">🔔 Thông báo</a>
+      <a href="#">🔔 Thông báo</a>
 
       <div className="user-info" onClick={handleUserClick}>
         <img

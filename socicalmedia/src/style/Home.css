@@ -1,64 +1,78 @@
+/* Container */
 .container {
     display: flex;
     height: auto;
     overflow: visible;
+    margin: 0 auto;
+    max-width: 1200px; /* Giới hạn chiều rộng của container */
 }
 
 /* Main content */
 .main {
-    margin-left: 0px;
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+    margin-left: 20px;
+    margin-right: 20px;
+    gap: 1rem; /* Tạo khoảng cách đều giữa các bài viết */
 }
 
 /* Bài viết */
 .post {
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    max-width: 800px;
-    width: 100%;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    padding:0px 1rem 1rem 1rem ;
+    margin-bottom: 0.5rem;
+    width: 70%;
+    max-width: 900px; /* Giới hạn chiều rộng của bài viết */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Header bài viết (đã giảm chiều cao) */
+.post:hover {
+    transform: translateY(-5px); /* Tăng hiệu ứng nổi bật khi hover */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Header bài viết */
 .post-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.25rem 0; /* Giảm padding để thấp hơn */
 }
 
 .user-info {
     display: flex;
     align-items: center;
-    gap: 0.5rem; /* Giảm khoảng cách giữa avatar và thông tin */
+    gap: 0.75rem; /* Khoảng cách giữa avatar và thông tin người dùng */
 }
 
 .avatar {
-    width: 30px; /* Giảm kích thước avatar */
-    height: 30px;
+    width: 40px; /* Tăng kích thước avatar */
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid #f1f1f1; /* Thêm viền cho avatar */
 }
 
 .user-info div {
-    line-height: 1.2; /* Giảm khoảng cách giữa tên và thời gian */
+    font-size: 0.95rem;
 }
 
 .post-header small {
-    font-size: 0.75rem; /* Làm nhỏ thời gian đăng */
-    line-height: 1;
+    font-size: 0.75rem;
+    color: #888;
+    line-height: 1.2;
 }
 
 /* Nội dung bài viết */
 .post-content {
-    font-size: 0.9rem;
-    margin-top: 0.25rem; /* Giảm khoảng cách với header */
+    font-size: 1rem;
+    margin-top: -10px;
+    margin-left: 5px;
+    color: #333;
 }
 
 /* Hình ảnh/video */
@@ -67,33 +81,84 @@
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 1.5rem;
+    margin-top: 1rem;
 }
 
 .media-wrapper img,
 .media-wrapper video {
     max-width: 100%;
-    border-radius: 6px;
+    border-radius: 10px;
     margin-bottom: 1.5rem;
-    max-height: 350px;
+    max-height: 400px;
     object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.media-wrapper img:hover,
+.media-wrapper video:hover {
+    transform: scale(1.05); /* Hiệu ứng phóng to khi hover lên hình ảnh/video */
 }
 
 /* Hành động: Thích, Bình luận, Chia sẻ */
 .actions {
     display: flex;
-    gap: 1rem;
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
+    gap: 1.25rem;
+    margin-top: 0.75rem;
+    font-size: 1rem;
+    justify-content: center;
 }
 
+.actions button {
+    background-color: #f46cef;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.actions button:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Thêm hiệu ứng cho nút 3 chấm */
 .options-btn {
     background: none;
     border: none;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #888;
+}
+
+.options-btn:hover {
+    color: #333;
+}
+
+/* Menu tùy chọn */
+.options-menu {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    top: 10px;
+    right: 0;
+    width: 120px;
+    padding: 8px 0;
+    z-index: 10;
+}
+
+.options-menu button {
+    background: none;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    text-align: left;
     cursor: pointer;
 }
 
-.options-menu {
-    display: none;
+.options-menu button:hover {
+    background-color: #f1f1f1;
 }

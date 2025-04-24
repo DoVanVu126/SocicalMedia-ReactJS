@@ -15,7 +15,7 @@ const AddPost = () => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setForm(f => ({ ...f, [name]: files ? files[0] : value }));
+    setForm((f) => ({ ...f, [name]: files ? files[0] : value }));
   };
 
   const handleSubmit = async (e) => {
@@ -23,9 +23,8 @@ const AddPost = () => {
     if (!user) return alert('Vui lòng đăng nhập');
 
     const data = new FormData();
-    data.append('content', form.content);
     data.append('user_id', user.id);
-    data.append('status', 'active');
+    data.append('content', form.content);
     if (form.image) data.append('image', form.image);
     if (form.video) data.append('video', form.video);
 
@@ -44,7 +43,7 @@ const AddPost = () => {
   if (!user) return <p>Đang tải thông tin người dùng…</p>;
 
   const avatarUrl = user.profilepicture
-    ? `http://localhost:8000/storage/images/${user.profilepicture}`
+    ? `http://localhost:8000/storage/images/${user.profilepicture}`//Lấy trong thư mục public\storage\images
     : '/default-avatar.png';
 
   return (
@@ -53,7 +52,7 @@ const AddPost = () => {
         <img src={avatarUrl} alt="Avatar" className="user-avatar" />
         <span className="user-name">{user.username}</span>
       </div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
         <textarea
           name="content"
           placeholder="Nội dung bài viết"
@@ -61,8 +60,30 @@ const AddPost = () => {
           onChange={handleChange}
           required
         />
-        <input type="file" name="image" accept="image/*" onChange={handleChange} />
-        <input type="file" name="video" accept="video/*" onChange={handleChange} />
+        <div className="file-inputs">
+          <label htmlFor="image" className="file-label">
+            {form.image ? form.image.name : 'Chọn ảnh'}
+          </label>
+          <input
+            type="file"
+            name="image"
+            id="image"
+            accept="image/*"
+            onChange={handleChange}
+            className="file-input"
+          />
+          <label htmlFor="video" className="file-label">
+            {form.video ? form.video.name : 'Chọn video'}
+          </label>
+          <input
+            type="file"
+            name="video"
+            id="video"
+            accept="video/*"
+            onChange={handleChange}
+            className="file-input"
+          />
+        </div>
         <button type="submit">Đăng bài</button>
       </form>
     </div>

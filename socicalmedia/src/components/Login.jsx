@@ -68,7 +68,7 @@ const Login = () => {
 
       {/* RIGHT: Image */}
       <div className="login-image-container">
-        <img src="/login-image.png" alt="Login illustration" className="login-image" />
+        <img src="http://localhost:8000/storage/image/login-image.jpg" alt="Login illustration" className="login-image" />
       </div>
     </div>
   );

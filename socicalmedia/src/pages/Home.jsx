@@ -22,7 +22,8 @@ export default function Home() {
             <div className="post-header">
               <div className="user-info">
                 <img
-                  src={`http://localhost:8000/storage/image/${post.user?.profilepicture || 'default-avatar.png'}`}
+                //Lấy trong thư mục public\storage\images
+                  src={`http://localhost:8000/storage/images/${post.user?.profilepicture || 'default-avatar.png'}`} 
                   alt="Avatar"
                   className="avatar"
                 />
@@ -46,7 +47,8 @@ export default function Home() {
             <div className="media-wrapper">
               {post.imageurl && (
                 <img
-                  src={`http://localhost:8000/storage/image/${post.imageurl}`}
+                //Lấy trong thư mục public\storage\image,video
+                  src={`http://localhost:8000/storage/images/${post.imageurl}`}
                   alt="Ảnh"
                   className="post-image"
                 />
