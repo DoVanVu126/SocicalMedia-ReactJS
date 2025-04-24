@@ -119,34 +119,35 @@
 }
 
 .actions button:hover {
-    background-color: #007bff;
+    background-color: #690856;
     color: #fff;
 }
 
 /* Thêm hiệu ứng cho nút 3 chấm */
 .options-btn {
-    background: none;
+    background: white;
     border: none;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     cursor: pointer;
     color: #888;
 }
 
 .options-btn:hover {
-    color: #333;
-}
+    color: #ffffff;
+} 
 
 /* Menu tùy chọn */
 .options-menu {
-    display: none;
+    display: block;
     position: absolute;
     background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     border-radius: 5px;
+    border: 1px solid black;
     top: 10px;
-    right: 0;
-    width: 120px;
-    padding: 8px 0;
+    right: -90px;
+    width: 90px;
+    padding: 4px 0;
     z-index: 10;
 }
 
@@ -157,6 +158,7 @@
     width: 100%;
     text-align: left;
     cursor: pointer;
+    color: black;
 }
 
 .options-menu button:hover {

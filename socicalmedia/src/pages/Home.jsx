@@ -6,7 +6,7 @@ import '../style/Home.css'; // Đảm bảo bạn đã tạo file này
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
-
+  const [activeMenuPostId, setActiveMenuPostId] = useState(null);
   useEffect(() => {
     axios.get('http://localhost:8000/api/posts')
       .then(res => setPosts(res.data))
@@ -22,8 +22,8 @@ export default function Home() {
             <div className="post-header">
               <div className="user-info">
                 <img
-                //Lấy trong thư mục public\storage\images
-                  src={`http://localhost:8000/storage/images/${post.user?.profilepicture || 'default-avatar.png'}`} 
+                  //Lấy trong thư mục public\storage\images
+                  src={`http://localhost:8000/storage/images/${post.user?.profilepicture || 'default-avatar.png'}`}
                   alt="Avatar"
                   className="avatar"
                 />
@@ -33,13 +33,26 @@ export default function Home() {
                   <small>{new Date(post.created_at).toLocaleString()}</small>
                 </div>
               </div>
-              <div className="post-options">
-                <button className="options-btn">⋯</button>
-                <div className="options-menu">
-                  <button>📝 Sửa</button>
-                  <button onClick={() => alert("Bạn có chắc chắn muốn xóa không?")}>🗑️ Xóa</button>
-                </div>
+              <div className="post-options" style={{ position: 'relative' }}>
+                <button
+                  className="options-btn"
+                  onClick={() =>
+                    setActiveMenuPostId(activeMenuPostId === post.id ? null : post.id)
+                  }
+                >
+                  ⋯
+                </button>
+
+                {activeMenuPostId === post.id && (
+                  <div className="options-menu">
+                    <button>📝 Sửa</button>
+                    <button onClick={() => alert("Bạn có chắc chắn muốn xóa không?")}>
+                      🗑️ Xóa
+                    </button>
+                  </div>
+                )}
               </div>
+
             </div>
 
             <p className="post-content">{post.content}</p>
@@ -47,7 +60,7 @@ export default function Home() {
             <div className="media-wrapper">
               {post.imageurl && (
                 <img
-                //Lấy trong thư mục public\storage\image,video
+                  //Lấy trong thư mục public\storage\image,video
                   src={`http://localhost:8000/storage/images/${post.imageurl}`}
                   alt="Ảnh"
                   className="post-image"
