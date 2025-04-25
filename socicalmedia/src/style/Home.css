@@ -1,35 +1,41 @@
-/* Home.css */
-
 /* Container layout với sidebar cố định */
 .container {
     display: flex;
-    height: 100vh; /* Chiếm toàn bộ chiều cao màn hình */
+    height: 100vh;
     overflow: hidden;
+    background-color: #f0f2f5; /* Màu nền nhẹ nhàng giống mạng xã hội */
 }
 
 /* Main content cuộn được */
 .main {
-    margin-left: 0px; /* Để không đè lên sidebar */
+    margin-left: 0px;
     flex: 1;
     overflow-y: auto;
-    padding: 0.5rem;
+    padding: 1rem;
     height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center; /* Căn giữa bài viết */
-    gap: 0rem;
+    align-items: center;
+    gap: 1rem;
 }
 
 /* Các bài viết */
 .post {
     background: white;
-    border-radius: 8px;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.2); /* Giảm độ mờ của bóng */
-    padding: 0.75rem; /* Giảm padding để bài viết nhỏ hơn */
-    margin-bottom: 1rem;
-    max-width: 800px; /* Giới hạn chiều rộng của bài viết */
-    width: 100%; /* Đảm bảo bài viết chiếm hết chiều rộng nhưng không vượt qua max-width */
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Bóng nhẹ và mềm mại hơn */
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    max-width: 600px; /* Thu hẹp chiều rộng để giao diện thoáng hơn */
+    width: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Hiệu ứng khi hover */
+}
+
+/* Hiệu ứng hover cho bài viết */
+.post:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
 /* Đảm bảo các phần tử trong bài viết vẫn căn chỉnh hợp lý */
@@ -37,6 +43,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 0.75rem;
 }
 
 .user-info {
@@ -46,50 +53,197 @@
 }
 
 .avatar {
-    width: 35px; /* Giảm kích thước avatar */
-    height: 35px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid #e0e0e0; /* Viền nhẹ cho avatar */
 }
 
 .post-content {
     margin: 1rem 0;
-    font-size: 0.9rem; /* Giảm kích thước font chữ */
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #333; /* Màu chữ đậm hơn để dễ đọc */
 }
 
 /* Căn giữa các hình ảnh và video trong bài viết */
 .media-wrapper {
     display: flex;
-    justify-content: center; /* Căn giữa tất cả hình ảnh/video */
+    justify-content: center;
     align-items: center;
-    flex-wrap: wrap; /* Nếu có nhiều ảnh, chúng sẽ xuống dòng */
-    gap: 1rem; /* Khoảng cách giữa các hình ảnh */
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
 }
 
 .media-wrapper img,
 .media-wrapper video {
     max-width: 100%;
-    border-radius: 6px;
-    margin-bottom: 1.5rem;
-    max-height: 350px; /* Giới hạn chiều cao ảnh/video */
-    object-fit: cover; /* Giữ tỷ lệ ảnh/video */
+    border-radius: 10px;
+    max-height: 400px;
+    object-fit: cover;
+    transition: transform 0.3s ease; /* Hiệu ứng phóng to khi hover */
+}
+
+.media-wrapper img:hover,
+.media-wrapper video:hover {
+    transform: scale(1.02);
 }
 
 /* Các hành động như Thích, Bình luận, Chia sẻ */
 .actions {
     display: flex;
-    gap: 1rem;
-    margin-top: 0.5rem;
-    font-size: 0.9rem; /* Giảm kích thước font chữ của nút */
+    align-items: center;
+    gap: 15px;
+    margin-top: 0.75rem;
+    position: relative;
+    border-top: 1px solid #e0e0e0; /* Đường viền phân cách */
+    padding-top: 0.5rem;
 }
 
+.reaction-summary {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    position: absolute;
+    top: -30px;
+    left: 0;
+    background-color: #fff;
+    padding: 4px 10px;
+    border-radius: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+    font-weight: 500;
+    color: #606770;
+}
+
+.reaction-summary span {
+    line-height: 1;
+}
+
+.like-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 8px 12px;
+    color: #606770;
+    border-radius: 6px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.like-button:hover {
+    background-color: #f0f2f5;
+    color: #1877f2; /* Màu xanh giống Facebook */
+}
+
+.reaction-icons {
+    display: none;
+    position: absolute;
+    top: -60px;
+    left: 0;
+    background-color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 6px;
+    border-radius: 25px;
+    z-index: 1000;
+}
+
+.reaction-icons button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    padding: 6px;
+    margin: 0 3px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.reaction-icons button:hover {
+    transform: scale(1.3);
+    opacity: 0.9;
+}
+
+.like-button:hover + .reaction-icons,
+.reaction-icons:hover {
+    display: flex;
+}
+
+/* Nút Bình luận và Chia sẻ */
+.actions button:not(.like-button) {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 8px 12px;
+    color: #606770;
+    border-radius: 6px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.actions button:not(.like-button):hover {
+    background-color: #f0f2f5;
+    color: #1877f2;
+}
+
+/* Nút tùy chọn (options) */
 .options-btn {
     background: none;
     border: none;
     font-size: 1.25rem;
     cursor: pointer;
+    color: #606770;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.options-btn:hover {
+    background-color: #f0f2f5;
 }
 
 .options-menu {
     display: none;
+    position: absolute;
+    right: 0;
+    top: 30px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 0.5rem;
+    z-index: 1000;
+}
+
+.options-menu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.options-menu button:hover {
+    background-color: #f0f2f5;
+}
+
+/* Hiển thị menu tùy chọn khi mở */
+details[open] .options-menu {
+    display: block;
+}
+
+.like-button::before {
+    content: '';
+    position: absolute;
+    top: -10px; /* Tạo một vùng vô hình phía trên nút Thích */
+    left: 0;
+    width: 100%;
+    height: 20px;
+    z-index: 1;
 }
