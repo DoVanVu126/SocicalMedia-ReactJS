@@ -1,0 +1,87 @@
+/* Sidebar cố định */
+.sidebar {
+  width: 250px; /* Điều chỉnh chiều rộng để phù hợp hơn */
+  background-color: #f5f5f5;
+  padding: 1rem;
+  flex-shrink: 0;
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  border-right: 1px solid #000000; /* Màu sắc đường viền nhẹ hơn */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tiêu đề Sidebar */
+.sidebar h2 {
+  margin-bottom: 1.5rem;
+  color: red; /* Giữ màu đỏ cho tiêu đề */
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Các link trong Sidebar */
+.sidebar a {
+  display: block;
+  padding: 15px; /* Giảm padding để tạo cảm giác vừa phải */
+  text-decoration: none;
+  color: #333;
+  font-size: 18px; /* Điều chỉnh font size để vừa mắt hơn */
+  transition: all 0.3s ease; /* Thêm hiệu ứng chuyển đổi khi hover */
+}
+
+/* Hover effect cho các link */
+.sidebar a:hover {
+  color: #007bff; /* Màu sắc khi hover */
+  background-color: #e0e0e0; /* Thêm màu nền khi hover */
+  border-radius: 5px; /* Làm tròn các góc của link khi hover */
+}
+
+/* Đẩy phần "User" và "Cài đặt" xuống dưới cùng */
+.sidebar .bottom-links {
+  margin-top: auto;
+}
+
+/* Cải thiện kiểu hiển thị cho avatar và tên người dùng */
+.user-info {
+  display: flex;
+  align-items: center;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+  cursor: pointer; /* Thêm hiệu ứng con trỏ khi hover vào phần người dùng */
+  transition: background-color 0.3s ease;
+}
+
+/* Thêm hiệu ứng khi hover vào người dùng */
+.user-info:hover {
+  background-color: #e0e0e0;
+  border-radius: 5px;
+}
+
+/* Avatar người dùng */
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 0.75rem;
+}
+
+/* Tên người dùng */
+.user-name {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+/* Các liên kết cuối cùng */
+.bottom-links a {
+  font-size: 16px; /* Giảm kích thước chữ */
+  color: #333;
+  padding: 10px;
+}
+
+.bottom-links a:hover {
+  color: #007bff; /* Màu sắc hover cho liên kết cài đặt */
+  background-color: #e0e0e0;
+  border-radius: 5px;
+}

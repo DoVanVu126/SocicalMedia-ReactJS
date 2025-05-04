@@ -1,25 +1,55 @@
-import logo from './logo.svg';
-import './App.css';
+// src/App.js
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import Home from './pages/Home';
+import Login from './components/Login';
+import Register from './components/Register';
+import AddPost from './pages/AddPost';
+import Sidebar from './components/Sidebar';
 
-function App() {
+function AppLayout() {
+  const location = useLocation();
+  // Những path không muốn hiển thị sidebar
+  const hideSidebar = ['/', '/register'].includes(location.pathname);
+
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+
+    <div style={{ display: 'flex' }}>
+      {!hideSidebar && <Sidebar />}
+
+      <div
+        style={{
+          marginLeft: hideSidebar ? 0 : '250px',
+          padding: '20px',
+          width: '100%',
+        }}
+      >
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route
+            path="/register"
+            element={<Register />}
+          />
+          <Route
+            path="/home"
+            element={<Home />}
+          />
+          <Route
+            path="/add-post"
+            element={<AddPost />}
+          />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </div>
     </div>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <Router>
+      <AppLayout />
+    </Router>
+  );
+}
