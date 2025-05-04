@@ -99,34 +99,12 @@
   border-radius: 10px;
   object-fit: cover;
   transition: transform 0.3s ease;
+  padding-bottom: 5px;
 }
 
 .media-image:hover,
 .media-video:hover {
   transform: scale(1.05);
-}
-
-/* Hành động: Thích, Bình luận, Chia sẻ */
-.actions {
-  display: flex;
-  gap: 1.25rem;
-  margin-top: 0.75rem;
-  font-size: 1rem;
-  justify-content: center;
-}
-
-.actions button {
-  background-color: #f46cef;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 6px 12px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.actions button:hover {
-  background-color: #690856;
-  color: #fff;
 }
 
 /* Thêm hiệu ứng cho nút 3 chấm */

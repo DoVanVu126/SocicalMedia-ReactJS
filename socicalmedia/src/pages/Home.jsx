@@ -219,7 +219,7 @@ export default function Home() {
   {post.videourl && (
     <div className="video-wrapper">
       <video controls className="media-video">
-        <source src={`http://localhost:8000/storage/video/${post.videourl}`} type="video/mp4" />
+        <source src={`http://localhost:8000/storage/videos/${post.videourl}`} type="video/mp4" />
         Trình duyệt của bạn không hỗ trợ video.
       </video>
     </div>
