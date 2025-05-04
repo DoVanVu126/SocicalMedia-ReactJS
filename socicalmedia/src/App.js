@@ -11,7 +11,10 @@ function AppLayout() {
   // Những path không muốn hiển thị sidebar
   const hideSidebar = ['/', '/register'].includes(location.pathname);
 
+
+
   return (
+
     <div style={{ display: 'flex' }}>
       {!hideSidebar && <Sidebar />}
 
