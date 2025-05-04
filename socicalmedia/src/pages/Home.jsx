@@ -205,16 +205,26 @@ export default function Home() {
 
               <p className="post-content">{post.content}</p>
 
-              <div className="media-wrapper">
-                {post.imageurl && (
-                  <img src={post.imageurl} alt="Ảnh bài viết" className="post-image" />
-                )}
-                {post.videourl && (
-                  <video controls className="post-video">
-                    <source src={post.videourl} type="video/mp4" />
-                  </video>
-                )}
-              </div>
+              <div className="post-media">
+  {post.imageurl && (
+    <div className="image-wrapper">
+      <img
+        src={`http://localhost:8000/storage/images/${post.imageurl}`}
+        alt="Ảnh bài viết"
+        className="media-image"
+      />
+    </div>
+  )}
+
+  {post.videourl && (
+    <div className="video-wrapper">
+      <video controls className="media-video">
+        <source src={`http://localhost:8000/storage/video/${post.videourl}`} type="video/mp4" />
+        Trình duyệt của bạn không hỗ trợ video.
+      </video>
+    </div>
+  )}
+</div>
 
               <div className="actions">
                 {post.user_reaction && (
