@@ -1,15 +1,88 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import '../style/Home.css';
 
 export default function Home() {
+  const [comments, setComments] = useState({});
+  const [commentInputs, setCommentInputs] = useState({});
+  const [selectedCommentPostId, setSelectedCommentPostId] = useState(null);
+
+  const menuRef = useRef(null);
+  const buttonRef = useRef(null);
   const [posts, setPosts] = useState([]);
   const [activeMenuPostId, setActiveMenuPostId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [userId] = useState(2); // Tạm thời hardcode, thay bằng localStorage sau
+
+  const user = JSON.parse(localStorage.getItem('user'));
+const userIDCMT = user?.id;
+
+  console.log("userIDCMT:", userIDCMT);
+
   const [showReactions, setShowReactions] = useState(null); // Kiểm soát hiển thị hộp reaction
+
+  //Hàm thêm Bình Luận
+  const handleCommentSubmit = async (postId) => {
+    const content = commentInputs[postId];
+    if (!content) return;
+
+    try {
+      const res = await fetch(`http://localhost:8000/api/posts/${postId}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: userIDCMT, // ✅ Gửi userIDCMT từ localStorage
+          content,
+        }),
+      });
+
+      console.log('Response:', await res.json());
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Lỗi từ server: ${res.status} - ${errorText}`);
+      }
+
+      await fetchComments(postId);
+      setCommentInputs({ ...commentInputs, [postId]: '' });
+    } catch (error) {
+      console.error('Lỗi gửi bình luận:', error.message);
+      setError('Không thể gửi bình luận');
+    }
+  };
+
+  // Hàm Bình Luận
+  const fetchComments = async (postId) => {
+    const res = await fetch(`http://localhost:8000/api/posts/${postId}/comments`);
+    const data = await res.json();
+    setComments(prev => ({ ...prev, [postId]: data }));
+  };
+
+
+  // Đóng menu ...
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Nếu menu đang mở và click nằm ngoài menu và nút 3 chấm thì đóng menu
+      if (
+        activeMenuPostId !== null &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
+        setActiveMenuPostId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [activeMenuPostId]);
 
   // Lấy danh sách bài viết
   useEffect(() => {
@@ -165,6 +238,7 @@ export default function Home() {
                 </div>
                 <div className="post-options">
                   <button
+                    ref={buttonRef}
                     className="options-btn"
                     onClick={() =>
                       setActiveMenuPostId(activeMenuPostId === post.id ? null : post.id)
@@ -173,7 +247,7 @@ export default function Home() {
                     ⋯
                   </button>
                   {activeMenuPostId === post.id && (
-                    <div className="options-menu">
+                    <div className="options-menu" ref={menuRef}>
                       <button onClick={() => alert('Chức năng sửa chưa được triển khai')}>
                         📝 Sửa
                       </button>
@@ -206,25 +280,25 @@ export default function Home() {
               <p className="post-content">{post.content}</p>
 
               <div className="post-media">
-  {post.imageurl && (
-    <div className="image-wrapper">
-      <img
-        src={`http://localhost:8000/storage/images/${post.imageurl}`}
-        alt="Ảnh bài viết"
-        className="media-image"
-      />
-    </div>
-  )}
+                {post.imageurl && (
+                  <div className="image-wrapper">
+                    <img
+                      src={`http://localhost:8000/storage/images/${post.imageurl}`}
+                      alt="Ảnh bài viết"
+                      className="media-image"
+                    />
+                  </div>
+                )}
 
-  {post.videourl && (
-    <div className="video-wrapper">
-      <video controls className="media-video">
-        <source src={`http://localhost:8000/storage/videos/${post.videourl}`} type="video/mp4" />
-        Trình duyệt của bạn không hỗ trợ video.
-      </video>
-    </div>
-  )}
-</div>
+                {post.videourl && (
+                  <div className="video-wrapper">
+                    <video controls className="media-video">
+                      <source src={`http://localhost:8000/storage/videos/${post.videourl}`} type="video/mp4" />
+                      Trình duyệt của bạn không hỗ trợ video.
+                    </video>
+                  </div>
+                )}
+              </div>
 
               <div className="actions">
                 {post.user_reaction && (
@@ -252,9 +326,8 @@ export default function Home() {
                       {['like', 'love', 'haha', 'wow', 'sad', 'angry'].map(type => (
                         <button
                           key={type}
-                          className={`reaction-icon ${
-                            post.user_reaction?.type === type ? 'selected' : ''
-                          }`}
+                          className={`reaction-icon ${post.user_reaction?.type === type ? 'selected' : ''
+                            }`}
                           onClick={() => handleReactionClick(post.id, type)}
                           title={type.charAt(0).toUpperCase() + type.slice(1)}
                         >
@@ -265,13 +338,46 @@ export default function Home() {
                   )}
                 </div>
 
-                <button onClick={() => alert('Chức năng bình luận chưa được triển khai')}>
+                <button
+                  onClick={() => {
+                    if (selectedCommentPostId === post.id) {
+                      setSelectedCommentPostId(null); // ẩn nếu nhấn lại
+                    } else {
+                      fetchComments(post.id);         // tải bình luận nếu chưa tải
+                      setSelectedCommentPostId(post.id);
+                    }
+                  }}
+                >
                   💬 Bình luận
                 </button>
+
                 <button onClick={() => alert('Chức năng chia sẻ chưa được triển khai')}>
                   🔗 Chia sẻ
                 </button>
               </div>
+              {selectedCommentPostId === post.id && (
+                <>
+                  <div className="add-comment">
+                    <input
+                      type="text"
+                      placeholder="Viết bình luận..."
+                      value={commentInputs[post.id] || ''}
+                      onChange={(e) =>
+                        setCommentInputs({ ...commentInputs, [post.id]: e.target.value })
+                      }
+                    />
+                    <button onClick={() => handleCommentSubmit(post.id)}>Gửi</button>
+                  </div>
+                  <div className="comments">
+                    {comments[post.id]?.map((comment, index) => (
+                      <div key={index} className="comment">
+                        <strong>{comment.user?.username || 'Người dùng'}:</strong> {comment.content}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
             </div>
           ))
         ) : (

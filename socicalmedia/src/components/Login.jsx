@@ -20,6 +20,9 @@ const Login = () => {
       const userData = res.data.user;
       if (userData) {
         localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('user_id', userData.id); // ✅ Thêm dòng này
+        console.log('userData:', userData);
+
         setMessage(res.data.message);
         navigate('/home');
       } else {
@@ -30,7 +33,7 @@ const Login = () => {
       setMessage(err.response?.data?.message || 'Đăng nhập thất bại');
     }
   };
-
+  
   return (
     <div className="login">
       {/* LEFT: Form */}
