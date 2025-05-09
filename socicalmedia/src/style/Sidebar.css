@@ -1,7 +1,7 @@
 /* Sidebar cố định */
 .sidebar {
-  width: 250px; /* Điều chỉnh chiều rộng để phù hợp hơn */
-  background-color: #f5f5f5;
+  width: 220px; /* Điều chỉnh chiều rộng để phù hợp hơn */
+  background-color: #ffffff;
   padding: 1rem;
   flex-shrink: 0;
   position: fixed;

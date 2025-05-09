@@ -5,7 +5,6 @@ import Login from './components/Login';
 import Register from './components/Register';
 import AddPost from './pages/AddPost';
 import Sidebar from './components/Sidebar';
-
 function AppLayout() {
   const location = useLocation();
   // Những path không muốn hiển thị sidebar

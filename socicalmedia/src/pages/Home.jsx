@@ -4,6 +4,10 @@ import Sidebar from '../components/Sidebar';
 import '../style/Home.css';
 
 export default function Home() {
+  const [openMenuCommentId, setOpenMenuCommentId] = useState(null);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editedContent, setEditedContent] = useState('');
+
   const [comments, setComments] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
   const [selectedCommentPostId, setSelectedCommentPostId] = useState(null);
@@ -17,11 +21,40 @@ export default function Home() {
   const [userId] = useState(2); // Tạm thời hardcode, thay bằng localStorage sau
 
   const user = JSON.parse(localStorage.getItem('user'));
-const userIDCMT = user?.id;
-
-  console.log("userIDCMT:", userIDCMT);
-
+  const userIDCMT = user?.id;
+  
   const [showReactions, setShowReactions] = useState(null); // Kiểm soát hiển thị hộp reaction
+
+  const handleDeleteComment = async (postId, commentId) => {
+    try {
+      await axios.delete(`http://localhost:8000/api/posts/${postId}/comments/${commentId}`, {
+        data: { user_id: userIDCMT },
+      });
+
+      await fetchComments(postId); // Load lại bình luận sau khi xóa
+    } catch (error) {
+      console.error('Lỗi khi xóa bình luận:', error.message);
+      setError('Không thể xóa bình luận');
+    }
+  };
+
+
+  const handleSaveEdit = async (postId, commentId) => {
+    try {
+      await axios.put(`http://localhost:8000/api/posts/${postId}/comments/${commentId}`, {
+        user_id: userIDCMT,
+        content: editedContent,
+      });
+
+      setEditingCommentId(null);
+      setEditedContent('');
+      await fetchComments(postId);
+    } catch (error) {
+      console.error('Lỗi khi sửa bình luận:', error.message);
+      setError('Không thể sửa bình luận');
+    }
+  };
+
 
   //Hàm thêm Bình Luận
   const handleCommentSubmit = async (postId) => {
@@ -257,13 +290,15 @@ const userIDCMT = user?.id;
                             setLoading(true);
                             axios
                               .delete(`http://localhost:8000/api/posts/${post.id}`, {
-                                data: { user_id: userId },
+                                data: { user_id: userIDCMT },  // Nếu cần, gửi user_id
                               })
-                              .then(() => {
+                              .then((response) => {
+                                console.log('Xóa thành công:', response);
+                                // Xóa bài post và bình luận ở frontend
                                 setPosts(posts.filter(p => p.id !== post.id));
                               })
-                              .catch(err => {
-                                console.error('Lỗi khi xóa bài viết:', err);
+                              .catch((err) => {
+                                console.error('Lỗi khi xóa bài viết:', err.response || err);
                                 setError('Không thể xóa bài viết');
                               })
                               .finally(() => setLoading(false));
@@ -272,6 +307,7 @@ const userIDCMT = user?.id;
                       >
                         🗑️ Xóa
                       </button>
+
                     </div>
                   )}
                 </div>
@@ -369,9 +405,44 @@ const userIDCMT = user?.id;
                     <button onClick={() => handleCommentSubmit(post.id)}>Gửi</button>
                   </div>
                   <div className="comments">
-                    {comments[post.id]?.map((comment, index) => (
-                      <div key={index} className="comment">
-                        <strong>{comment.user?.username || 'Người dùng'}:</strong> {comment.content}
+                    {comments[post.id]?.map((comment) => (
+                      <div key={comment.id} className="comment">
+                        <strong>{comment.user?.username || 'Người dùng'}:</strong>
+                        {editingCommentId === comment.id ? (
+                          <>
+                            <input
+                              value={editedContent}
+                              onChange={(e) => setEditedContent(e.target.value)}
+                            />
+                            <button onClick={() => handleSaveEdit(post.id, comment.id)}>Lưu</button>
+                            <button onClick={() => setEditingCommentId(null)}>Hủy</button>
+                          </>
+                        ) : (
+                          <>
+                            <span> {comment.content}</span>
+                            <div className="comment-actions">
+                              <button onClick={() =>
+                                setOpenMenuCommentId(openMenuCommentId === comment.id ? null : comment.id)
+                              }>
+                                ...
+                              </button>
+                              {openMenuCommentId === comment.id && comment.user_id === userIDCMT && (
+                                <div className="comment-menu">
+                                  <button onClick={() => {
+                                    setEditingCommentId(comment.id);
+                                    setEditedContent(comment.content);
+                                    setOpenMenuCommentId(null);
+                                  }}>✏️ Sửa</button>
+                                  <button onClick={() => {
+                                    handleDeleteComment(post.id, comment.id);
+                                    setOpenMenuCommentId(null);
+                                  }}>🗑️ Xóa</button>
+                                </div>
+                              )}
+                            </div>
+
+                          </>
+                        )}
                       </div>
                     ))}
                   </div>
