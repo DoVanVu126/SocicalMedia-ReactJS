@@ -5,6 +5,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import AddPost from './pages/AddPost';
 import Sidebar from './components/Sidebar';
+import Notification from './components/Notification';
 
 function AppLayout() {
   const location = useLocation();
@@ -35,10 +36,12 @@ function AppLayout() {
             path="/home"
             element={<Home />}
           />
+          
           <Route
-            path="/add-post"
+            path="/add-post"  
             element={<AddPost />}
           />
+           <Route path="/notifications/:userId" element={<Notification />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
