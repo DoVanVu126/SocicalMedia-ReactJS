@@ -2,8 +2,21 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
 import "../style/Home.css";
+import { useNavigate } from "react-router-dom";
+
 
 export default function Home() {
+  const navigate = useNavigate();
+  const handleEdit = (post) => {
+    navigate(`/edit-post/${post.id}`, {
+      state: {
+        content: post.content,
+        imageUrl: post.imageurl,
+        videoUrl: post.videourl,
+      },
+    });
+  };
+
   const [comments, setComments] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
   const [selectedCommentPostId, setSelectedCommentPostId] = useState(null);
@@ -17,8 +30,6 @@ export default function Home() {
 
   const user = JSON.parse(localStorage.getItem("user"));
   const userIDCMT = user?.id;
-
-  console.log("userIDCMT:", userIDCMT);
 
   const [showReactions, setShowReactions] = useState(null); // Kiểm soát hiển thị hộp reaction
 
@@ -247,212 +258,213 @@ export default function Home() {
         {error && <p className="error">{error}</p>}
         {Array.isArray(posts) && posts.length > 0
           ? posts.map((post) => (
-              <div className="post" key={post.id}>
-                <div className="post-header">
-                  <div className="user-info">
-                    <img
-                      src={
-                        post.user?.profilepicture
-                          ? `http://localhost:8000/storage/images/${post.user.profilepicture}`
-                          : "/default-avatar.png"
-                      }
-                      alt="Avatar"
-                      className="avatar"
-                    />
-                    <div>
-                      <strong>{post.user?.username || "Người dùng"}</strong>
-                      <br />
-                      <small>
-                        {new Date(post.created_at).toLocaleString()}
-                      </small>
-                    </div>
-                  </div>
-                  <div className="post-options">
-                    <button
-                      ref={buttonRef}
-                      className="options-btn"
-                      onClick={() =>
-                        setActiveMenuPostId(
-                          activeMenuPostId === post.id ? null : post.id
-                        )
-                      }
-                    >
-                      ⋯
-                    </button>
-                    {activeMenuPostId === post.id && (
-                      <div className="options-menu" ref={menuRef}>
-                        <button
-                          onClick={() =>
-                            alert("Chức năng sửa chưa được triển khai")
-                          }
-                        >
-                          📝 Sửa
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                "Bạn có chắc chắn muốn xóa bài viết này?"
-                              )
-                            ) {
-                              setLoading(true);
-                              axios
-                                .delete(
-                                  `http://localhost:8000/api/posts/${post.id}`,
-                                  {
-                                    data: { user_id: userIDCMT },
-                                  }
-                                )
-                                .then(() => {
-                                  setPosts(
-                                    posts.filter((p) => p.id !== post.id)
-                                  );
-                                })
-                                .catch((err) => {
-                                  console.error("Lỗi khi xóa bài viết:", err);
-                                  setError("Không thể xóa bài viết");
-                                })
-                                .finally(() => setLoading(false));
-                            }
-                          }}
-                        >
-                          🗑️ Xóa
-                        </button>
-                      </div>
-                    )}
+            <div className="post" key={post.id}>
+              <div className="post-header">
+                <div className="user-info">
+                  <img
+                    src={
+                      post.user?.profilepicture
+                        ? `http://localhost:8000/storage/images/${post.user.profilepicture}`
+                        : "/default-avatar.png"
+                    }
+                    alt="Avatar"
+                    className="avatar"
+                  />
+                  <div>
+                    <strong>{post.user?.username || "Người dùng"}</strong>
+                    <br />
+                    <small>
+                      {new Date(post.created_at).toLocaleString()}
+                    </small>
                   </div>
                 </div>
-
-                <p className="post-content">{post.content}</p>
-
-                <div className="post-media">
-                  {post.imageurl && (
-                    <div className="image-wrapper">
-                      <img
-                        src={`http://localhost:8000/storage/images/${post.imageurl}`}
-                        alt="Ảnh bài viết"
-                        className="media-image"
-                      />  
-                    </div>
-                  )}
-
-                  {post.videourl && (
-                    <div className="video-wrapper">
-                      <video controls className="media-video">
-                        <source
-                          src={`http://localhost:8000/storage/videos/${post.videourl}`}
-                          type="video/mp4"
-                        />
-                        Trình duyệt của bạn không hỗ trợ video.
-                      </video>
-                    </div>
-                  )}
-                </div>
-
-                <div className="actions">
-                  {getTotalReactions(post.reaction_summary) > 0 && (
-                    <div className="reaction-summary">
-                      <span className="reaction-icon">
-                        {Object.keys(post.reaction_summary).map((type) =>
-                          post.reaction_summary[type] > 0 ? (
-                            <span key={type}>{renderReaction(type)}</span>
-                          ) : null
-                        )}
-                      </span>
-                      <span>{getTotalReactions(post.reaction_summary)}</span>
-                    </div>
-                  )}
-
-                  <div
-                    className="reaction-container"
-                    onMouseEnter={() => setShowReactions(post.id)}
-                    onMouseLeave={() => setShowReactions(null)}
-                  >
-                    <button
-                      className={`like-button ${
-                        post.user_reaction ? "reacted" : ""
-                      }`}
-                      onClick={() => handleReactionClick(post.id)}
-                    >
-                      {renderButtonLabel(post.user_reaction)}
-                    </button>
-                    {showReactions === post.id && (
-                      <div className="reaction-icons">
-                        {["like", "love", "haha", "wow", "sad", "angry"].map(
-                          (type) => (
-                            <button
-                              key={type}
-                              className={`reaction-icon ${
-                                post.user_reaction?.type === type
-                                  ? "selected"
-                                  : ""
-                              }`}
-                              onClick={() => handleReactionClick(post.id, type)}
-                              title={
-                                type.charAt(0).toUpperCase() + type.slice(1)
-                              }
-                            >
-                              {renderReaction(type)}
-                            </button>
-                          )
-                        )}
-                      </div>
-                    )}
-                  </div>
-
+                <div className="post-options">
                   <button
-                    onClick={() => {
-                      if (selectedCommentPostId === post.id) {
-                        setSelectedCommentPostId(null); // ẩn nếu nhấn lại
-                      } else {
-                        fetchComments(post.id); // tải bình luận nếu chưa tải
-                        setSelectedCommentPostId(post.id);
-                      }
-                    }}
-                  >
-                    💬 Bình luận
-                  </button>
-
-                  <button
+                    ref={buttonRef}
+                    className="options-btn"
                     onClick={() =>
-                      alert("Chức năng chia sẻ chưa được triển khai")
+                      setActiveMenuPostId(
+                        activeMenuPostId === post.id ? null : post.id
+                      )
                     }
                   >
-                    🔗 Chia sẻ
+                    ⋯
                   </button>
-                </div>
-                {selectedCommentPostId === post.id && (
-                  <>
-                    <div className="add-comment">
-                      <input
-                        type="text"
-                        placeholder="Viết bình luận..."
-                        value={commentInputs[post.id] || ""}
-                        onChange={(e) =>
-                          setCommentInputs({
-                            ...commentInputs,
-                            [post.id]: e.target.value,
-                          })
-                        }
-                      />
-                      <button onClick={() => handleCommentSubmit(post.id)}>
-                        Gửi
+                  {activeMenuPostId === post.id && (
+                    <div className="options-menu" ref={menuRef}>
+                      <button
+                        onClick={() => handleEdit(post)}
+                        className="text-blue-600 underline"
+                      >
+                        📝 Sửa
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          if (
+                            window.confirm(
+                              "Bạn có chắc chắn muốn xóa bài viết này?"
+                            )
+                          ) {
+                            setLoading(true);
+                            axios
+                              .delete(
+                                `http://localhost:8000/api/posts/${post.id}`,
+                                {
+                                  data: { user_id: userIDCMT },
+                                }
+                              )
+                              .then(() => {
+                                setPosts(
+                                  posts.filter((p) => p.id !== post.id)
+                                );
+                              })
+                              .catch((err) => {
+                                console.error("Lỗi khi xóa bài viết:", err);
+                                setError("Không thể xóa bài viết");
+                              })
+                              .finally(() => setLoading(false));
+                          }
+                        }}
+                      >
+                        🗑️ Xóa
                       </button>
                     </div>
-                    <div className="comments">
-                      {comments[post.id]?.map((comment, index) => (
-                        <div key={index} className="comment">
-                          <strong>
-                            {comment.user?.username || "Người dùng"}:
-                          </strong>{" "}
-                          {comment.content}
-                        </div>
-                      ))}
-                    </div>
-                  </>
+                  )}
+                </div>
+              </div>
+
+              <p className="post-content">{post.content}</p>
+
+              <div className="post-media">
+                {Array.isArray(post.imageurl) && post.imageurl.length > 0 && (
+                  <div className="image-wrapper">
+                    {post.imageurl.map((img, index) => (
+                      <img
+                        key={index}
+                        src={`http://localhost:8000/storage/images/${img}`}
+                        alt={`Ảnh bài viết ${index + 1}`}
+                        className="media-image"
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {post.videourl && (
+                  <div className="video-wrapper">
+                    <video controls className="media-video">
+                      <source
+                        src={`http://localhost:8000/storage/videos/${post.videourl}`}
+                        type="video/mp4"
+                      />
+                      Trình duyệt của bạn không hỗ trợ video.
+                    </video>
+                  </div>
                 )}
               </div>
-            ))
+
+              <div className="actions">
+                {getTotalReactions(post.reaction_summary) > 0 && (
+                  <div className="reaction-summary">
+                    <span className="reaction-icon">
+                      {Object.keys(post.reaction_summary).map((type) =>
+                        post.reaction_summary[type] > 0 ? (
+                          <span key={type}>{renderReaction(type)}</span>
+                        ) : null
+                      )}
+                    </span>
+                    <span>{getTotalReactions(post.reaction_summary)}</span>
+                  </div>
+                )}
+
+                <div
+                  className="reaction-container"
+                  onMouseEnter={() => setShowReactions(post.id)}
+                  onMouseLeave={() => setShowReactions(null)}
+                >
+                  <button
+                    className={`like-button ${post.user_reaction ? "reacted" : ""
+                      }`}
+                    onClick={() => handleReactionClick(post.id)}
+                  >
+                    {renderButtonLabel(post.user_reaction)}
+                  </button>
+                  {showReactions === post.id && (
+                    <div className="reaction-icons">
+                      {["like", "love", "haha", "wow", "sad", "angry"].map(
+                        (type) => (
+                          <button
+                            key={type}
+                            className={`reaction-icon ${post.user_reaction?.type === type
+                              ? "selected"
+                              : ""
+                              }`}
+                            onClick={() => handleReactionClick(post.id, type)}
+                            title={
+                              type.charAt(0).toUpperCase() + type.slice(1)
+                            }
+                          >
+                            {renderReaction(type)}
+                          </button>
+                        )
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => {
+                    if (selectedCommentPostId === post.id) {
+                      setSelectedCommentPostId(null); // ẩn nếu nhấn lại
+                    } else {
+                      fetchComments(post.id); // tải bình luận nếu chưa tải
+                      setSelectedCommentPostId(post.id);
+                    }
+                  }}
+                >
+                  💬 Bình luận
+                </button>
+
+                <button
+                  onClick={() =>
+                    alert("Chức năng chia sẻ chưa được triển khai")
+                  }
+                >
+                  🔗 Chia sẻ
+                </button>
+              </div>
+              {selectedCommentPostId === post.id && (
+                <>
+                  <div className="add-comment">
+                    <input
+                      type="text"
+                      placeholder="Viết bình luận..."
+                      value={commentInputs[post.id] || ""}
+                      onChange={(e) =>
+                        setCommentInputs({
+                          ...commentInputs,
+                          [post.id]: e.target.value,
+                        })
+                      }
+                    />
+                    <button onClick={() => handleCommentSubmit(post.id)}>
+                      Gửi
+                    </button>
+                  </div>
+                  <div className="comments">
+                    {comments[post.id]?.map((comment, index) => (
+                      <div key={index} className="comment">
+                        <strong>
+                          {comment.user?.username || "Người dùng"}:
+                        </strong>{" "}
+                        {comment.content}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          ))
           : !loading && <p>Không có bài viết nào</p>}
       </div>
     </div>

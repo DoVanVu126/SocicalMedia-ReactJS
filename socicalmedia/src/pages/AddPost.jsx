@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import '../style/AddPost.css';
 
 const AddPost = () => {
-  const [form, setForm] = useState({ content: '', image: null, video: null });
+  const [form, setForm] = useState({ content: '', images: [], video: null });
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
@@ -15,7 +15,15 @@ const AddPost = () => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setForm((f) => ({ ...f, [name]: files ? files[0] : value }));
+    if (files) {
+      if (name === 'images') {
+        setForm((f) => ({ ...f, images: Array.from(files) }));
+      } else {
+        setForm((f) => ({ ...f, [name]: files[0] }));
+      }
+    } else {
+      setForm((f) => ({ ...f, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -25,7 +33,9 @@ const AddPost = () => {
     const data = new FormData();
     data.append('user_id', user.id);
     data.append('content', form.content);
-    if (form.image) data.append('image', form.image);
+    form.images.forEach((image, index) => {
+      data.append(`images[]`, image); // Laravel expects an array
+    });
     if (form.video) data.append('video', form.video);
 
     try {
@@ -39,6 +49,7 @@ const AddPost = () => {
       alert('Có lỗi xảy ra khi thêm bài viết');
     }
   };
+
 
   if (!user) return <p>Đang tải thông tin người dùng…</p>;
 
@@ -61,17 +72,19 @@ const AddPost = () => {
           required
         />
         <div className="file-inputs">
-          <label htmlFor="image" className="file-label">
-            {form.image ? form.image.name : 'Chọn ảnh'}
+          <label htmlFor="images" className="file-label">
+            {form.images.length > 0 ? `${form.images.length} ảnh đã chọn` : 'Chọn nhiều ảnh'}
           </label>
           <input
             type="file"
-            name="image"
-            id="image"
+            name="images"
+            id="images"
             accept="image/*"
+            multiple
             onChange={handleChange}
             className="file-input"
           />
+
           <label htmlFor="video" className="file-label">
             {form.video ? form.video.name : 'Chọn video'}
           </label>
