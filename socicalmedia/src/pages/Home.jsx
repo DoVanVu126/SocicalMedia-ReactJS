@@ -440,15 +440,15 @@ export default function Home() {
                       </button>
                     </div>
                     <div className="comments">
-                      {comments[post.id]?.map((comment, index) => (
-                        <div key={index} className="comment">
-                          <strong>
-                            {comment.user?.username || "Người dùng"}:
-                          </strong>{" "}
-                          {comment.content}
-                        </div>
-                      ))}
-                    </div>
+  {comments[post.id]?.map((comment, index) => (
+    <div key={index} className="comment">
+      <strong>
+        {comment.user?.username || "Người dùng"}:
+      </strong>{" "}
+      {comment.content}
+    </div>
+  ))}
+</div>
                   </>
                 )}
               </div>

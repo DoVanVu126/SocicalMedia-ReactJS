@@ -4,7 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import '../style/AddPost.css';
 
 const AddPost = () => {
-  const [form, setForm] = useState({ content: '', image: null, video: null });
+  const [form, setForm] = useState({
+    content: '',
+    image: null,
+    video: null,
+    visibility: 'public', // mặc định là công khai
+  });
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
@@ -15,7 +20,10 @@ const AddPost = () => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setForm((f) => ({ ...f, [name]: files ? files[0] : value }));
+    setForm((prevForm) => ({
+      ...prevForm,
+      [name]: files ? files[0] : value,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -25,6 +33,7 @@ const AddPost = () => {
     const data = new FormData();
     data.append('user_id', user.id);
     data.append('content', form.content);
+    data.append('visibility', form.visibility); // Thêm quyền riêng tư
     if (form.image) data.append('image', form.image);
     if (form.video) data.append('video', form.video);
 
@@ -43,7 +52,7 @@ const AddPost = () => {
   if (!user) return <p>Đang tải thông tin người dùng…</p>;
 
   const avatarUrl = user.profilepicture
-    ? `http://localhost:8000/storage/images/${user.profilepicture}`//Lấy trong thư mục public\storage\images
+    ? `http://localhost:8000/storage/images/${user.profilepicture}`
     : '/default-avatar.png';
 
   return (
@@ -60,6 +69,22 @@ const AddPost = () => {
           onChange={handleChange}
           required
         />
+
+        {/* Quyền riêng tư */}
+        <div className="visibility-selector">
+          <label htmlFor="visibility">Quyền riêng tư:</label>
+          <select
+            id="visibility"
+            name="visibility"
+            value={form.visibility}
+            onChange={handleChange}
+          >
+            <option value="public">Công khai</option>
+            <option value="private">Riêng tư</option>
+          </select>
+        </div>
+
+        {/* Ảnh và video */}
         <div className="file-inputs">
           <label htmlFor="image" className="file-label">
             {form.image ? form.image.name : 'Chọn ảnh'}
@@ -84,6 +109,7 @@ const AddPost = () => {
             className="file-input"
           />
         </div>
+
         <button type="submit">Đăng bài</button>
       </form>
     </div>
