@@ -341,12 +341,12 @@ export default function Home() {
                 <div className="story-menu">
                   <button onClick={() => handleToggleMenu(story.id)} className="menu-button">⋯</button>
                   {showMenu === story.id && (
-                    <div className="menu-options">
+                    <div className="options-menu" style={{right: '-7px', top: '50px'}}>  
                       <button className="edit-button" onClick={() => alert("Chức năng sửa story chưa được triển khai")}>
-                        Sửa
+                        Sửa✏️
                       </button>
                       <button className="delete-button" onClick={() => handleDeleteStory(story.id)}>
-                        Xóa
+                        Xóa🗑️
                       </button>
                     </div>
                   )}

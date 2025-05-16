@@ -449,7 +449,7 @@
 /* Story styles */
 .story-container {
   width: 100%;
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto 20px auto;
   padding: 20px;
   background: #fff;
@@ -559,6 +559,7 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
+/* Story menu */
 .story-menu {
   position: absolute;
   top: 8px;
@@ -566,6 +567,7 @@
   z-index: 1;
 }
 
+/* Menu button (unchanged) */
 .menu-button {
   background: rgba(0, 0, 0, 0.5);
   border: none;
@@ -577,36 +579,36 @@
   line-height: 1;
 }
 
+/* Updated menu options container */
 .menu-options {
   position: absolute;
-  top: 25px;
-  right: 0;
+  top: 28px;
+  right: -10px;
   background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border-radius: 5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
   z-index: 10;
-  min-width: 100px;
+  width: 100px; /* Slightly wider for better readability */
+  padding: 8px 0;
+  overflow: hidden;
 }
 
-.edit-button, .delete-button {
-  display: block;
+/* Updated edit button */
+.edit-button {
+  display: flex;
+  align-items: center;
   width: 100%;
-  padding: 8px 12px;
+  padding: 10px 16px;
   background: none;
   border: none;
-  text-align: left;
+  text-align: right;
   color: #1a1a1a;
   font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-.edit-button:hover, .delete-button:hover {
-  background: #f0f2f5;
-}
-
-.delete-button {
-  color: #e41e3f;
-}
 
 /* Đảm bảo các style khác của Home không bị ảnh hưởng */
 .container {
