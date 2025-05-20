@@ -93,3 +93,14 @@ button:hover {
     padding: 20px;
   }
 }
+
+
+.visibility-selector {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.visibility-selector label {
+  margin-right: 8px;
+  font-weight: bold;
+}

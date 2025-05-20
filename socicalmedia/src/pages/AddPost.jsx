@@ -4,7 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import '../style/AddPost.css';
 
 const AddPost = () => {
-  const [form, setForm] = useState({ content: '', images: [], video: null });
+  const [form, setForm] = useState({
+    content: '',
+    image: [],
+    video: null,
+    visibility: 'public', // mặc định là công khai
+  });
+
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
@@ -33,6 +39,9 @@ const AddPost = () => {
     const data = new FormData();
     data.append('user_id', user.id);
     data.append('content', form.content);
+
+    data.append('visibility', form.visibility); // Thêm quyền riêng tư
+
     form.images.forEach((image, index) => {
       data.append(`images[]`, image); // Laravel expects an array
     });
@@ -54,7 +63,7 @@ const AddPost = () => {
   if (!user) return <p>Đang tải thông tin người dùng…</p>;
 
   const avatarUrl = user.profilepicture
-    ? `http://localhost:8000/storage/images/${user.profilepicture}`//Lấy trong thư mục public\storage\images
+    ? `http://localhost:8000/storage/images/${user.profilepicture}`
     : '/default-avatar.png';
 
   return (
@@ -71,6 +80,22 @@ const AddPost = () => {
           onChange={handleChange}
           required
         />
+
+        {/* Quyền riêng tư */}
+        <div className="visibility-selector">
+          <label htmlFor="visibility">Quyền riêng tư:</label>
+          <select
+            id="visibility"
+            name="visibility"
+            value={form.visibility}
+            onChange={handleChange}
+          >
+            <option value="public">Công khai</option>
+            <option value="private">Riêng tư</option>
+          </select>
+        </div>
+
+        {/* Ảnh và video */}
         <div className="file-inputs">
           <label htmlFor="images" className="file-label">
             {form.images.length > 0 ? `${form.images.length} ảnh đã chọn` : 'Chọn nhiều ảnh'}
@@ -97,6 +122,7 @@ const AddPost = () => {
             className="file-input"
           />
         </div>
+
         <button type="submit">Đăng bài</button>
       </form>
     </div>

@@ -6,7 +6,15 @@ import Register from './components/Register';
 import AddPost from './pages/AddPost';
 import Sidebar from './components/Sidebar';
 import Notification from './components/Notification';
+
+import Story from './pages/Story';  
+import Search from './pages/Search'; 
+import UserProfile from './pages/UserProfile';
+
+
+
 import EditPost from "./pages/EditPost";
+
 function AppLayout() {
   const location = useLocation();
   // Những path không muốn hiển thị sidebar
@@ -35,7 +43,12 @@ function AppLayout() {
           <Route
             path="/home"
             element={<Home />}
+            
           />
+      
+<Route path="/profile/:userId" element={<UserProfile />} />
+<Route path="/story" element={<Story />} /> {/* Đường dẫn cho Story */}
+<Route path="/search" element={<Search />} />
           
           <Route
             path="/add-post"  

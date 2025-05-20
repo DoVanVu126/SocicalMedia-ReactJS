@@ -1,6 +1,5 @@
-// src/components/Sidebar.js
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';  
 import '../style/Sidebar.css';
 
 const Sidebar = () => {
@@ -30,8 +29,10 @@ const Sidebar = () => {
     <div className="sidebar">
       <h2>Social App</h2>
       <a href="/home">🏠 Home</a>
-      <a href="#">🔍 Tìm kiếm</a> 
+      <a href="#" onClick={(e) => { e.preventDefault(); navigate('/search'); }}>🔍 Tìm kiếm</a> 
       <a href="/add-post">➕ Thêm bài viết</a>
+      {/* Thay đổi liên kết để dẫn đến trang Story */}
+      <a href="/story">🌟 Story</a>  
       <a href="#">⭐ Yêu thích</a>  
       <a href={`/notifications/${user.id}`}>🔔 Thông báo</a>  
 

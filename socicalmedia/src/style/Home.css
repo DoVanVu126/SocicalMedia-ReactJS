@@ -312,7 +312,6 @@
 }
 
 .reaction-summary span:last-child {
-  margin-left: 0.3rem;
   font-weight: 500;
   color: #606770;
 }
@@ -352,6 +351,7 @@
   /* Xóa width: 300px, trả về kích thước mặc định */
 }
 
+
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -368,18 +368,18 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.5rem;
-  /* Trả về kích thước mặc định */
-  padding: 0.25rem;
+  font-size: 1rem; /* Kích thước biểu tượng cảm xúc */
+  margin-left: -10px; /* Điều chỉnh khoảng cách giữa các biểu tượng */
   transition: transform 0.2s ease;
+  z-index: 1; /* Đảm bảo các biểu tượng cảm xúc được hiển thị đúng thứ tự */
 }
 
 .reaction-icon:hover {
-  transform: scale(1.3);
+  transform: scale(1);
 }
 
 .reaction-icon.selected {
-  transform: scale(1.2);
+  transform: scale(1);
   background: #f0f2f5;
   border-radius: 50%;
 }
@@ -476,5 +476,352 @@
   .reaction-icon {
     font-size: 1.25rem;
     /* Trả về kích thước mặc định trên mobile */
+  }
+}
+
+
+.comments {
+  margin-top: 10px;
+  padding-left: 10px;
+}
+
+.comment {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.comment strong {
+  color: #333;
+}
+
+
+
+
+/* Story styles */
+.story-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto 20px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.story-header {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.loading {
+  font-size: 16px;
+  text-align: center;
+  color: #606770;
+}
+
+.story-list {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  scrollbar-width: none; /* Ẩn thanh cuộn trên Firefox */
+}
+
+.story-list::-webkit-scrollbar {
+  display: none; /* Ẩn thanh cuộn trên Chrome/Safari */
+}
+
+.story-item {
+  flex: 0 0 112px; /* Chiều rộng cố định để giống Facebook */
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.story-item:hover {
+  transform: scale(1.03); /* Hiệu ứng phóng to nhẹ khi hover */
+}
+
+.story-user-info {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.story-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid #1877f2; /* Viền xanh giống Facebook */
+  margin-bottom: 5px;
+}
+
+.story-user-details {
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8); /* Đổ bóng chữ để dễ đọc */
+}
+
+.story-username {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.story-time {
+  font-size: 10px;
+  opacity: 0.9;
+}
+
+.story-image-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 177.78%; /* Tỷ lệ 9:16 (16/9 = 1.7778) */
+}
+
+.story-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.story-content {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+  color: #fff;
+  font-size: 12px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Story menu */
+.story-menu {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+}
+
+/* Menu button (unchanged) */
+.menu-button {
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 50%;
+  line-height: 1;
+}
+
+/* Updated menu options container */
+.menu-options {
+  position: absolute;
+  top: 28px;
+  right: -10px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  z-index: 10;
+  width: 100px; /* Slightly wider for better readability */
+  padding: 8px 0;
+  overflow: hidden;
+}
+
+/* Updated edit button */
+.edit-button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  text-align: right;
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+
+/* Đảm bảo các style khác của Home không bị ảnh hưởng */
+.container {
+  display: flex;
+}
+
+.main {
+  flex: 1;
+  padding: 20px;
+}
+
+
+
+/* Reaction list form */
+/* Reaction list backdrop (for dimming the background) */
+/* Reaction list container */
+.reaction-list {
+  position: absolute;
+  top: 100%; /* Đặt ngay dưới reaction_summary */
+  left: 0;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  z-index: 1000; /* Đảm bảo nằm trên các phần tử khác */
+  width: 350px;
+  max-height: 500px;
+  overflow-y: auto;
+  font-family: Arial, sans-serif;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+}
+
+/* Custom scrollbar for Chrome/Safari */
+.reaction-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.reaction-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.reaction-list::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+/* Header của reaction list */
+.reaction-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 8px;
+}
+
+.reaction-list-header span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.reaction-list-header .close-button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #606770;
+  padding: 2px 6px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.reaction-list-header .close-button:hover {
+  background-color: #f0f2f5;
+}
+
+/* Reaction counts (tóm tắt số lượng reaction) */
+.reaction-counts {
+  display: flex;
+  gap: 8px;
+  padding: 0 12px 8px;
+  border-bottom: 1px solid #ddd;
+  font-size: 13px;
+  color: #606770;
+}
+
+.reaction-count {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Danh sách người dùng reaction */
+.reaction-users {
+  margin-top: 8px;
+}
+
+.reaction-user {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #1a1a1a;
+  transition: background-color 0.2s ease;
+}
+
+.reaction-user:hover {
+  background-color: #f0f2f5;
+}
+
+.reaction-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 8px;
+  border: 1px solid #ddd;
+}
+
+.reaction-user span {
+  font-weight: 500;
+  flex: 1;
+  color: #1a1a1a;
+}
+
+/* Nút thêm bạn bè */
+.add-friend-btn {
+  background: none;
+  border: 1px solid #1877f2;
+  color: #1877f2;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.add-friend-btn:hover {
+  background-color: #1877f2;
+  color: #fff;
+}
+
+/* Responsive design */
+@media (mind-width: 768px) {
+  .reaction-list {
+    width: 300px;
+    max-height: 450px;
+  }
+
+  .reaction-user-avatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .add-friend-btn {
+    font-size: 11px;
+    padding: 2px 6px;
   }
 }
