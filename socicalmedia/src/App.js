@@ -6,10 +6,14 @@ import Register from './components/Register';
 import AddPost from './pages/AddPost';
 import Sidebar from './components/Sidebar';
 import Notification from './components/Notification';
+
 import Story from './pages/Story';  
 import Search from './pages/Search'; 
 import UserProfile from './pages/UserProfile';
 
+
+
+import EditPost from "./pages/EditPost";
 
 function AppLayout() {
   const location = useLocation();
@@ -50,6 +54,7 @@ function AppLayout() {
             path="/add-post"  
             element={<AddPost />}
           />
+          <Route path="/edit-post/:id" element={<EditPost />} />
            <Route path="/notifications/:userId" element={<Notification />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

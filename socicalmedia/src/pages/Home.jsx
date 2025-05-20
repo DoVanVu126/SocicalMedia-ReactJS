@@ -3,8 +3,21 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import "../style/Home.css";
+import { useNavigate } from "react-router-dom";
+
 
 export default function Home() {
+  const navigate = useNavigate();
+  const handleEdit = (post) => {
+    navigate(`/edit-post/${post.id}`, {
+      state: {
+        content: post.content,
+        imageUrl: post.imageurl,
+        videoUrl: post.videourl,
+      },
+    });
+  };
+
   const [comments, setComments] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
   const [selectedCommentPostId, setSelectedCommentPostId] = useState(null);
@@ -86,6 +99,7 @@ export default function Home() {
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
     return date.toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
   };
+  const [showReactions, setShowReactions] = useState(null); // Kiểm soát hiển thị hộp reaction
 
   const handleCommentSubmit = async (postId) => {
     const content = commentInputs[postId];
@@ -520,6 +534,7 @@ export default function Home() {
                 >
                   <button
                     className={`like-button ${post.user_reaction ? "reacted" : ""}`}
+
                     onClick={() => handleReactionClick(post.id)}
                   >
                     {renderButtonLabel(post.user_reaction)}
@@ -545,17 +560,17 @@ export default function Home() {
                 <button
                   onClick={() => {
                     if (selectedCommentPostId === post.id) {
-                      setSelectedCommentPostId(null);
+                      setSelectedCommentPostId(null); // ẩn nếu nhấn lại
                     } else {
-                      fetchComments(post.id);
+                      fetchComments(post.id); // tải bình luận nếu chưa tải
                       setSelectedCommentPostId(post.id);
                     }
                   }}
                 >
                   💬 Bình luận
                 </button>
-
                 <button onClick={() => alert("Chức năng chia sẻ chưa được triển khai")}>
+
                   🔗 Chia sẻ
                 </button>
               </div>
@@ -578,7 +593,10 @@ export default function Home() {
                   <div className="comments">
                     {comments[post.id]?.map((comment, index) => (
                       <div key={index} className="comment">
-                        <strong>{comment.user?.username || "Người dùng"}:</strong> {comment.content}
+                        <strong>
+                          {comment.user?.username || "Người dùng"}:
+                        </strong>{" "}
+                        {comment.content}
                       </div>
                     ))}
                   </div>
