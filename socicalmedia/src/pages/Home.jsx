@@ -1,20 +1,19 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // chỉ giữ dòng này
 import Sidebar from "../components/Sidebar";
 import "../style/Home.css";
-import { useNavigate } from "react-router-dom";
-
 
 export default function Home() {
   const navigate = useNavigate();
+
   const handleEdit = (post) => {
     navigate(`/edit-post/${post.id}`, {
       state: {
         content: post.content,
         imageUrl: post.imageurl,
         videoUrl: post.videourl,
-      },
+      },  
     });
   };
 
@@ -36,7 +35,7 @@ export default function Home() {
 
   const user = JSON.parse(localStorage.getItem("user"));
   const userIDCMT = user?.id;
-  const navigate = useNavigate();
+
 
   useEffect(() => {
     if (!userIDCMT) return;
@@ -46,7 +45,7 @@ export default function Home() {
       .then((res) => {
         setStories(res.data);
         setLoading(false);
-      })
+      })  
       .catch((err) => {
         console.error("Lỗi khi tải story:", err);
         setError("Không thể tải story");
@@ -99,7 +98,6 @@ export default function Home() {
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
     return date.toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
   };
-  const [showReactions, setShowReactions] = useState(null); // Kiểm soát hiển thị hộp reaction
 
   const handleCommentSubmit = async (postId) => {
     const content = commentInputs[postId];
