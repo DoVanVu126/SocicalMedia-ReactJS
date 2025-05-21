@@ -6,7 +6,7 @@ import '../style/AddPost.css';
 const AddPost = () => {
   const [form, setForm] = useState({
     content: '',
-    image: [],
+    images: [],
     video: null,
     visibility: 'public', // mặc định là công khai
   });

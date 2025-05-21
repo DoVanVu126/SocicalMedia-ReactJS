@@ -9,6 +9,25 @@ import { initBlinkText } from '../script';
 
 
 export default function Home() {
+const [expandedPosts, setExpandedPosts] = useState({}); // lưu trạng thái mở rộng của từng post theo id hoặc index
+
+  // Hàm toggle mở rộng ảnh cho post
+  const toggleExpandImages = (postId) => {
+    setExpandedPosts(prev => ({
+      ...prev,
+      [postId]: !prev[postId],
+    }));
+  };
+
+  const [posts, setPosts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 5;
+  const indexOfLastPost = currentPage * postsPerPage;
+  const indexOfFirstPost = indexOfLastPost - postsPerPage;
+  const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+
   const navigate = useNavigate();
 
   const handleEdit = (post) => {
@@ -27,7 +46,6 @@ export default function Home() {
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
   const reactionListRef = useRef(null);
-  const [posts, setPosts] = useState([]);
   const [activeMenuPostId, setActiveMenuPostId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -41,11 +59,11 @@ export default function Home() {
 
   const user = JSON.parse(localStorage.getItem("user"));
   const userIDCMT = user?.id;
-   
+
+
   useEffect(() => {
-      // Gọi initBlinkText khi component mount
-      initBlinkText();
-    }, []);
+    initBlinkText();
+  }, []);
 
   useEffect(() => {
     if (!userIDCMT) return;
@@ -329,7 +347,7 @@ export default function Home() {
 
   return (
     <div className="container">
-           <Header/>
+      <Header />
       <Sidebar />
       <div className="main">
         <div className="story-containers">
@@ -376,22 +394,22 @@ export default function Home() {
                     <span className="story-time">{formatTime(story.created_at)}</span>
                   </div>
                 </div>
-                  <button
-                      className="story-menu-btn"
-                      onClick={() => handleToggleMenu(story.id)}
-                    >  ⋮
-                      
+                <button
+                  className="story-menu-btn"
+                  onClick={() => handleToggleMenu(story.id)}
+                >  ⋮
+
+                </button>
+                {showMenu === story.id && story.user?.id === user?.id && (
+                  <div className="story-menu" ref={menuRef}>
+                    <button
+                      className="story-menu-item"
+                      onClick={() => handleDeleteStory(story.id)}
+                    >
+                      🗑️ Xóa Story
                     </button>
-                     {showMenu === story.id && story.user?.id === user?.id && (
-                      <div className="story-menu" ref={menuRef}>
-                        <button
-                          className="story-menu-item"
-                          onClick={() => handleDeleteStory(story.id)}
-                        >
-                          🗑️ Xóa Story
-                        </button>
-                      </div>
-                    )}
+                  </div>
+                )}
                 <div className="story-image-wrapper">
                   {story.videourl?.match(/\.(mp4|webm)$/i) ? (
                     <video
@@ -410,8 +428,8 @@ export default function Home() {
                 <div className="story-content">
                   <p className="text">{story.content}</p>
                   <div className="story-menu-wrapper" onClick={(e) => e.stopPropagation()}>
-                  
-                   
+
+
                   </div>
                 </div>
               </div>
@@ -425,11 +443,10 @@ export default function Home() {
             />
           )}
         </div>
-
         {loading && <p className="loading">⏳ Đang tải...</p>}
         {error && <p className="error">{error}</p>}
         {Array.isArray(posts) && posts.length > 0 ? (
-          posts.map((post) => (
+          currentPosts.map((post) => (
             <div className="post" key={post.id}>
               <div className="post-header">
                 <div className="user-info">
@@ -460,13 +477,9 @@ export default function Home() {
                   >
                     ⋯
                   </button>
-                  {activeMenuPostId === post.id && (
+                  {activeMenuPostId === post.id && post.user?.id === user?.id && (
                     <div className="options-menu" ref={menuRef}>
-                      <button
-                        onClick={() => handleEdit(post)}
-                      >
-                        📝 Sửa
-                      </button>
+                      <button onClick={() => handleEdit(post)}>📝 Sửa</button>
                       <button
                         onClick={() => {
                           if (
@@ -504,16 +517,42 @@ export default function Home() {
 
               <p className="post-content">{post.content}</p>
 
-              <div className="post-media">
-                {post.imageurl && (
-                  <div className="image-wrapper">
-                    <img
-                      src={`http://localhost:8000/storage/images/${post.imageurl}`}
-                      alt="Ảnh bài viết"
-                      className="media-image"
-                    />
-                  </div>
+              <div key={post.id} className="post-media">
+                {(Array.isArray(post.imageurl)) && (
+                  <>
+                    {/* Nếu chưa mở rộng thì hiển thị 6 ảnh */}
+                    {(expandedPosts[post.id] !== true
+                      ? post.imageurl.slice(0, 6)
+                      : post.imageurl
+                    ).map((img, index) => (
+                      <div key={index} className="image-wrapper">
+                        <img
+                          src={`http://localhost:8000/storage/images/${img}`}
+                          alt={`Ảnh ${index + 1}`}
+                          className="media-image"
+                        />
+                        {/* Nếu là ảnh thứ 6, còn ảnh nữa và chưa mở rộng thì hiển thị lớp phủ */}
+                        {index === 5 && post.imageurl.length > 6 && expandedPosts[post.id] !== true && (
+                          <div
+                            className="image-overlay"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => toggleExpandImages(post.id)}
+                          >
+                            +{post.imageurl.length - 6} ảnh
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {/* Nếu đang mở rộng thì hiển thị nút thu gọn */}
+                    {expandedPosts[post.id] === true && (
+                      <button onClick={() => toggleExpandImages(post.id)} className="collapse-btn">
+                        Thu gọn
+                      </button>
+                    )}
+                  </>
                 )}
+
+                {/* Hiển thị video như bình thường */}
                 {post.videourl && (
                   <div className="video-wrapper">
                     <video controls className="media-video">
@@ -606,9 +645,8 @@ export default function Home() {
                   onMouseLeave={() => setShowReactions(null)}
                 >
                   <button
-                    className={`like-button ${
-                      post.user_reaction ? "reacted" : ""
-                    }`}
+                    className={`like-button ${post.user_reaction ? "reacted" : ""
+                      }`}
                     onClick={() => handleReactionClick(post.id)}
                   >
                     {renderButtonLabel(post.user_reaction)}
@@ -619,9 +657,8 @@ export default function Home() {
                         (type) => (
                           <button
                             key={type}
-                            className={`reaction-icon ${
-                              post.user_reaction?.type === type ? "selected" : ""
-                            }`}
+                            className={`reaction-icon ${post.user_reaction?.type === type ? "selected" : ""
+                              }`}
                             onClick={() => handleReactionClick(post.id, type)}
                             title={type.charAt(0).toUpperCase() + type.slice(1)}
                           >
@@ -686,7 +723,38 @@ export default function Home() {
         ) : (
           !loading && <p>Không có bài viết nào</p>
         )}
+        <div className="pagination">
+          {/* Nút Trước */}
+          <button
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Trước
+          </button>
+
+          {/* Các nút số trang */}
+          {Array.from({ length: Math.ceil(posts.length / postsPerPage) }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => paginate(i + 1)}
+              className={currentPage === i + 1 ? "active" : ""}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          {/* Nút Sau */}
+          <button
+            onClick={() => paginate(currentPage + 1)}
+            disabled={currentPage === Math.ceil(posts.length / postsPerPage)}
+          >
+            Sau
+          </button>
+        </div>
+
       </div>
+
     </div>
+
   );
 }
