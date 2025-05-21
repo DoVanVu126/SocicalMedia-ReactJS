@@ -9,7 +9,7 @@
 }
 
 /* Main content */
-.main {
+.main_content {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -465,7 +465,7 @@
     /* Tăng khoảng cách dưới */
   }
 
-  .main {
+  .main_content {
     padding: 0.5rem;
   }
 
@@ -667,7 +667,7 @@
   display: flex;
 }
 
-.main {
+.main_content {
   flex: 1;
   padding: 20px;
 }
