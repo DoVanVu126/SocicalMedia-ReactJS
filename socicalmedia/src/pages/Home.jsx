@@ -494,15 +494,19 @@ export default function Home() {
               <p className="post-content">{post.content}</p>
 
               <div className="post-media">
-                {post.imageurl && (
+                {post.imageurl && post.imageurl.length > 0 && (
                   <div className="image-wrapper">
-                    <img
-                      src={`http://localhost:8000/storage/images/${post.imageurl}`}
-                      alt="Ảnh bài viết"
-                      className="media-image"
-                    />
+                    {post.imageurl.map((img, index) => (
+                      <img
+                        key={index}
+                        src={`http://localhost:8000/storage/images/${img}`}
+                        alt={`Ảnh bài viết ${index + 1}`}
+                        className="media-image"
+                      />
+                    ))}
                   </div>
                 )}
+
                 {post.videourl && (
                   <div className="video-wrapper">
                     <video controls className="media-video">
@@ -604,6 +608,7 @@ export default function Home() {
                   </button>
                   {showReactions === post.id && (
                     <div className="reaction-icons">
+
                       {["like", "love", "haha", "wow", "sad", "angry"].map(
                         (type) => (
                           <button
