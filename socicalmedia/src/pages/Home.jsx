@@ -13,7 +13,7 @@ export default function Home() {
         content: post.content,
         imageUrl: post.imageurl,
         videoUrl: post.videourl,
-      },  
+      },
     });
   };
 
@@ -45,7 +45,7 @@ export default function Home() {
       .then((res) => {
         setStories(res.data);
         setLoading(false);
-      })  
+      })
       .catch((err) => {
         console.error("Lỗi khi tải story:", err);
         setError("Không thể tải story");
@@ -134,15 +134,15 @@ export default function Home() {
     setComments((prev) => ({ ...prev, [postId]: data }));
   };
 
- const fetchReactionList = async (postId) => {
-  try {
-    const res = await axios.get(`http://localhost:8000/api/posts/${postId}/reactions`);
-    setReactionList((prev) => ({ ...prev, [postId]: res.data }));
-  } catch (err) {
-    console.error("Lỗi khi lấy danh sách cảm xúc:", err);
-    setError("Không thể tải danh sách cảm xúc");
-  }
-};
+  const fetchReactionList = async (postId) => {
+    try {
+      const res = await axios.get(`http://localhost:8000/api/posts/${postId}/reactions`);
+      setReactionList((prev) => ({ ...prev, [postId]: res.data }));
+    } catch (err) {
+      console.error("Lỗi khi lấy danh sách cảm xúc:", err);
+      setError("Không thể tải danh sách cảm xúc");
+    }
+  };
 
   const handleReactionSummaryClick = (postId) => {
     if (showReactionList === postId) {
@@ -320,7 +320,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="story-image-wrapper">
-                
+
               </div>
             </div>
             {stories.map((story) => (
@@ -353,7 +353,7 @@ export default function Home() {
                 <div className="story-menu">
                   <button onClick={() => handleToggleMenu(story.id)} className="menu-button">⋯</button>
                   {showMenu === story.id && (
-                    <div className="options-menu" style={{right: '-7px', top: '50px'}}>  
+                    <div className="options-menu" style={{ right: '-7px', top: '50px' }}>
                       <button className="edit-button" onClick={() => alert("Chức năng sửa story chưa được triển khai")}>
                         Sửa✏️
                       </button>
@@ -434,15 +434,19 @@ export default function Home() {
               <p className="post-content">{post.content}</p>
 
               <div className="post-media">
-                {post.imageurl && (
+                {post.imageurl && post.imageurl.length > 0 && (
                   <div className="image-wrapper">
-                    <img
-                      src={`http://localhost:8000/storage/images/${post.imageurl}`}
-                      alt="Ảnh bài viết"
-                      className="media-image"
-                    />
+                    {post.imageurl.map((img, index) => (
+                      <img
+                        key={index}
+                        src={`http://localhost:8000/storage/images/${img}`}
+                        alt={`Ảnh bài viết ${index + 1}`}
+                        className="media-image"
+                      />
+                    ))}
                   </div>
                 )}
+
                 {post.videourl && (
                   <div className="video-wrapper">
                     <video controls className="media-video">
@@ -542,9 +546,8 @@ export default function Home() {
                       {["like", "love", "haha", "wow", "sad", "angry"].map((type) => (
                         <button
                           key={type}
-                          className={`reaction-icon ${
-                            post.user_reaction?.type === type ? "selected" : ""
-                          }`}
+                          className={`reaction-icon ${post.user_reaction?.type === type ? "selected" : ""
+                            }`}
                           onClick={() => handleReactionClick(post.id, type)}
                           title={type.charAt(0).toUpperCase() + type.slice(1)}
                         >
