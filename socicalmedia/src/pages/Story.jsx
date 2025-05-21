@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
 import "../style/AddStory.css";
 
 const Story = () => {
@@ -94,32 +96,23 @@ const Story = () => {
 
   return (
     <div className="story-container">
-      <div className="story-list">
-        {stories.map((story) => (
-          <div key={story.id} className="story-item">
-            <img
-              src={`http://localhost:8000/storage/stories/${story.imageurl}`}
-              alt="Story"
-              className="story-image"
-            />
-            <div className="story-content">
-              <p>{story.content}</p>
-              <span className="story-time">{new Date(story.created_at).toLocaleString()}</span>
-            </div>
-            <div className="story-menu">
-              <button onClick={() => handleToggleMenu(story.id)} className="menu-button">•••</button>
-              {showMenu === story.id && (
-                <div className="menu-options">
-                  <button className="edit-button">Sửa</button>
-                  <button className="delete-button" onClick={() => handleDeleteStory(story.id)}>
-                    Xóa
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+      <Header/>
+            <Sidebar />
+      <div className="story-list row">
+  {stories.map((story) => (
+    <div key={story.id} className="story-item col-md-4">
+      <img
+        src={`http://localhost:8000/storage/story_images/${story.imageurl}`}
+        alt="Story"
+        className="story-image"
+      />
+      <div className="story-content">
+        <p className="text">{story.content}</p>
+        <span className="story-time">{new Date(story.created_at).toLocaleString()}</span>
       </div>
+    </div>
+  ))}
+</div>
 
       {/* Add New Story Form */}
       <h4 className="add-story-header">Thêm Story mới</h4>

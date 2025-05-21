@@ -1,77 +1,85 @@
-/* Search.css */
+/* Search.css - giảm khoảng trống và cân đối giao diện */
 .search-container {
-  max-width: 600px;
-  margin: 60px auto;
-  padding: 20px 30px;
-  background: #ffffff;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  max-width: 1000px; /* Tăng max-width để tận dụng không gian ngang */
+  margin: 80px 20px; /* Giảm margin-top và margin ngang để giảm khoảng trống */
+  padding: 25px 100px; /* Giảm padding để không gian gọn hơn */
+  border-radius: 18px;
+  background: linear-gradient(135deg, #e6f0ff, #ffffff);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
   text-align: center;
-  transform: perspective(1000px);
-  animation: fadeIn 1s ease-out;
+  animation: fadeInUp 0.8s ease forwards;
+  backdrop-filter: blur(5px);
 }
 
 .search-container h2 {
-  font-size: 26px;
-  margin-bottom: 20px;
-  color: #333;
+  font-size: 26px; /* Giảm cỡ chữ để tiết kiệm không gian */
+  margin-bottom: 15px; /* Giảm margin-bottom */
+  color: #1a1a1a;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .search-input {
   width: 100%;
-  padding: 12px 18px;
-  font-size: 16px;
+  max-width: 850px; /* Tăng chiều rộng input để lấp đầy không gian */
+  margin: 0 auto;
+  padding: 12px 18px; /* Giảm padding để input gọn hơn */
+  font-size: 16px; /* Giảm cỡ chữ để cân đối */
   border-radius: 10px;
   border: 1px solid #ccc;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+  background-color: #f7f9fc;
   transition: all 0.3s ease-in-out;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
+  display: block;
 }
 
 .search-input:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 8px rgba(0,123,255,0.3);
-  transform: scale(1.02);
+  border-color: #3399ff;
+  box-shadow: 0 0 10px rgba(51, 153, 255, 0.5);
+  transform: scale(1.01); /* Giảm hiệu ứng phóng to */
+  background-color: #ffffff;
 }
 
 .search-results {
   list-style: none;
-  margin: 30px 0 0;
+  margin: 20px 0 0; /* Giảm margin-top để giảm khoảng trống */
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px; /* Giảm gap để các item gần nhau hơn */
 }
 
 .search-item {
-  background: linear-gradient(145deg, #f0f0f0, #ffffff);
-  padding: 12px 16px;
+  background: linear-gradient(145deg, #f4f7fa, #ffffff);
+  padding: 12px 18px; /* Giảm padding để item không quá lớn */
   border-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 15px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  gap: 12px; /* Giảm khoảng cách giữa avatar và thông tin */
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
   transform-style: preserve-3d;
-  perspective: 1000px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 }
 
 .search-item:hover {
-  transform: translateY(-5px) rotateX(3deg) rotateY(3deg);
-  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+  transform: translateY(-4px) rotateX(4deg) rotateY(4deg);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
 }
 
 .search-avatar {
-  width: 60px;
-  height: 60px;
+  width: 50px; /* Giảm kích thước avatar để tiết kiệm không gian */
+  height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #007bff;
-  transition: transform 0.3s ease;
+  border: 2px solid #3399ff; /* Giảm độ dày viền */
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
 .search-item:hover .search-avatar {
-  transform: scale(1.1) rotateZ(3deg);
+  transform: scale(1.1) rotateZ(5deg); /* Giảm hiệu ứng phóng to */
+  box-shadow: 0 0 12px 3px rgba(51, 153, 255, 0.5); /* Giảm hiệu ứng phát sáng */
 }
 
 .search-info {
@@ -79,23 +87,123 @@
 }
 
 .search-name {
-  font-size: 18px;
+  font-size: 16px; /* Giảm cỡ chữ để tiết kiệm không gian */
   font-weight: 600;
   color: #222;
 }
 
 .search-username {
-  font-size: 14px;
+  font-size: 12px; /* Giảm cỡ chữ để cân đối */
   color: #666;
 }
 
-@keyframes fadeIn {
-  from {
+@keyframes fadeInUp {
+  0% {
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
+    transform: translateY(30px) scale(0.96);
   }
-  to {
+  100% {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+/* css hiệu ứng blinktext */
+.blink-text {
+  font-size: 2em;
+}
+.blink-text-animation span {
+  animation: blink 0.8s both;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0;
+  }
+
+  5% {
+    opacity: 0.4;
+  }
+
+  10% {
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 0.55;
+  }
+
+  20% {
+    opacity: 0.55;
+  }
+
+  25% {
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 0.7;
+  }
+
+  40% {
+    opacity: 0.7;
+  }
+
+  45% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0.85;
+  }
+
+  65% {
+    opacity: 0.85;
+  }
+
+  70% {
+    opacity: 0;
+  }
+
+  75% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+
+/* Responsive design */
+@media (max-width: 992px) {
+  .search-container {
+    max-width: calc(100% - 40px); /* Đảm bảo không gian ngang được tận dụng */
+    margin: 60px 20px; /* Giảm margin-top trên mobile */
+    padding: 20px 25px;
+  }
+
+  .search-input {
+    max-width: 100%; /* Input chiếm toàn bộ chiều rộng trên mobile */
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+
+  .search-item {
+    padding: 10px 15px;
+    gap: 10px;
+  }
+
+  .search-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .search-name {
+    font-size: 14px;
+  }
+
+  .search-username {
+    font-size: 11px;
   }
 }

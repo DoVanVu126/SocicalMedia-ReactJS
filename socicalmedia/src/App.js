@@ -6,6 +6,7 @@ import Register from './components/Register';
 import AddPost from './pages/AddPost';
 import Sidebar from './components/Sidebar';
 import Notification from './components/Notification';
+import StoryViewer from './components/StoryViewer';
 
 import Story from './pages/Story';
 import Search from './pages/Search';
@@ -28,11 +29,13 @@ function AppLayout() {
         <Routes>
             <Route path="/" element={<Login/>}/>
             <Route path="/register" element={<Register/>}/>
-            <Route path="/home" element={<Home/>}/>
+            
 
             <Route path="/profile/:userId" element={<UserProfile/>}/>
             <Route path="/story" element={<Story/>}/> {/* Đường dẫn cho Story */}
+            <Route path="/storyviewer" element={<StoryViewer />} />
             <Route path="/search" element={<Search/>}/>
+            <Route path="/home" element={<Home/>}/>
 
             <Route path="/add-post" element={<AddPost/>}/>
             <Route path="/edit-post/:id" element={<EditPost/>}/>

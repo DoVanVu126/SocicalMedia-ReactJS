@@ -35,7 +35,7 @@ function Sidebar() {
                 </li>
 
                 <li className="nav-item">
-                    <a className="nav-link collapsed" href="#">
+                    <a className="nav-link collapsed" href="/search">
                         <i className="bi bi-search"></i>
                         <span>Tìm kiếm</span>
                     </a>
