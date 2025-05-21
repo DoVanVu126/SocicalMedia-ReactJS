@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // chỉ giữ dòng này
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import "../style/Home.css";
+import StoryViewer from "../components/StoryViewer";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -13,7 +14,7 @@ export default function Home() {
         content: post.content,
         imageUrl: post.imageurl,
         videoUrl: post.videourl,
-      },  
+      },
     });
   };
 
@@ -32,20 +33,23 @@ export default function Home() {
   const [showMenu, setShowMenu] = useState(null);
   const [reactionList, setReactionList] = useState({});
   const [showReactionList, setShowReactionList] = useState(null);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const user = JSON.parse(localStorage.getItem("user"));
   const userIDCMT = user?.id;
-
 
   useEffect(() => {
     if (!userIDCMT) return;
     setLoading(true);
     axios
-      .get("http://localhost:8000/api/stories", { params: { user_id: userIDCMT } })
+      .get("http://localhost:8000/api/stories", {
+        params: { user_id: userIDCMT },
+      })
       .then((res) => {
         setStories(res.data);
         setLoading(false);
-      })  
+      })
       .catch((err) => {
         console.error("Lỗi khi tải story:", err);
         setError("Không thể tải story");
@@ -60,7 +64,9 @@ export default function Home() {
     }
     setLoading(true);
     axios
-      .get("http://localhost:8000/api/posts", { params: { user_id: userIDCMT } })
+      .get("http://localhost:8000/api/posts", {
+        params: { user_id: userIDCMT },
+      })
       .then((res) => {
         setPosts(res.data);
         setLoading(false);
@@ -94,9 +100,14 @@ export default function Home() {
     const diffInSeconds = Math.floor((now - date) / 1000);
 
     if (diffInSeconds < 60) return `${diffInSeconds} giây trước`;
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
-    return date.toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
+    if (diffInSeconds < 3600)
+      return `${Math.floor(diffInSeconds / 60)} phút trước`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+    return date.toLocaleString("vi-VN", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
   };
 
   const handleCommentSubmit = async (postId) => {
@@ -104,16 +115,19 @@ export default function Home() {
     if (!content) return;
 
     try {
-      const res = await fetch(`http://localhost:8000/api/posts/${postId}/comments`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_id: userIDCMT,
-          content,
-        }),
-      });
+      const res = await fetch(
+        `http://localhost:8000/api/posts/${postId}/comments`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: userIDCMT,
+            content,
+          }),
+        }
+      );
 
       if (!res.ok) {
         const errorText = await res.text();
@@ -129,20 +143,24 @@ export default function Home() {
   };
 
   const fetchComments = async (postId) => {
-    const res = await fetch(`http://localhost:8000/api/posts/${postId}/comments`);
+    const res = await fetch(
+      `http://localhost:8000/api/posts/${postId}/comments`
+    );
     const data = await res.json();
     setComments((prev) => ({ ...prev, [postId]: data }));
   };
 
- const fetchReactionList = async (postId) => {
-  try {
-    const res = await axios.get(`http://localhost:8000/api/posts/${postId}/reactions`);
-    setReactionList((prev) => ({ ...prev, [postId]: res.data }));
-  } catch (err) {
-    console.error("Lỗi khi lấy danh sách cảm xúc:", err);
-    setError("Không thể tải danh sách cảm xúc");
-  }
-};
+  const fetchReactionList = async (postId) => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8000/api/posts/${postId}/reactions`
+      );
+      setReactionList((prev) => ({ ...prev, [postId]: res.data }));
+    } catch (err) {
+      console.error("Lỗi khi lấy danh sách cảm xúc:", err);
+      setError("Không thể tải danh sách cảm xúc");
+    }
+  };
 
   const handleReactionSummaryClick = (postId) => {
     if (showReactionList === postId) {
@@ -296,6 +314,11 @@ export default function Home() {
     return Object.values(summary || {}).reduce((sum, count) => sum + count, 0);
   };
 
+  const handleOpenViewer = (index) => {
+    setSelectedIndex(index);
+    setIsViewerOpen(true);
+  };
+
   return (
     <div className="container">
       <Sidebar />
@@ -304,7 +327,10 @@ export default function Home() {
           <h3 className="story-header">Story của bạn 💫</h3>
           {loading && <p className="loading">⏳ Đang tải...</p>}
           <div className="story-list">
-            <div className="story-item create-story" onClick={() => navigate("/story")}>
+            <div
+              className="story-item create-story"
+              onClick={() => navigate("/story")}
+            >
               <div className="story-user-info">
                 <img
                   src={
@@ -319,12 +345,13 @@ export default function Home() {
                   <span className="story-username">Tạo tin ➕</span>
                 </div>
               </div>
-              <div className="story-image-wrapper">
-                
-              </div>
             </div>
-            {stories.map((story) => (
-              <div key={story.id} className="story-item">
+            {stories.map((story, index) => (
+              <div
+                key={story.id}
+                className="story-item"
+                onClick={() => handleOpenViewer(index)}
+              >
                 <div className="story-user-info">
                   <img
                     src={
@@ -341,31 +368,51 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="story-image-wrapper">
-                  <img
-                    src={`http://localhost:8000/storage/story_images/${story.imageurl}`}
-                    alt="Story"
-                    className="story-image"
-                  />
+                  {story.videourl?.match(/\.(mp4|webm)$/i) ? (
+                    <video
+                      src={`http://localhost:8000/storage/story_videos/${story.videourl}`}
+                      className="story-image"
+                      muted
+                    />
+                  ) : (
+                    <img
+                      src={`http://localhost:8000/storage/story_images/${story.imageurl}`}
+                      alt="Story"
+                      className="story-image"
+                    />
+                  )}
                 </div>
                 <div className="story-content">
                   <p>{story.content}</p>
-                </div>
-                <div className="story-menu">
-                  <button onClick={() => handleToggleMenu(story.id)} className="menu-button">⋯</button>
-                  {showMenu === story.id && (
-                    <div className="options-menu" style={{right: '-7px', top: '50px'}}>  
-                      <button className="edit-button" onClick={() => alert("Chức năng sửa story chưa được triển khai")}>
-                        Sửa✏️
-                      </button>
-                      <button className="delete-button" onClick={() => handleDeleteStory(story.id)}>
-                        Xóa🗑️
-                      </button>
-                    </div>
-                  )}
+                  <div className="story-menu-wrapper" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      className="story-menu-btn"
+                      onClick={() => handleToggleMenu(story.id)}
+                    >
+                      ⋮
+                    </button>
+                    {showMenu === story.id && story.user?.id === user?.id && (
+                      <div className="story-menu" ref={menuRef}>
+                        <button
+                          className="story-menu-item"
+                          onClick={() => handleDeleteStory(story.id)}
+                        >
+                          🗑️ Xóa Story
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
+          {isViewerOpen && (
+            <StoryViewer
+              stories={stories}
+              onClose={() => setIsViewerOpen(false)}
+              initialIndex={selectedIndex}
+            />
+          )}
         </div>
 
         {loading && <p className="loading">⏳ Đang tải...</p>}
@@ -395,26 +442,39 @@ export default function Home() {
                     ref={buttonRef}
                     className="options-btn"
                     onClick={() =>
-                      setActiveMenuPostId(activeMenuPostId === post.id ? null : post.id)
+                      setActiveMenuPostId(
+                        activeMenuPostId === post.id ? null : post.id
+                      )
                     }
                   >
                     ⋯
                   </button>
                   {activeMenuPostId === post.id && (
                     <div className="options-menu" ref={menuRef}>
-                      <button onClick={() => alert("Chức năng sửa chưa được triển khai")}>
+                      <button
+                        onClick={() => handleEdit(post)}
+                      >
                         📝 Sửa
                       </button>
                       <button
                         onClick={() => {
-                          if (window.confirm("Bạn có chắc muốn xóa bài viết này?")) {
+                          if (
+                            window.confirm(
+                              "Bạn có chắc muốn xóa bài viết này?"
+                            )
+                          ) {
                             setLoading(true);
                             axios
-                              .delete(`http://localhost:8000/api/posts/${post.id}`, {
-                                data: { user_id: userIDCMT },
-                              })
+                              .delete(
+                                `http://localhost:8000/api/posts/${post.id}`,
+                                {
+                                  data: { user_id: userIDCMT },
+                                }
+                              )
                               .then(() => {
-                                setPosts(posts.filter((p) => p.id !== post.id));
+                                setPosts(
+                                  posts.filter((p) => p.id !== post.id)
+                                );
                               })
                               .catch((err) => {
                                 console.error("Lỗi khi xóa bài viết:", err);
@@ -480,7 +540,8 @@ export default function Home() {
                       <div className="reaction-list" ref={reactionListRef}>
                         <div className="reaction-list-header">
                           <span>
-                            {getTotalReactions(post.reaction_summary)} lượt thả cảm xúc
+                            {getTotalReactions(post.reaction_summary)} lượt thả
+                            cảm xúc
                           </span>
                           <button
                             className="close-button"
@@ -494,7 +555,8 @@ export default function Home() {
                             (type) =>
                               post.reaction_summary[type] > 0 && (
                                 <span key={type} className="reaction-count">
-                                  {renderReaction(type)} {post.reaction_summary[type]}
+                                  {renderReaction(type)}{" "}
+                                  {post.reaction_summary[type]}
                                 </span>
                               )
                           )}
@@ -512,8 +574,10 @@ export default function Home() {
                                   alt="Avatar"
                                   className="reaction-user-avatar"
                                 />
-                                <span>{reaction.user?.username || reaction.username}</span>:{" "}
-                                {renderReaction(reaction.type)}
+                                <span>
+                                  {reaction.user?.username || reaction.username}
+                                </span>
+                                : {renderReaction(reaction.type)}
                               </div>
                             ))
                           ) : (
@@ -531,26 +595,29 @@ export default function Home() {
                   onMouseLeave={() => setShowReactions(null)}
                 >
                   <button
-                    className={`like-button ${post.user_reaction ? "reacted" : ""}`}
-
+                    className={`like-button ${
+                      post.user_reaction ? "reacted" : ""
+                    }`}
                     onClick={() => handleReactionClick(post.id)}
                   >
                     {renderButtonLabel(post.user_reaction)}
                   </button>
                   {showReactions === post.id && (
                     <div className="reaction-icons">
-                      {["like", "love", "haha", "wow", "sad", "angry"].map((type) => (
-                        <button
-                          key={type}
-                          className={`reaction-icon ${
-                            post.user_reaction?.type === type ? "selected" : ""
-                          }`}
-                          onClick={() => handleReactionClick(post.id, type)}
-                          title={type.charAt(0).toUpperCase() + type.slice(1)}
-                        >
-                          {renderReaction(type)}
-                        </button>
-                      ))}
+                      {["like", "love", "haha", "wow", "sad", "angry"].map(
+                        (type) => (
+                          <button
+                            key={type}
+                            className={`reaction-icon ${
+                              post.user_reaction?.type === type ? "selected" : ""
+                            }`}
+                            onClick={() => handleReactionClick(post.id, type)}
+                            title={type.charAt(0).toUpperCase() + type.slice(1)}
+                          >
+                            {renderReaction(type)}
+                          </button>
+                        )
+                      )}
                     </div>
                   )}
                 </div>
@@ -558,17 +625,20 @@ export default function Home() {
                 <button
                   onClick={() => {
                     if (selectedCommentPostId === post.id) {
-                      setSelectedCommentPostId(null); // ẩn nếu nhấn lại
+                      setSelectedCommentPostId(null);
                     } else {
-                      fetchComments(post.id); // tải bình luận nếu chưa tải
+                      fetchComments(post.id);
                       setSelectedCommentPostId(post.id);
                     }
                   }}
                 >
                   💬 Bình luận
                 </button>
-                <button onClick={() => alert("Chức năng chia sẻ chưa được triển khai")}>
-
+                <button
+                  onClick={() =>
+                    alert("Chức năng chia sẻ chưa được triển khai")
+                  }
+                >
                   🔗 Chia sẻ
                 </button>
               </div>
@@ -586,14 +656,14 @@ export default function Home() {
                         })
                       }
                     />
-                    <button onClick={() => handleCommentSubmit(post.id)}>Gửi</button>
+                    <button onClick={() => handleCommentSubmit(post.id)}>
+                      Gửi
+                    </button>
                   </div>
                   <div className="comments">
                     {comments[post.id]?.map((comment, index) => (
                       <div key={index} className="comment">
-                        <strong>
-                          {comment.user?.username || "Người dùng"}:
-                        </strong>{" "}
+                        <strong>{comment.user?.username || "Người dùng"}:</strong>{" "}
                         {comment.content}
                       </div>
                     ))}

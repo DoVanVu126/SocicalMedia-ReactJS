@@ -499,60 +499,115 @@
 
 
 /* Story styles */
+/* Story styles */
 .story-container {
   width: 100%;
   max-width: 1000px;
-  margin: 0 auto 20px auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0 auto 30px auto;
+  padding: 20px 0;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  transition: box-shadow 0.3s ease;
+}
+
+.story-container:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .story-header {
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
   color: #1a1a1a;
-  margin-bottom: 15px;
+  margin: 0 20px 15px 20px;
   text-align: left;
+  letter-spacing: 0.2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.story-header::before {
+  content: "📸";
+  font-size: 24px;
 }
 
 .loading {
   font-size: 16px;
   text-align: center;
-  color: #606770;
+  color: #65676b;
+  padding: 15px 0;
+  font-style: italic;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
 }
 
 .story-list {
   display: flex;
   overflow-x: auto;
-  gap: 10px;
-  padding-bottom: 10px;
-  margin-bottom: 20px;
-  scrollbar-width: none; /* Ẩn thanh cuộn trên Firefox */
+  gap: 12px;
+  padding: 0 20px 15px 20px;
+  margin-bottom: 10px;
+  scrollbar-width: none;
 }
 
 .story-list::-webkit-scrollbar {
-  display: none; /* Ẩn thanh cuộn trên Chrome/Safari */
+  display: none;
+}
+
+.story-item-wrapper {
+  position: relative;
+  flex: 0 0 120px; /* Tăng nhẹ chiều rộng để thoáng hơn */
 }
 
 .story-item {
-  flex: 0 0 112px; /* Chiều rộng cố định để giống Facebook */
-  border-radius: 10px;
+  flex: 0 0 120px;
+  height: 210px; /* Tăng chiều cao để cân đối */
+  border-radius: 14px;
   overflow: hidden;
-  background: #fff;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.45));
   position: relative;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .story-item:hover {
-  transform: scale(1.03); /* Hiệu ứng phóng to nhẹ khi hover */
+  transform: scale(1.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.story-item.create-story {
+  background: #f7f8fa;
+  border: 2px dashed #ccd0d5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.story-item.create-story:hover {
+  background: #eceef1;
+  border-color: #b0b3b8;
+}
+
+.story-item.create-story .story-username {
+  color: #1a1a1a;
+  text-shadow: none;
+  font-weight: 600;
 }
 
 .story-user-info {
   position: absolute;
-  top: 8px;
+  top: 12px;
   left: 8px;
   z-index: 1;
   display: flex;
@@ -561,35 +616,48 @@
 }
 
 .story-avatar {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  border: 3px solid #1877f2; /* Viền xanh giống Facebook */
-  margin-bottom: 5px;
+  border: 3px solid #1877f2;
+  margin-bottom: 6px;
+  box-shadow: 0 0 0 0 rgba(24, 119, 242, 0.4);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transform: translateX(-2px);
+}
+
+.story-item:hover .story-avatar {
+  box-shadow: 0 0 0 4px rgba(24, 119, 242, 0.4);
+  transform: translateX(-2px) scale(1.05);
 }
 
 .story-user-details {
   display: flex;
   flex-direction: column;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8); /* Đổ bóng chữ để dễ đọc */
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .story-username {
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.2;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .story-time {
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 400;
   opacity: 0.9;
 }
 
 .story-image-wrapper {
   position: relative;
   width: 100%;
-  padding-bottom: 177.78%; /* Tỷ lệ 9:16 (16/9 = 1.7778) */
+  height: 100%;
 }
 
 .story-image {
@@ -599,26 +667,132 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  filter: brightness(0.9);
+  transition: filter 0.3s ease;
+}
+
+.story-item:hover .story-image {
+  filter: brightness(1);
 }
 
 .story-content {
   position: absolute;
-  bottom: 8px;
-  left: 8px;
-  right: 8px;
-  color: #fff;
-  font-size: 12px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 /* Story menu */
-.story-menu {
+.story-menu-wrapper {
   position: absolute;
-  top: 8px;
+  top: 12px;
   right: 8px;
-  z-index: 1;
+  z-index: 2;
 }
 
+.story-menu-btn {
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: #ffffff;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 50%;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.story-menu-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: scale(1.1);
+}
+
+.story-menu {
+  position: absolute;
+  top: 32px;
+  right: 0;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 8px 0;
+  z-index: 10;
+  min-width: 110px;
+}
+
+.story-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.story-menu-item:hover {
+  background: #f0f2f5;
+}
+
+/* Story navigation buttons */
+.story-navigation {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.story-nav-btn {
+  pointer-events: all;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: #ffffff;
+  font-size: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.story-nav-btn:hover {
+  background: rgba(0, 0, 0, 0.75);
+  transform: scale(1.1);
+}
+
+.story-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.story-nav-prev {
+  margin-left: 6px;
+}
+
+.story-nav-next {
+  margin-right: 6px;
+}
 /* Menu button (unchanged) */
 .menu-button {
   background: rgba(0, 0, 0, 0.5);
