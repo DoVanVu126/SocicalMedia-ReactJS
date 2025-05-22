@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../style/AddPost.css';
-
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
 const AddPost = () => {
   const [form, setForm] = useState({
     content: '',
@@ -67,65 +68,65 @@ const AddPost = () => {
     : '/default-avatar.png';
 
   return (
-    <div className="add-post-container">
-      <div className="user-info">
-        <img src={avatarUrl} alt="Avatar" className="user-avatar" />
-        <span className="user-name">{user.username}</span>
+    <><Header />
+      <Sidebar />
+      <div className="add-post-container">
+        <div className="user-info">
+          <img src={avatarUrl} alt="Avatar" className="user-avatar" />
+          <span className="user-name">{user.username}</span>
+        </div>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
+          <textarea
+            name="content"
+            placeholder="Nội dung bài viết"
+            value={form.content}
+            onChange={handleChange}
+          />
+          {/* Quyền riêng tư */}
+          <div className="visibility-selector">
+            <label htmlFor="visibility">Quyền riêng tư:</label>
+            <select
+              id="visibility"
+              name="visibility"
+              value={form.visibility}
+              onChange={handleChange}
+            >
+              <option value="public">Công khai</option>
+              <option value="private">Riêng tư</option>
+            </select>
+          </div>
+
+          {/* Ảnh và video */}
+          <div className="file-inputs">
+            <label htmlFor="images" className="file-label">
+              {form.images.length > 0 ? `${form.images.length} ảnh đã chọn` : 'Chọn ảnh'}
+            </label>
+            <input
+              type="file"
+              name="images"
+              id="images"
+              accept="image/*"
+              multiple
+              onChange={handleChange}
+              className="file-input"
+            />
+
+            <label htmlFor="video" className="file-label">
+              {form.video ? form.video.name : 'Chọn video'}
+            </label>
+            <input
+              type="file"
+              name="video"
+              id="video"
+              accept="video/*"
+              onChange={handleChange}
+              className="file-input"
+            />
+          </div>
+          <button type="submit">Đăng bài</button>
+        </form>
       </div>
-      <form onSubmit={handleSubmit} encType="multipart/form-data">
-        <textarea
-          name="content"
-          placeholder="Nội dung bài viết"
-          value={form.content}
-          onChange={handleChange}
-          required
-        />
-
-        {/* Quyền riêng tư */}
-        <div className="visibility-selector">
-          <label htmlFor="visibility">Quyền riêng tư:</label>
-          <select
-            id="visibility"
-            name="visibility"
-            value={form.visibility}
-            onChange={handleChange}
-          >
-            <option value="public">Công khai</option>
-            <option value="private">Riêng tư</option>
-          </select>
-        </div>
-
-        {/* Ảnh và video */}
-        <div className="file-inputs">
-          <label htmlFor="images" className="file-label">
-            {form.images.length > 0 ? `${form.images.length} ảnh đã chọn` : 'Chọn nhiều ảnh'}
-          </label>
-          <input
-            type="file"
-            name="images"
-            id="images"
-            accept="image/*"
-            multiple
-            onChange={handleChange}
-            className="file-input"
-          />
-
-          <label htmlFor="video" className="file-label">
-            {form.video ? form.video.name : 'Chọn video'}
-          </label>
-          <input
-            type="file"
-            name="video"
-            id="video"
-            accept="video/*"
-            onChange={handleChange}
-            className="file-input"
-          />
-        </div>
-
-        <button type="submit">Đăng bài</button>
-      </form>
-    </div>
+    </>
   );
 };
 

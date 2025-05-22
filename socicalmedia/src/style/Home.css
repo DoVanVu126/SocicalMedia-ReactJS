@@ -78,25 +78,21 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  justify-content: space-between;
+  justify-content: center;
+  padding-bottom: 10px;
 }
 
-/* Ảnh và video mỗi phần tử 30% */
 .image-wrapper,
 .video-wrapper {
   position: relative;
   width: 45%;
   overflow: hidden;
-  /* để overlay lớn hơn ảnh không bị cắt */
   border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
 
 }
-
-/* Overlay nền đen to hơn 5px, nằm dưới ảnh/video */
-/* Container chứa overlay */
 .media-overlay-container {
   position: absolute;
   top: 0;
@@ -106,36 +102,30 @@
   pointer-events: none;
   z-index: 1;
 }
-
 /* Lớp nền đen đứng yên */
 .media-overlay-black {
   position: absolute;
   top: -5px;
   left: -5px;
-  width: calc(100% + 1200px);
-  height: calc(100% + 1200px);
+  width: 5000px;
+  height: 5000px;
   background: black;
   border-radius: 15px;
   z-index: 1;
   opacity: 0;
-  /* Thêm */
   transition: opacity 0.3s ease;
-  /* Thêm */
 }
-
-/* Lớp xoay bên ngoài */
 .media-overlay-hover {
   position: absolute;
-  background-image: conic-gradient(black 80%, turquoise 88%, green 90%, black 92%);
+  background-image: conic-gradient(black 50%, turquoise 85%, green 96%, black 97%);
   border-radius: 15px;
   opacity: 0;
   inset: -50%;
   transition: opacity 0.3s ease, transform 1s ease;
   transform: rotate(0deg);
   z-index: 2;
+  animation: continuous-rotate 1s linear infinite; /* Thêm animation */
 }
-
-/* Hover: hiển thị cả hai lớp */
 .image-wrapper:hover .media-overlay-hover,
 .video-wrapper:hover .media-overlay-hover,
 .image-wrapper:hover .media-overlay-black,
@@ -143,24 +133,23 @@
   opacity: 1;
 }
 
-/* Lớp xoay thêm hiệu ứng xoay riêng */
-.image-wrapper:hover .media-overlay-hover,
-.video-wrapper:hover .media-overlay-hover {
-  transform: rotate(360deg);
+@keyframes continuous-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
-
-
-/* Ảnh và video chính */
 .media-image,
 .media-video {
-  width: 95%;
-  height: 95%;
+  width: 98%;
+  height: 98%;
   object-fit: cover;
   border-radius: 8px;
   transition: transform 0.3s ease;
   position: relative;
   z-index: 2;
-  /* nằm trên overlay nền */
 }
 
 /* Overlay "+x ảnh" */
@@ -182,7 +171,6 @@
   cursor: pointer;
 }
 
-/* Nút thu gọn */
 .collapse-btn {
   margin-top: 10px;
   background-color: #ddd;
@@ -204,35 +192,6 @@
 
 .options-btn:hover {
   color: #ffffff;
-}
-
-/* Menu tùy chọn */
-.options-menu {
-  display: block;
-  position: absolute;
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  border-radius: 5px;
-  border: 1px solid black;
-  top: 10px;
-  right: -90px;
-  width: 90px;
-  padding: 4px 0;
-  z-index: 10;
-}
-
-.options-menu button {
-  background: none;
-  border: none;
-  padding: 10px;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  color: black;
-}
-
-.options-menu button:hover {
-  background-color: #f1f1f1;
 }
 
 /* Container for add-comment */
@@ -324,9 +283,9 @@
 /* Menu hiển thị sau khi click vào '...' */
 .comment-menu {
   position: absolute;
-  top: 20px;
+  top: 5px;
   /* Khoảng cách từ nút '...' đến menu */
-  right: 0;
+  left: 20px;
   background: white;
   border: 1px solid #ccc;
   border-radius: 6px;
@@ -334,11 +293,11 @@
   z-index: 10;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   /* Hiệu ứng bóng mờ */
-  min-width: 90px;
+  min-width: 70px;
 }
 
 .comment-menu button {
-  width: 100%;
+  width: 70%;
   padding: 8px;
   background: none;
   border: none;
@@ -359,8 +318,6 @@
   /* Khoảng cách giữa các nút */
 }
 
-
-
 /* Actions: Like*/
 .actions {
   display: flex;
@@ -371,6 +328,7 @@
   padding-top: 1rem;
   /* Tăng khoảng cách */
   position: relative;
+  z-index: 3;
 }
 
 .reaction-container {
@@ -490,7 +448,6 @@
 
 /* Options menu */
 .options-btn {
-
   background: none;
   border: none;
   font-size: 1.25rem;
@@ -812,8 +769,6 @@
   transition: background 0.3s ease, transform 0.3s ease;
   z-index: 1000;
 }
-
-
 .story-menu {
   position: absolute;
   top: 60px;
@@ -825,7 +780,6 @@
   z-index: 10;
   min-width: 110px;
 }
-
 .story-menu-item {
   display: flex;
   align-items: center;
@@ -935,19 +889,14 @@
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
-
-
 /* Đảm bảo các style khác của Home không bị ảnh hưởng */
 .container {
   display: flex;
 }
-
 .main {
   flex: 1;
   padding: 20px;
 }
-
-
 
 /* Reaction list form */
 /* Reaction list backdrop (for dimming the background) */
