@@ -122,7 +122,6 @@ export default function UserProfile() {
     fetchUserData();
   };
 
-  // Hiển thị loading/error
   if (loading) return <p className="loading-text">Đang tải thông tin người dùng...</p>;
   if (error) return <p className="error-text">{error}</p>;
 
@@ -134,7 +133,7 @@ export default function UserProfile() {
         <div className="profile-container">
           <div className="top-buttons">
             <button onClick={() => navigate(-1)} className="back-button">← Quay lại</button>
-            <button onClick={refreshPosts} className="refresh-button">🔄</button>
+            <button onClick={refreshPosts} className="refresh-button">🔄 Làm mới</button>
           </div>
 
           <div className="profile-card">
@@ -153,21 +152,15 @@ export default function UserProfile() {
               <h1 className="name">{user.username}</h1>
               <p className="username">@{user.username}</p>
 
-          <div className="stats">
-  <div><strong>{posts.length}</strong> Bài viết</div>
-  <div
-    className="clickable"
-    onClick={() => navigate(`/users/${user.id}/followers`)}
-  >
-    <strong>{followCount}</strong> Người theo dõi
-  </div>
-  <div
-    className="clickable"
-    onClick={() => navigate(`/users/${user.id}/following`)}
-  >
-    <strong>{followingCount}</strong> Đang theo dõi
-  </div>
-</div>
+              <div className="stats">
+                <div><strong>{posts.length}</strong> Bài viết</div>
+                <div className="clickable" onClick={() => navigate(`/users/${user.id}/followers`)}>
+                  <strong>{followCount}</strong> Người theo dõi
+                </div>
+                <div className="clickable" onClick={() => navigate(`/users/${user.id}/following`)}>
+                  <strong>{followingCount}</strong> Đang theo dõi
+                </div>
+              </div>
 
               <p><strong>Email:</strong> {user.email}</p>
               <p><strong>SĐT:</strong> {user.phone || 'Chưa cập nhật'}</p>

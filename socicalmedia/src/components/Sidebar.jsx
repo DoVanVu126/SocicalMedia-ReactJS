@@ -30,7 +30,7 @@ function Sidebar() {
                 <li className="nav-item">
                     <a className="nav-link collapsed" href="/home">
                         <i className="bi bi-grid"></i>
-                        <span>Thống kê</span>
+                        <span>Home</span>
                     </a>
                 </li>
 
@@ -98,14 +98,14 @@ function Sidebar() {
                 </li>
 
                 <li className="nav-item">
-                    <a className="nav-link collapsed" href="#">
+                    <a className="nav-link collapsed" href={`/users/${user.id}`}>
                         <i className="bi bi-person"></i>
                         <span>Trang cá nhân</span>
                     </a>
                 </li>
 
                 <li className="nav-item">
-                    <a className="nav-link collapsed" href="#">
+                    <a className="nav-link collapsed" href="/">
                         <i className="bi bi-box-arrow-right"></i>
                         <span>Đăng xuất</span>
                     </a>
