@@ -9,17 +9,141 @@ import { initBlinkText } from '../script';
 
 
 export default function Home() {
-  const navigate = useNavigate();
-
-  const handleEdit = (post) => {
-    navigate(`/edit-post/${post.id}`, {
-      state: {
-        content: post.content,
-        imageUrl: post.imageurl,
-        videoUrl: post.videourl,
-      },
-    });
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editContent, setEditContent] = useState("");
+  const [openMenuIndex, setOpenMenuIndex] = useState(null);
+  const toggleMenu = (index) => {
+    setOpenMenuIndex(openMenuIndex === index ? null : index);
   };
+  const handleEditClick = (index, currentContent, commentId) => {
+    setEditingIndex(index);
+    setEditContent(currentContent);
+    setOpenMenuIndex(null); // đóng menu
+    setSelectedCommentId(commentId); // Lưu trữ commentId
+  };
+
+  // Thêm state để theo dõi commentId đang được chỉnh sửa/xóa
+  const [selectedCommentId, setSelectedCommentId] = useState(null);
+
+  const handleSaveEdit = async () => {
+    if (editingIndex === null || selectedCommentPostId === null || selectedCommentId === null) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${selectedCommentId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: editContent,
+            user_id: userIDCMT, // Đảm bảo bạn có userIDCMT từ localStorage hoặc state
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Lỗi sửa bình luận:', errorData);
+        setError('Không thể sửa bình luận.');
+        return;
+      }
+
+      const updatedComment = await response.json();
+
+      // Cập nhật state comments với nội dung đã sửa
+      setComments(prevComments => {
+        const updatedComments = { ...prevComments };
+        if (updatedComments[selectedCommentPostId]) {
+          const commentIndex = updatedComments[selectedCommentPostId].findIndex(
+            (cmt) => cmt.id === selectedCommentId
+          );
+          if (commentIndex !== -1) {
+            updatedComments[selectedCommentPostId][commentIndex] = updatedComment;
+          }
+        }
+        return updatedComments;
+      });
+
+      setEditingIndex(null);
+      setEditContent('');
+      setSelectedCommentId(null);
+    } catch (error) {
+      console.error('Lỗi kết nối khi sửa bình luận:', error);
+      setError('Lỗi kết nối khi sửa bình luận.');
+    }
+  };
+
+  const handleDelete = async (commentId) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa bình luận này?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${commentId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_id: userIDCMT, // Đảm bảo bạn có userIDCMT
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Lỗi xóa bình luận:', errorData);
+        setError('Không thể xóa bình luận.');
+        return;
+      }
+
+      // Cập nhật state comments sau khi xóa thành công
+      setComments(prevComments => {
+        const updatedComments = { ...prevComments };
+        if (updatedComments[selectedCommentPostId]) {
+          updatedComments[selectedCommentPostId] = updatedComments[selectedCommentPostId].filter(
+            (comment) => comment.id !== commentId
+          );
+        }
+        return updatedComments;
+      });
+
+      setOpenMenuIndex(null);
+    } catch (error) {
+      console.error('Lỗi kết nối khi xóa bình luận:', error);
+      setError('Lỗi kết nối khi xóa bình luận.');
+    }
+  };
+  const [expandedPosts, setExpandedPosts] = useState({}); // lưu trạng thái mở rộng của từng post theo id hoặc index
+
+// Hàm toggle mở rộng ảnh cho post
+const toggleExpandImages = (postId) => {
+  setExpandedPosts(prev => ({
+    ...prev,
+    [postId]: !prev[postId],
+  }));
+};
+
+const [posts, setPosts] = useState([]);
+
+const navigate = useNavigate();
+
+const handleEdit = (post) => {
+  navigate(`/edit-post/${post.id}`, {
+    state: {
+      content: post.content,
+      imageUrl: post.imageurl,
+      videoUrl: post.videourl,
+    },
+  });
+};
+
 
   const [comments, setComments] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
@@ -27,7 +151,6 @@ export default function Home() {
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
   const reactionListRef = useRef(null);
-  const [posts, setPosts] = useState([]);
   const [activeMenuPostId, setActiveMenuPostId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -460,13 +583,9 @@ export default function Home() {
                   >
                     ⋯
                   </button>
-                  {activeMenuPostId === post.id && (
+                  {activeMenuPostId === post.id && post.user?.id === user?.id && (
                     <div className="options-menu" ref={menuRef}>
-                      <button
-                        onClick={() => handleEdit(post)}
-                      >
-                        📝 Sửa
-                      </button>
+                      <button onClick={() => handleEdit(post)}>📝 Sửa</button>
                       <button
                         onClick={() => {
                           if (
@@ -504,18 +623,45 @@ export default function Home() {
 
               <p className="post-content">{post.content}</p>
 
-              <div className="post-media">
-                {post.imageurl && (
-                  <div className="image-wrapper">
-                    <img
-                      src={`http://localhost:8000/storage/images/${post.imageurl}`}
-                      alt="Ảnh bài viết"
-                      className="media-image"
-                    />
-                  </div>
+              <div key={post.id} className="post-media">
+                {Array.isArray(post.imageurl) && (
+                  <>
+                    {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 4)).map((img, index) => (
+                      <div key={index} className="image-wrapper">
+                        {/* Overlay đen nhạt khi hover */}
+                        <div className="media-overlay-black"></div>
+                        <div className="media-overlay-hover"></div>
+                        {/* Ảnh */}
+                        <img
+                          src={`http://localhost:8000/storage/images/${img}`}
+                          alt={`Ảnh ${index + 1}`}
+                          className="media-image"
+                        />
+                        {/* Overlay +x ảnh */}
+                        {index === 3 && post.imageurl.length > 4 && !expandedPosts[post.id] && (
+                          <div
+                            className="image-overlay"
+                            onClick={() => toggleExpandImages(post.id)}
+                          >
+                            +{post.imageurl.length - 4} ảnh
+                          </div>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* Nút thu gọn */}
+                    {expandedPosts[post.id] && (
+                      <button onClick={() => toggleExpandImages(post.id)} className="collapse-btn">
+                        Thu gọn
+                      </button>
+                    )}
+                  </>
                 )}
+
+                {/* Video */}
                 {post.videourl && (
                   <div className="video-wrapper">
+                    <div className="media-overlay-hover"></div>
                     <video controls className="media-video">
                       <source
                         src={`http://localhost:8000/storage/videos/${post.videourl}`}
@@ -526,6 +672,7 @@ export default function Home() {
                   </div>
                 )}
               </div>
+
 
               <div className="actions">
                 {getTotalReactions(post.reaction_summary) > 0 && (
@@ -671,14 +818,40 @@ export default function Home() {
                       Gửi
                     </button>
                   </div>
-                  <div className="comments">
+
+                                    <div className="comments">
                     {comments[post.id]?.map((comment, index) => (
                       <div key={index} className="comment">
                         <strong>{comment.user?.username || "Người dùng"}:</strong>{" "}
-                        {comment.content}
+                        {editingIndex === index ? (
+                          <>
+                            <input
+                              type="text"
+                              value={editContent}
+                              onChange={(e) => setEditContent(e.target.value)}
+                            />
+                            <button onClick={handleSaveEdit}>Lưu</button>
+                            <button onClick={() => setEditingIndex(null)}>Hủy</button>
+                          </>
+                        ) : (
+                          comment.content
+                        )}
+
+                        <div className="comment-actions">
+                          {comment.user?.id === userIDCMT && (
+                            <>
+                              <button className="btn-more" onClick={() => toggleMenu(index)}>...</button>
+                              <div className="comment-menu" style={{ display: openMenuIndex === index ? "block" : "none" }}>
+                                <button className="edit-btn" onClick={() => handleEditClick(index, comment.content, comment.id)}>Sửa</button>
+                                <button className="delete-btn" onClick={() => handleDelete(comment.id)}>Xóa</button>
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
+
                 </>
               )}
             </div>

@@ -1,4 +1,3 @@
-
 /* Main content */
 .main {
   flex: 1;
@@ -75,15 +74,13 @@
   color: #333;
 }
 
-/* Hình ảnh/video */
+/* Vùng chứa tất cả hình ảnh/video */
 .post-media {
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
   flex-wrap: wrap;
-  /* Nếu có nhiều hình/video, sẽ tự động xuống hàng */
   gap: 1rem;
-  margin-top: 1rem;
+  justify-content: center;
+  padding-bottom: 10px;
 }
 
 .image-wrapper,
@@ -120,35 +117,6 @@
 
 .options-btn:hover {
   color: #ffffff;
-}
-
-/* Menu tùy chọn */
-.options-menu {
-  display: block;
-  position: absolute;
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  border-radius: 5px;
-  border: 1px solid black;
-  top: 10px;
-  right: -90px;
-  width: 90px;
-  padding: 4px 0;
-  z-index: 10;
-}
-
-.options-menu button {
-  background: none;
-  border: none;
-  padding: 10px;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  color: black;
-}
-
-.options-menu button:hover {
-  background-color: #f1f1f1;
 }
 
 /* Container for add-comment */
@@ -203,8 +171,10 @@
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   position: relative;
-  padding-right: 40px; /* Giữ khoảng cách cho nút '...' */
-  margin-bottom: 10px; /* Khoảng cách giữa các bình luận */
+  padding-right: 40px;
+  /* Giữ khoảng cách cho nút '...' */
+  margin-bottom: 10px;
+  /* Khoảng cách giữa các bình luận */
 }
 
 .comment strong {
@@ -238,18 +208,21 @@
 /* Menu hiển thị sau khi click vào '...' */
 .comment-menu {
   position: absolute;
-  top: 20px; /* Khoảng cách từ nút '...' đến menu */
-  right: 0;
+  top: 5px;
+  /* Khoảng cách từ nút '...' đến menu */
+  left: 20px;
   background: white;
   border: 1px solid #ccc;
   border-radius: 6px;
   padding: 10px;
   z-index: 10;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Hiệu ứng bóng mờ */
-  min-width: 90px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  /* Hiệu ứng bóng mờ */
+  min-width: 70px;
 }
+
 .comment-menu button {
-  width: 100%;
+  width: 70%;
   padding: 8px;
   background: none;
   border: none;
@@ -259,15 +232,16 @@
   color: #333;
   border-radius: 4px;
 }
+
 .comment-menu button:hover {
-  background-color: #f0f0f0; 
+  background-color: #f0f0f0;
 }
+
 /* Tùy chỉnh vị trí các nút trong menu để dễ nhìn */
 .comment-menu button:first-child {
-  margin-bottom: 8px; /* Khoảng cách giữa các nút */
+  margin-bottom: 8px;
+  /* Khoảng cách giữa các nút */
 }
-
-
 
 /* Actions: Like*/
 .actions {
@@ -279,6 +253,7 @@
   padding-top: 1rem;
   /* Tăng khoảng cách */
   position: relative;
+  z-index: 3;
 }
 
 .reaction-container {
@@ -361,10 +336,13 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1rem; /* Kích thước biểu tượng cảm xúc */
-  margin-left: -10px; /* Điều chỉnh khoảng cách giữa các biểu tượng */
+  font-size: 1rem;
+  /* Kích thước biểu tượng cảm xúc */
+  margin-left: -10px;
+  /* Điều chỉnh khoảng cách giữa các biểu tượng */
   transition: transform 0.2s ease;
-  z-index: 1; /* Đảm bảo các biểu tượng cảm xúc được hiển thị đúng thứ tự */
+  z-index: 1;
+  /* Đảm bảo các biểu tượng cảm xúc được hiển thị đúng thứ tự */
 }
 
 .reaction-icon:hover {
@@ -395,7 +373,6 @@
 
 /* Options menu */
 .options-btn {
-
   background: none;
   border: none;
   font-size: 1.25rem;
@@ -496,7 +473,7 @@
   max-width: 800px;
   margin: 0 auto 30px auto;
   padding: 20px 0;
-  background: #ffffff;  
+  background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(0, 0, 0, 0.03);
@@ -534,9 +511,17 @@
 }
 
 @keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
 .story-list {
@@ -554,13 +539,15 @@
 
 .story-item-wrapper {
   position: relative;
-  flex: 0 0 120px; /* Tăng nhẹ chiều rộng để thoáng hơn */
+  flex: 0 0 120px;
+  /* Tăng nhẹ chiều rộng để thoáng hơn */
 }
 
 .story-item {
   position: relative;
   flex: 0 0 120px;
-  height: 210px; /* Tăng chiều cao để cân đối */
+  height: 210px;
+  /* Tăng chiều cao để cân đối */
   border-radius: 14px;
   overflow: hidden;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.45));
@@ -694,20 +681,20 @@
 
 .story-menu-btn {
   position: absolute;
-  top: 14px;        /* Giống vị trí top của avatar */
-  right: 8px;       /* Canh phải thay vì left âm */
+  top: 14px;
+  /* Giống vị trí top của avatar */
+  right: 8px;
+  /* Canh phải thay vì left âm */
   background: rgba(0, 0, 0, 0.5);
   border: none;
   color: #ffffff;
   font-size: 16px;
-  cursor: pointer;  
+  cursor: pointer;
   padding: 5px 8px;
   border-radius: 50%;
   transition: background 0.3s ease, transform 0.3s ease;
   z-index: 1000;
 }
-
-
 .story-menu {
   position: absolute;
   top: 60px;
@@ -719,7 +706,6 @@
   z-index: 10;
   min-width: 110px;
 }
-
 .story-menu-item {
   display: flex;
   align-items: center;
@@ -786,6 +772,7 @@
 .story-nav-next {
   margin-right: 6px;
 }
+
 /* Menu button (unchanged) */
 .menu-button {
   background: rgba(0, 0, 0, 0.5);
@@ -807,7 +794,8 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   border-radius: 8px;
   z-index: 10;
-  width: 100px; /* Slightly wider for better readability */
+  width: 100px;
+  /* Slightly wider for better readability */
   padding: 8px 0;
   overflow: hidden;
 }
@@ -827,32 +815,29 @@
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
-
-
 /* Đảm bảo các style khác của Home không bị ảnh hưởng */
 .container {
   display: flex;
 }
-
 .main {
   flex: 1;
   padding: 20px;
 }
-
-
 
 /* Reaction list form */
 /* Reaction list backdrop (for dimming the background) */
 /* Reaction list container */
 .reaction-list {
   position: absolute;
-  top: 100%; /* Đặt ngay dưới reaction_summary */
+  top: 100%;
+  /* Đặt ngay dưới reaction_summary */
   left: 0;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   padding: 12px;
-  z-index: 1000; /* Đảm bảo nằm trên các phần tử khác */
+  z-index: 1000;
+  /* Đảm bảo nằm trên các phần tử khác */
   width: 350px;
   max-height: 500px;
   overflow-y: auto;
@@ -995,4 +980,24 @@
     font-size: 11px;
     padding: 2px 6px;
   }
+}
+
+/* Phân trang */
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pagination button {
+  padding: 8px 12px;
+  margin: 0 4px;
+  border: none;
+  background-color: #ddd;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.pagination button.active {
+  background-color: #007bff;
+  color: white;
 }
