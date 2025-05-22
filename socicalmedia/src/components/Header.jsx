@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 import {BASE_URL_SERVER} from "../config/server";
+import { initBlinkText } from '../script';
+import "../style/Home.css";
 
 const handleLogout = () => {
     localStorage.clear();
@@ -8,6 +10,8 @@ const handleLogout = () => {
     alert('Đăng xuất thành công!')
     window.location.href = `/`;
 }
+
+
 
 
 function Header() {
@@ -21,6 +25,11 @@ function Header() {
         }
     }, []);
 
+    useEffect(() => {
+  setTimeout(() => {
+    initBlinkText();
+  }, 100); // chờ 100ms để DOM render xong
+}, []);
     const handleUserClick = () => {
         navigate('/user');
     };
@@ -39,7 +48,7 @@ function Header() {
                 <div className="d-flex align-items-center justify-content-between">
                     <a href="/" className="logo d-flex align-items-center">
                         <img src="/logo192.png" alt=""/>
-                        <span className="d-none d-lg-block">Social App</span>
+                        <span className="d-none d-lg-block blink-text">Social App</span>
                     </a>
                     <i className="bi bi-list toggle-sidebar-btn"></i>
                 </div>
