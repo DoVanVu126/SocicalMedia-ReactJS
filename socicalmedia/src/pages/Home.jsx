@@ -9,7 +9,7 @@ import { initBlinkText } from '../script';
 
 
 export default function Home() {
-const [expandedPosts, setExpandedPosts] = useState({}); // lưu trạng thái mở rộng của từng post theo id hoặc index
+  const [expandedPosts, setExpandedPosts] = useState({}); // lưu trạng thái mở rộng của từng post theo id hoặc index
 
   // Hàm toggle mở rộng ảnh cho post
   const toggleExpandImages = (postId) => {
@@ -518,33 +518,34 @@ const [expandedPosts, setExpandedPosts] = useState({}); // lưu trạng thái m�
               <p className="post-content">{post.content}</p>
 
               <div key={post.id} className="post-media">
-                {(Array.isArray(post.imageurl)) && (
+                {Array.isArray(post.imageurl) && (
                   <>
-                    {/* Nếu chưa mở rộng thì hiển thị 6 ảnh */}
-                    {(expandedPosts[post.id] !== true
-                      ? post.imageurl.slice(0, 6)
-                      : post.imageurl
-                    ).map((img, index) => (
+                    {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 4)).map((img, index) => (
                       <div key={index} className="image-wrapper">
+                        {/* Overlay đen nhạt khi hover */}
+                        <div className="media-overlay-black"></div>
+                        <div className="media-overlay-hover"></div>
+                        {/* Ảnh */}
                         <img
                           src={`http://localhost:8000/storage/images/${img}`}
                           alt={`Ảnh ${index + 1}`}
                           className="media-image"
                         />
-                        {/* Nếu là ảnh thứ 6, còn ảnh nữa và chưa mở rộng thì hiển thị lớp phủ */}
-                        {index === 5 && post.imageurl.length > 6 && expandedPosts[post.id] !== true && (
+
+                        {/* Overlay +x ảnh */}
+                        {index === 3 && post.imageurl.length > 4 && !expandedPosts[post.id] && (
                           <div
                             className="image-overlay"
-                            style={{ cursor: "pointer" }}
                             onClick={() => toggleExpandImages(post.id)}
                           >
-                            +{post.imageurl.length - 6} ảnh
+                            +{post.imageurl.length - 4} ảnh
                           </div>
                         )}
                       </div>
                     ))}
-                    {/* Nếu đang mở rộng thì hiển thị nút thu gọn */}
-                    {expandedPosts[post.id] === true && (
+
+                    {/* Nút thu gọn */}
+                    {expandedPosts[post.id] && (
                       <button onClick={() => toggleExpandImages(post.id)} className="collapse-btn">
                         Thu gọn
                       </button>
@@ -552,9 +553,10 @@ const [expandedPosts, setExpandedPosts] = useState({}); // lưu trạng thái m�
                   </>
                 )}
 
-                {/* Hiển thị video như bình thường */}
+                {/* Video */}
                 {post.videourl && (
                   <div className="video-wrapper">
+                    <div className="media-overlay-hover"></div>
                     <video controls className="media-video">
                       <source
                         src={`http://localhost:8000/storage/videos/${post.videourl}`}
@@ -565,6 +567,7 @@ const [expandedPosts, setExpandedPosts] = useState({}); // lưu trạng thái m�
                   </div>
                 )}
               </div>
+
 
               <div className="actions">
                 {getTotalReactions(post.reaction_summary) > 0 && (
