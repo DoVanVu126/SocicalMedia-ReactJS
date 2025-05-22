@@ -10,6 +10,7 @@ import StoryViewer from './components/StoryViewer';
 
 import Story from './pages/Story';
 import Search from './pages/Search';
+import FollowersList from './pages/FollowersList';
 import UserProfile from './pages/UserProfile';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -36,6 +37,9 @@ function AppLayout() {
             <Route path="/storyviewer" element={<StoryViewer />} />
             <Route path="/search" element={<Search/>}/>
             <Route path="/home" element={<Home/>}/>
+
+            <Route path="/users/:userId/followers" element={<FollowersList type="followers" />} />
+<Route path="/users/:userId/following" element={<FollowersList type="following" />} />
 
             <Route path="/add-post" element={<AddPost/>}/>
             <Route path="/edit-post/:id" element={<EditPost/>}/>

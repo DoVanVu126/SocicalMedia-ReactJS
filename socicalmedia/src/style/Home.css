@@ -36,7 +36,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 15px;
+  margin-top: 10px;
 }
 
 .user-info {
@@ -247,9 +247,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   position: relative;
   padding-right: 40px;
-  /* Giữ khoảng cách cho nút '...' */
   margin-bottom: 10px;
-  /* Khoảng cách giữa các bình luận */
 }
 
 .comment strong {
@@ -541,6 +539,7 @@
 }
 
 
+
 /* Story styles */
 .story-containers {
   width: 100%;
@@ -614,14 +613,12 @@
 .story-item-wrapper {
   position: relative;
   flex: 0 0 120px;
-  /* Tăng nhẹ chiều rộng để thoáng hơn */
 }
 
 .story-item {
   position: relative;
   flex: 0 0 120px;
   height: 210px;
-  /* Tăng chiều cao để cân đối */
   border-radius: 14px;
   overflow: hidden;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.45));
@@ -1054,9 +1051,6 @@
     font-size: 11px;
     padding: 2px 6px;
   }
-}
-
-/* Phân trang */
 .pagination {
   margin-top: 20px;
   text-align: center;

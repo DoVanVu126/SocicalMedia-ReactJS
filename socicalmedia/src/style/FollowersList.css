@@ -1,0 +1,145 @@
+.followers-list {
+  padding: 20px;
+  max-width: 700px;
+  height: 650px;
+  margin: auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f9f9fb;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  margin-top: 80px;
+  margin-left: 400px;
+}
+
+.followers-list h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #222;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.followers-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.followers-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 12px 20px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.07),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.4);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  cursor: default;
+}
+
+.followers-list li:hover {
+  box-shadow:
+    0 6px 20px rgba(13, 110, 253, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.6);
+  transform: translateY(-3px);
+}
+
+.followers-list span {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+}
+
+.followers-list button {
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: black;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  user-select: none;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.15);
+  transition:
+    background-position 0.5s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  background-size: 200% 200%;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.25);
+}
+
+/* Nút Theo dõi (Follow) gradient màu xanh dương 3D động */
+.followers-list button.follow {
+  background-image: linear-gradient(45deg, #0d6efd, #0a58ca, #3a86ff);
+  background-position: 0% 50%;
+  box-shadow:
+    0 6px 12px rgba(13, 110, 253, 0.7),
+    inset 0 -3px 6px rgba(10, 88, 202, 0.8);
+}
+
+.followers-list button.follow:hover {
+  background-position: 100% 50%;
+  transform: scale(1.07);
+  box-shadow:
+    0 8px 20px rgba(13, 110, 253, 0.9),
+    inset 0 -4px 8px rgba(10, 88, 202, 0.9);
+}
+
+/* Nút Hủy theo dõi (Unfollow) gradient màu đỏ 3D động */
+.followers-list button.unfollow {
+  background-image: linear-gradient(45deg, #dc3545, #b02a37, #ff4d4f);
+  background-position: 0% 50%;
+  box-shadow:
+    0 6px 12px rgba(220, 53, 69, 0.7),
+    inset 0 -3px 6px rgba(176, 42, 55, 0.8);
+}
+
+.followers-list button.unfollow:hover {
+  background-position: 100% 50%;
+  transform: scale(1.07);
+  box-shadow:
+    0 8px 20px rgba(220, 53, 69, 0.9),
+    inset 0 -4px 8px rgba(176, 42, 55, 0.9);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 16px;
+  gap: 12px;
+  font-weight: 600;
+  color: #444;
+}
+
+.pagination button {
+  background: #eee;
+  border-radius: 6px;
+  border: none;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #ccc;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.pagination span {
+  font-size: 1rem;
+  min-width: 80px;
+  text-align: center;
+}

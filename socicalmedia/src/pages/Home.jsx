@@ -136,7 +136,6 @@ export default function Home() {
   const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-
   const navigate = useNavigate();
 
   const handleEdit = (post) => {
@@ -155,6 +154,7 @@ export default function Home() {
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
   const reactionListRef = useRef(null);
+  const [posts, setPosts] = useState([]);
   const [activeMenuPostId, setActiveMenuPostId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -168,11 +168,11 @@ export default function Home() {
 
   const user = JSON.parse(localStorage.getItem("user"));
   const userIDCMT = user?.id;
-
-
+   
   useEffect(() => {
-    initBlinkText();
-  }, []);
+      // Gọi initBlinkText khi component mount
+      initBlinkText();
+    }, []);
 
   useEffect(() => {
     if (!userIDCMT) return;
@@ -456,7 +456,7 @@ export default function Home() {
 
   return (
     <div className="container">
-      <Header />
+           <Header/>
       <Sidebar />
       <div className="main">
         <div className="story-containers">
@@ -503,22 +503,22 @@ export default function Home() {
                     <span className="story-time">{formatTime(story.created_at)}</span>
                   </div>
                 </div>
-                <button
-                  className="story-menu-btn"
-                  onClick={() => handleToggleMenu(story.id)}
-                >  ⋮
-
-                </button>
-                {showMenu === story.id && story.user?.id === user?.id && (
-                  <div className="story-menu" ref={menuRef}>
-                    <button
-                      className="story-menu-item"
-                      onClick={() => handleDeleteStory(story.id)}
-                    >
-                      🗑️ Xóa Story
+                  <button
+                      className="story-menu-btn"
+                      onClick={() => handleToggleMenu(story.id)}
+                    >  ⋮
+                      
                     </button>
-                  </div>
-                )}
+                     {showMenu === story.id && story.user?.id === user?.id && (
+                      <div className="story-menu" ref={menuRef}>
+                        <button
+                          className="story-menu-item"
+                          onClick={() => handleDeleteStory(story.id)}
+                        >
+                          🗑️ Xóa Story
+                        </button>
+                      </div>
+                    )}
                 <div className="story-image-wrapper">
                   {story.videourl?.match(/\.(mp4|webm)$/i) ? (
                     <video
@@ -537,8 +537,8 @@ export default function Home() {
                 <div className="story-content">
                   <p className="text">{story.content}</p>
                   <div className="story-menu-wrapper" onClick={(e) => e.stopPropagation()}>
-
-
+                  
+                   
                   </div>
                 </div>
               </div>
@@ -552,10 +552,11 @@ export default function Home() {
             />
           )}
         </div>
+
         {loading && <p className="loading">⏳ Đang tải...</p>}
         {error && <p className="error">{error}</p>}
         {Array.isArray(posts) && posts.length > 0 ? (
-          currentPosts.map((post) => (
+          posts.map((post) => (
             <div className="post" key={post.id}>
               <div className="post-header">
                 <div className="user-info">
@@ -756,8 +757,9 @@ export default function Home() {
                   onMouseLeave={() => setShowReactions(null)}
                 >
                   <button
-                    className={`like-button ${post.user_reaction ? "reacted" : ""
-                      }`}
+                    className={`like-button ${
+                      post.user_reaction ? "reacted" : ""
+                    }`}
                     onClick={() => handleReactionClick(post.id)}
                   >
                     {renderButtonLabel(post.user_reaction)}
@@ -768,8 +770,9 @@ export default function Home() {
                         (type) => (
                           <button
                             key={type}
-                            className={`reaction-icon ${post.user_reaction?.type === type ? "selected" : ""
-                              }`}
+                            className={`reaction-icon ${
+                              post.user_reaction?.type === type ? "selected" : ""
+                            }`}
                             onClick={() => handleReactionClick(post.id, type)}
                             title={type.charAt(0).toUpperCase() + type.slice(1)}
                           >
@@ -820,7 +823,7 @@ export default function Home() {
                     </button>
                   </div>
 
-                  <div className="comments">
+                                    <div className="comments">
                     {comments[post.id]?.map((comment, index) => (
                       <div key={index} className="comment">
                         <strong>{comment.user?.username || "Người dùng"}:</strong>{" "}
@@ -888,10 +891,7 @@ export default function Home() {
             Sau
           </button>
         </div>
-
       </div>
-
     </div>
-
   );
 }
