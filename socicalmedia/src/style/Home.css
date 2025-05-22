@@ -6,7 +6,7 @@
   justify-content: flex-start;
   align-items: center;
   margin-top: 50px;
-  margin-left: 200px;
+  margin-left: 300px;
   margin-right: 20px;
   gap: 1rem;
   /* Tạo khoảng cách đều giữa các bài viết */
@@ -47,9 +47,8 @@
 }
 
 .avatar {
-  width: 40px;
-  /* Tăng kích thước avatar */
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid #f1f1f1;
@@ -57,11 +56,11 @@
 }
 
 .user-info div {
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .post-header small {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: #888;
   line-height: 1.2;
 }
@@ -85,25 +84,108 @@
 
 .image-wrapper,
 .video-wrapper {
-  flex: 1 1 45%;
-  /* Đảm bảo chia đều, chiếm khoảng 45% mỗi loại */
-  max-width: 45%;
+  position: relative;
+  width: 45%;
+  overflow: hidden;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+
+.media-overlay-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Lớp nền đen đứng yên */
+.media-overlay-black {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 5000px;
+  height: 5000px;
+  background: black;
+  border-radius: 15px;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.media-overlay-hover {
+  position: absolute;
+  background-image: conic-gradient(black 50%, turquoise 85%, green 96%, black 97%);
+  border-radius: 15px;
+  opacity: 0;
+  inset: -50%;
+  transition: opacity 0.3s ease, transform 1s ease;
+  transform: rotate(0deg);
+  z-index: 2;
+  animation: continuous-rotate 1s linear infinite;
+  /* Thêm animation */
+}
+
+.image-wrapper:hover .media-overlay-hover,
+.video-wrapper:hover .media-overlay-hover,
+.image-wrapper:hover .media-overlay-black,
+.video-wrapper:hover .media-overlay-black {
+  opacity: 1;
+}
+
+@keyframes continuous-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .media-image,
 .media-video {
-  width: 100%;
-  height: auto;
-  max-height: 400px;
-  border-radius: 10px;
+  width: 98%;
+  height: 98%;
   object-fit: cover;
+  border-radius: 8px;
   transition: transform 0.3s ease;
-  padding-bottom: 5px;
+  position: relative;
+  z-index: 2;
 }
 
-.media-image:hover,
-.media-video:hover {
-  transform: scale(1.05);
+/* Overlay "+x ảnh" */
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-weight: bold;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.collapse-btn {
+  margin-top: 10px;
+  background-color: #ddd;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
 }
 
 /* Thêm hiệu ứng cho nút 3 chấm */
@@ -172,9 +254,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   position: relative;
   padding-right: 40px;
-  /* Giữ khoảng cách cho nút '...' */
   margin-bottom: 10px;
-  /* Khoảng cách giữa các bình luận */
 }
 
 .comment strong {
@@ -470,8 +550,8 @@
 /* Story styles */
 .story-containers {
   width: 100%;
-  max-width: 800px;
-  margin: 0 auto 30px auto;
+  max-width: 1200px;
+  margin: 0 auto 10px auto;
   padding: 20px 0;
   background: #ffffff;
   border-radius: 12px;
@@ -540,14 +620,12 @@
 .story-item-wrapper {
   position: relative;
   flex: 0 0 120px;
-  /* Tăng nhẹ chiều rộng để thoáng hơn */
 }
 
 .story-item {
   position: relative;
   flex: 0 0 120px;
   height: 210px;
-  /* Tăng chiều cao để cân đối */
   border-radius: 14px;
   overflow: hidden;
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.45));
@@ -695,6 +773,7 @@
   transition: background 0.3s ease, transform 0.3s ease;
   z-index: 1000;
 }
+
 .story-menu {
   position: absolute;
   top: 60px;
@@ -706,6 +785,7 @@
   z-index: 10;
   min-width: 110px;
 }
+
 .story-menu-item {
   display: flex;
   align-items: center;
@@ -815,10 +895,12 @@
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
+
 /* Đảm bảo các style khác của Home không bị ảnh hưởng */
 .container {
   display: flex;
 }
+
 .main {
   flex: 1;
   padding: 20px;
@@ -982,7 +1064,6 @@
   }
 }
 
-/* Phân trang */
 .pagination {
   margin-top: 20px;
   text-align: center;
