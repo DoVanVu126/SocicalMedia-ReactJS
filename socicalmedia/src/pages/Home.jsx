@@ -154,7 +154,6 @@ export default function Home() {
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
   const reactionListRef = useRef(null);
-  const [posts, setPosts] = useState([]);
   const [activeMenuPostId, setActiveMenuPostId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
