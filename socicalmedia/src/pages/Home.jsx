@@ -2,8 +2,11 @@ import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
 import "../style/Home.css";
 import StoryViewer from "../components/StoryViewer";
+import { initBlinkText } from '../script';
+
 
 export default function Home() {
   const navigate = useNavigate();
@@ -38,6 +41,11 @@ export default function Home() {
 
   const user = JSON.parse(localStorage.getItem("user"));
   const userIDCMT = user?.id;
+   
+  useEffect(() => {
+      // Gọi initBlinkText khi component mount
+      initBlinkText();
+    }, []);
 
   useEffect(() => {
     if (!userIDCMT) return;
@@ -321,10 +329,11 @@ export default function Home() {
 
   return (
     <div className="container">
+           <Header/>
       <Sidebar />
       <div className="main">
-        <div className="story-container">
-          <h3 className="story-header">Story của bạn 💫</h3>
+        <div className="story-containers">
+          <h3 className="story-header blink-text">Bảng tin</h3>
           {loading && <p className="loading">⏳ Đang tải...</p>}
           <div className="story-list">
             <div
@@ -367,6 +376,22 @@ export default function Home() {
                     <span className="story-time">{formatTime(story.created_at)}</span>
                   </div>
                 </div>
+                  <button
+                      className="story-menu-btn"
+                      onClick={() => handleToggleMenu(story.id)}
+                    >  ⋮
+                      
+                    </button>
+                     {showMenu === story.id && story.user?.id === user?.id && (
+                      <div className="story-menu" ref={menuRef}>
+                        <button
+                          className="story-menu-item"
+                          onClick={() => handleDeleteStory(story.id)}
+                        >
+                          🗑️ Xóa Story
+                        </button>
+                      </div>
+                    )}
                 <div className="story-image-wrapper">
                   {story.videourl?.match(/\.(mp4|webm)$/i) ? (
                     <video
@@ -383,24 +408,10 @@ export default function Home() {
                   )}
                 </div>
                 <div className="story-content">
-                  <p>{story.content}</p>
+                  <p className="text">{story.content}</p>
                   <div className="story-menu-wrapper" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      className="story-menu-btn"
-                      onClick={() => handleToggleMenu(story.id)}
-                    >
-                      ⋮
-                    </button>
-                    {showMenu === story.id && story.user?.id === user?.id && (
-                      <div className="story-menu" ref={menuRef}>
-                        <button
-                          className="story-menu-item"
-                          onClick={() => handleDeleteStory(story.id)}
-                        >
-                          🗑️ Xóa Story
-                        </button>
-                      </div>
-                    )}
+                  
+                   
                   </div>
                 </div>
               </div>
@@ -494,19 +505,15 @@ export default function Home() {
               <p className="post-content">{post.content}</p>
 
               <div className="post-media">
-                {post.imageurl && post.imageurl.length > 0 && (
+                {post.imageurl && (
                   <div className="image-wrapper">
-                    {post.imageurl.map((img, index) => (
-                      <img
-                        key={index}
-                        src={`http://localhost:8000/storage/images/${img}`}
-                        alt={`Ảnh bài viết ${index + 1}`}
-                        className="media-image"
-                      />
-                    ))}
+                    <img
+                      src={`http://localhost:8000/storage/images/${post.imageurl}`}
+                      alt="Ảnh bài viết"
+                      className="media-image"
+                    />
                   </div>
                 )}
-
                 {post.videourl && (
                   <div className="video-wrapper">
                     <video controls className="media-video">
@@ -608,7 +615,6 @@ export default function Home() {
                   </button>
                   {showReactions === post.id && (
                     <div className="reaction-icons">
-
                       {["like", "love", "haha", "wow", "sad", "angry"].map(
                         (type) => (
                           <button
