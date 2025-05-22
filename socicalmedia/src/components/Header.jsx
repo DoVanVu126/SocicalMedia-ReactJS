@@ -46,7 +46,7 @@ function Header() {
             <header id="header" className="header fixed-top d-flex align-items-center">
 
                 <div className="d-flex align-items-center justify-content-between">
-                    <a href="/" className="logo d-flex align-items-center">
+                    <a href="/home" className="logo d-flex align-items-center">
                         <img src="/logo192.png" alt=""/>
                         <span className="d-none d-lg-block blink-text">Social App</span>
                     </a>
@@ -82,7 +82,7 @@ function Header() {
                                 </li>
 
                                 <li>
-                                    <a className="dropdown-item d-flex align-items-center" href="#">
+                                    <a className="dropdown-item d-flex align-items-center" href={`/users/${user.id}`}>
                                         <i className="bi bi-person"></i>
                                         <span>Trang cá nhân</span>
                                     </a>

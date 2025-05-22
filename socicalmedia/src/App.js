@@ -40,6 +40,7 @@ function AppLayout() {
 
             <Route path="/users/:userId/followers" element={<FollowersList type="followers" />} />
 <Route path="/users/:userId/following" element={<FollowersList type="following" />} />
+<Route path="/users/:userId" element={<UserProfile />} />
 
             <Route path="/add-post" element={<AddPost/>}/>
             <Route path="/edit-post/:id" element={<EditPost/>}/>
