@@ -48,7 +48,7 @@ function Header() {
                 <div className="d-flex align-items-center justify-content-between">
                     <a href="/home" className="logo d-flex align-items-center">
                         <img src="/logo192.png" alt=""/>
-                        <span className="d-none d-lg-block blink-text">Social App</span>
+                        <span className="d-none d-lg-block blink-text">Socical App</span>
                     </a>
                     <i className="bi bi-list toggle-sidebar-btn"></i>
                 </div>

@@ -1,96 +1,154 @@
-.add-post-container {
-    margin-left: 200px;
-    padding: 20px;
-    max-width: 800px;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
-    min-height: 90vh;
+/* Các style hiện tại của bạn */
+.add-post-container-edit {
+  margin-left: 200px;
+  padding: 20px;
+  max-width: 800px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
+  min-height: 90vh;
+  transform: translate(200px, 80px); /* Thêm dòng này */
+}
+
+.user-info-edit {
+  display: flex;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.user-avatar-edit {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 15px;
+  border: 2px solid #007bff;
+}
+
+.user-name-edit {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.textarea-edit {
+  padding: 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  resize: vertical;
+  outline: none;
+  min-height: 80px;
+  transition: border 0.2s;
+}
+
+.file-input-edit {
+  display: none;
+}
+
+.file-section-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.file-section-edit.horizontal-images {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.image-preview-container-edit {
+  position: relative;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.image-preview-edit {
+  max-height: 150px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.remove-image-button-edit {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 0.8rem;
+  line-height: 20px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.file-label-edit {
+  padding: 12px;
+  font-size: 1rem;
+  color: #007bff;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.file-label-edit:hover {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.button-edit {
+  padding: 12px;
+  font-size: 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.button-edit:hover {
+  background-color: #0056b3;
+}
+
+/* Style cho loading icon */
+.loading-container-edit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+.rocket-icon-edit {
+  animation: launch-edit 1.5s infinite alternate;
+}
+
+.loading-text-edit {
+  margin-top: 5px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+@keyframes launch-edit {
+  0% {
+    transform: translateY(0);
   }
-  
-  .user-info {
-    display: flex;
-    align-items: center;
-    margin-bottom: 25px;
+  100% {
+    transform: translateY(-10px);
   }
-  
-  .user-avatar {
-    width: 55px;
-    height: 55px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 15px;
-    border: 2px solid #007bff;
-  }
-  
-  .user-name {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #333;
-  }
-  
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  textarea {
-    padding: 12px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    resize: vertical;
-    outline: none;
-    min-height: 80px;
-    transition: border 0.2s;
-  }
-  
-  input[type="file"] {
-    display: none;
-  }
-  
-  .file-inputs {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .file-label {
-    padding: 12px;
-    font-size: 1rem;
-    color: #007bff;
-    background-color: #f5f5f5;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-  }
-  
-  .file-label:hover {
-    background-color: #007bff;
-    color: #fff;
-  }
-  
-  button {
-    padding: 12px;
-    font-size: 1rem;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
-  @media screen and (max-width: 768px) {
-    .add-post-container {
-      margin-left: 0;
-      padding: 20px;
-    }
-  }
-  
+}

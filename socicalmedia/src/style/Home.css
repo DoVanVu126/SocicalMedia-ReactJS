@@ -85,7 +85,7 @@
 .image-wrapper,
 .video-wrapper {
   position: relative;
-  width: 45%;
+  width: 40%;
   overflow: hidden;
   border-radius: 8px;
   display: flex;
@@ -1064,21 +1064,68 @@
   }
 }
 
-.pagination {
-  margin-top: 20px;
-  text-align: center;
+/* Loading */
+.neon-loader-home{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f6f9ff;
+  padding: 30px;
+  border-radius: 10px;
+  color: #00f0ff;
+  font-family: 'Segoe UI', sans-serif;
+  text-shadow: 0 0 10px #00f0ff;
 }
 
-.pagination button {
-  padding: 8px 12px;
-  margin: 0 4px;
-  border: none;
-  background-color: #ddd;
-  cursor: pointer;
-  border-radius: 4px;
+.circle-loader-home {
+  width: 60px;
+  height: 60px;
+  border: 6px solid transparent;
+  border-top: 6px solid #00f0ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
 }
 
-.pagination button.active {
-  background-color: #007bff;
-  color: white;
+.bar-loader-home {
+  width: 200px;
+  height: 14px;
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid #00f0ff;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.bar-loader-home .progress-home {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #00f0ff, #007d9c);
+  animation: progressBar 3s forwards;
+}
+
+.text-loading-home {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #00f0ff;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes progressBar {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
 }

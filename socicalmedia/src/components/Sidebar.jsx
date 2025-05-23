@@ -28,7 +28,7 @@ function Sidebar() {
                 <li className="nav-item">
                     <a className="nav-link collapsed" href="/home">
                         <i className="bi bi-grid"></i>
-                        <span>Home</span>
+                        <span>Trang chủ</span>
                     </a>
                 </li>
 

@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import '../style/Login.css';
 
 const Login = () => {
+  const [imageLoading, setImageLoading] = useState(true);
+
   const [form, setForm] = useState({ email: '', password: '' });
   const [otpForm, setOtpForm] = useState({ otp_code: '' });
   const [message, setMessage] = useState('');
@@ -64,6 +66,9 @@ const Login = () => {
     <div className="login">
       <div className="login-form-container">
         <form onSubmit={isOtpRequired ? handleOtpSubmit : handleSubmit} style={{ width: '100%', maxWidth: '400px' }}>
+          <div class="pow-container">
+          <span class="pow-letter">SocicalApp</span>
+        </div>
           <h2 className="login-title">Đăng nhập</h2>
 
           {!isOtpRequired ? (
@@ -114,10 +119,23 @@ const Login = () => {
           )}
         </form>
       </div>
-
       <div className="login-image-container">
-        <img src="http://localhost:8000/storage/image/login-image.jpg" alt="Login illustration" className="login-image" />
+        {imageLoading && (
+          <div className="image-loader">
+            <div className="circle-loader"></div>
+            <p className="text-loading">Đang tải ảnh...</p>
+          </div>
+        )}
+        <img
+          src="http://localhost:8000/storage/image/login-image2.jpg"
+          alt="Login illustration"
+          className="login-image"
+          onLoad={() => setImageLoading(false)}
+          onError={() => setImageLoading(false)}
+          style={{ display: imageLoading ? 'none' : 'block' }}
+        />
       </div>
+
     </div>
   );
 };

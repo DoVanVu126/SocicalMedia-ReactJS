@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import '../style/EditPost.css';
-
+import { FaRocket } from 'react-icons/fa'; // Import icon tên lửa
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
 const EditPost = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -11,9 +13,11 @@ const EditPost = () => {
   const [postOwnerId, setPostOwnerId] = useState(null);
   const [form, setForm] = useState({ content: '', video: null });
   const [images, setImages] = useState([]);
-  const [oldImages, setOldImages] = useState([]); // Thêm state để lưu ảnh cũ
+  const [oldImages, setOldImages] = useState([]);
   const [previewVideo, setPreviewVideo] = useState('');
   const [removeVideo, setRemoveVideo] = useState(false);
+  const [isLoadingOldImages, setIsLoadingOldImages] = useState(true);
+  const [isLoadingNewImages, setIsLoadingNewImages] = useState(false); // Thêm state loading cho ảnh mới
 
   useEffect(() => {
     const u = localStorage.getItem('user');
@@ -24,13 +28,14 @@ const EditPost = () => {
       setPostOwnerId(res.data.user_id);
 
       if (res.data.imageurl) {
-        const imgs = res.data.imageurl.split(','); // tách chuỗi thành mảng
-        setOldImages(imgs);  // Lưu ảnh cũ vào state
+        const imgs = res.data.imageurl.split(',');
+        setOldImages(imgs);
       }
 
       if (res.data.videourl) {
         setPreviewVideo(`http://localhost:8000/storage/videos/${res.data.videourl}`);
       }
+      setIsLoadingOldImages(false);
     });
   }, [id]);
 
@@ -38,11 +43,13 @@ const EditPost = () => {
     const { name, value, files } = e.target;
     if (files?.length) {
       if (name === 'image') {
+        setIsLoadingNewImages(true); // Bắt đầu loading khi có ảnh mới
         const newImgs = Array.from(files).map(file => ({
           file,
           src: URL.createObjectURL(file),
         }));
         setImages(prev => [...prev, ...newImgs]);
+        setIsLoadingNewImages(false); // Kết thúc loading sau khi ảnh mới được thêm
       }
       if (name === 'video') {
         setForm(f => ({ ...f, video: files[0] }));
@@ -60,13 +67,15 @@ const EditPost = () => {
 
   const handleRemoveOldImage = (index) => {
     const imgToRemove = oldImages[index];
-
+    setIsLoadingOldImages(true);
     axios.post(`http://localhost:8000/api/posts/${id}/remove-image`, { image: imgToRemove })
       .then(() => {
-        setOldImages(prev => prev.filter((_, i) => i !== index));  // Xóa ảnh khỏi state
+        setOldImages(prev => prev.filter((_, i) => i !== index));
+        setIsLoadingOldImages(false);
       })
       .catch(err => {
         console.error('Có lỗi khi xóa ảnh:', err);
+        setIsLoadingOldImages(false);
       });
   };
 
@@ -97,7 +106,7 @@ const EditPost = () => {
     }
   };
 
-  if (!user) return <p>Đang tải thông tin người dùng…</p>;
+  if (!user) return <p>Vui lòng đăng nhập để chỉnh sửa bài viết.</p>;
   if (user.id !== postOwnerId) return <p style={{ color: 'red' }}>❌ Bạn không có quyền chỉnh sửa bài viết này.</p>;
 
   const avatar = user.profilepicture
@@ -105,73 +114,92 @@ const EditPost = () => {
     : '/default-avatar.png';
 
   return (
-    <div className="add-post-container">
-      <div className="user-info">
-        <img src={avatar} alt="Avatar" className="user-avatar" />
-        <span className="user-name">{user.username}</span>
+    <><Header />
+      <Sidebar />
+      <div className="add-post-container-edit">
+        <div className="user-info-edit">
+          <img src={avatar} alt="Avatar" className="user-avatar-edit" />
+          <span className="user-name-edit">{user.username}</span>
+        </div>
+
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
+          <textarea
+            name="content"
+            placeholder="Nội dung bài viết"
+            value={form.content}
+            onChange={handleChange}
+            required
+            className="textarea-edit"
+          />
+
+          <div className="file-section-edit horizontal-images">
+            {isLoadingOldImages ? (
+              <div className="loading-container-edit">
+                <FaRocket className="rocket-icon-edit" size={40} color="#007bff" />
+                <span className="loading-text-edit">Đang tải ảnh cũ...</span>
+              </div>
+            ) : (
+              oldImages.length > 0 && oldImages.map((img, i) => (
+                <div key={`old-${i}`} className="image-preview-container-edit">
+                  <img
+                    src={`http://localhost:8000/storage/images/${img}`}
+                    alt={`old-${i}`}
+                    className="image-preview-edit"
+                  />
+                  <button type="button" onClick={() => handleRemoveOldImage(i)} className="remove-image-button-edit">
+                    X
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="file-section-edit horizontal-images">
+            {isLoadingNewImages ? (
+              <div className="loading-container-edit">
+                <FaRocket className="rocket-icon-edit" size={40} color="#007bff" />
+                <span className="loading-text-edit">Đang tải ảnh mới...</span>
+              </div>
+            ) : images.length > 0 ? (
+              images.map((img, i) => (
+                <div key={i} className="image-preview-container-edit">
+                  <img
+                    src={img.src}
+                    alt=""
+                    className="image-preview-edit"
+                  />
+                  <button type="button" onClick={() => handleRemoveImage(i)} className="remove-image-button-edit">
+                    X
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p>Thêm ảnh mới</p>
+            )}
+          </div>
+
+          <label htmlFor="image" className="file-label-edit">Chọn ảnh</label>
+          <input type="file" id="image" name="image" accept="image/*" onChange={handleChange} className="file-input-edit" multiple />
+
+          <div className="file-section-edit">
+            {previewVideo && (
+              <div style={{ marginTop: 10 }}>
+                <video controls style={{ maxHeight: 240, borderRadius: 8 }}>
+                  <source src={previewVideo} type="video/mp4" />
+                </video>
+                <button type="button" onClick={handleRemoveVideo} style={{ color: 'red' }}>
+                  X
+                </button>
+              </div>
+            )}
+          </div>
+          <label htmlFor="video" className="file-label-edit">Chọn video</label>
+          <input type="file" id="video" name="video" accept="video/*" onChange={handleChange} className="file-input-edit" />
+
+          <button type="submit" className="button-edit">💾 Lưu thay đổi</button>
+        </form>
       </div>
-
-      <form onSubmit={handleSubmit} encType="multipart/form-data">
-        <textarea
-          name="content"
-          placeholder="Nội dung bài viết"
-          value={form.content}
-          onChange={handleChange}
-          required
-        />
-
-        <div className="file-section">
-          {oldImages.length > 0 ? oldImages.map((img, i) => (
-            <div key={`old-${i}`} style={{ marginTop: 10 }}>
-              <img
-                src={`http://localhost:8000/storage/images/${img}`}
-                alt={`old-${i}`}
-                style={{ maxHeight: 200, borderRadius: 8 }}
-              />
-              <button type="button" onClick={() => handleRemoveOldImage(i)} style={{ color: 'red' }}>
-                X
-              </button>
-            </div>
-          )) : null}
-        </div>
-
-        <div className="file-section">
-          {images.length > 0 ? images.map((img, i) => (
-            <div key={i} style={{ marginTop: 10 }}>
-              <img
-                src={img.src}
-                alt=""
-                style={{ maxHeight: 200, borderRadius: 8 }}
-              />
-              <button type="button" onClick={() => handleRemoveImage(i)} style={{ color: 'red' }}>
-                X
-              </button>
-            </div>
-          )) : <p>Thêm ảnh mới</p>}
-        </div>
-
-        <label htmlFor="image" className="file-label">Chọn ảnh</label>
-        <input type="file" id="image" name="image" accept="image/*" onChange={handleChange} className="file-input" />
-
-        <div className="file-section">
-          {previewVideo && (
-            <div style={{ marginTop: 10 }}>
-              <video controls style={{ maxHeight: 240, borderRadius: 8 }}>
-                <source src={previewVideo} type="video/mp4" />
-              </video>
-              <button type="button" onClick={handleRemoveVideo} style={{ color: 'red' }}>
-                X
-              </button>
-            </div>
-          )}
-
-        </div>
-        <label htmlFor="video" className="file-label">Chọn video</label>
-        <input type="file" id="video" name="video" accept="video/*" onChange={handleChange} className="file-input" />
-
-        <button type="submit">💾 Lưu thay đổi</button>
-      </form>
-    </div>
+    </>
   );
 };
 
