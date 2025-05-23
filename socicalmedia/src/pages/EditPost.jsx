@@ -187,7 +187,7 @@ const EditPost = () => {
                 <video controls style={{ maxHeight: 240, borderRadius: 8 }}>
                   <source src={previewVideo} type="video/mp4" />
                 </video>
-                <button type="button" onClick={handleRemoveVideo} style={{ color: 'red' }}>
+                <button type="button" onClick={handleRemoveVideo} style={{ color: 'blue' }}>
                   X
                 </button>
               </div>

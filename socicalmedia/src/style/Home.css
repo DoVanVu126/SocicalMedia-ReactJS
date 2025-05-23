@@ -468,7 +468,7 @@
 
 .options-menu {
   position: absolute;
-  right: 0;
+  right: -80px;
   top: 2rem;
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);

@@ -55,15 +55,12 @@ form {
 .file-section-edit {
   display: flex;
   flex-direction: column;
-  gap: 15px;
 }
 
 .file-section-edit.horizontal-images {
   display: flex;
   flex-direction: row;
-  gap: 10px;
   overflow-x: auto;
-  padding-bottom: 10px;
 }
 
 .image-preview-container-edit {
@@ -73,7 +70,7 @@ form {
 }
 
 .image-preview-edit {
-  max-height: 150px;
+  max-height: 120px;
   border-radius: 8px;
   object-fit: cover;
 }
@@ -82,14 +79,14 @@ form {
   position: absolute;
   top: -8px;
   right: -8px;
-  background-color: red;
+  background-color: rgb(64, 0, 255);
   color: white;
   border: none;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 10px;
+  height: 10px;
   font-size: 0.8rem;
-  line-height: 20px;
+  line-height: 0px;
   text-align: center;
   cursor: pointer;
 }

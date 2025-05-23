@@ -5,8 +5,8 @@
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
-  min-height: 90vh;
-  transform: translate(200px, 80px); /* Thêm dòng này */
+  min-height: 80vh;
+  transform: translate(300px, 80px); /* Thêm dòng này */
 }
 
 /* Các style khác giữ nguyên */
