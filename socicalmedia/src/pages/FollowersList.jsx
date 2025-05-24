@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // thêm useNavigate
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../style/FollowersList.css";
 import Sidebar from "../components/Sidebar";
@@ -7,27 +7,27 @@ import Header from "../components/Header";
 
 export default function FollowersList({ type }) {
   const { userId } = useParams();
-  const navigate = useNavigate(); // khởi tạo navigate
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
-  const size = 6; // số mục mỗi trang
+  const size = 6;
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const uid = parseInt(localStorage.getItem("user_id"));
-    setCurrentUserId(uid);
+    if (uid) setCurrentUserId(uid);
   }, []);
 
   useEffect(() => {
     if (!currentUserId) return;
 
+    const endpoint = `http://localhost:8000/api/users/${userId}/${type}?page=${page}&size=${size}&currentUserId=${currentUserId}`;
+
     setLoading(true);
     setError(null);
-
-    const endpoint = `http://localhost:8000/api/users/${userId}/${type}?page=${page}&size=${size}&currentUserId=${currentUserId}`;
 
     axios
       .get(endpoint)
@@ -46,7 +46,7 @@ export default function FollowersList({ type }) {
 
   const toggleFollow = (targetUserId, isFollowing) => {
     const url = isFollowing
-      ? "http://localhost:8000/api/follow/unfollow"
+      ? "http://localhost:8000/api/unfollow"
       : "http://localhost:8000/api/follow";
 
     axios
@@ -68,14 +68,10 @@ export default function FollowersList({ type }) {
 
   return (
     <div className="followers-list">
-      {/* Nút quay lại */}
-      <Header/>
-            <Sidebar />
-      <button
-        className="back-button"
-        onClick={() => navigate(-1)}
-        aria-label="Quay lại trang trước"
-      >
+      <Header />
+      <Sidebar />
+
+      <button className="back-button" onClick={() => navigate(-1)}>
         &times;
       </button>
 
@@ -104,12 +100,8 @@ export default function FollowersList({ type }) {
             ))}
           </ul>
 
-          {/* Pagination đơn giản */}
           <div className="pagination">
-            <button
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(p - 1, 1))}
-            >
+            <button disabled={page <= 1} onClick={() => setPage(page - 1)}>
               Trang trước
             </button>
             <span>
@@ -117,7 +109,7 @@ export default function FollowersList({ type }) {
             </span>
             <button
               disabled={page >= totalPages}
-              onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+              onClick={() => setPage(page + 1)}
             >
               Trang sau
             </button>

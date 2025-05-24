@@ -175,6 +175,138 @@
 }
 
 
+/* Gradient nền */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Hiệu ứng chuột lấp lánh */
+.sparkle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, white, rgba(255,255,255,0));
+  pointer-events: none;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: sparkleFade 0.5s ease-out forwards;
+  z-index: 9999;
+}
+
+@keyframes sparkleFade {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2);
+  }
+}
+
+/* Hiệu ứng rung nhẹ */
+.shake {
+  animation: shake 0.3s ease-in-out 2;
+  color: #ff4d4f;
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0px); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0px); }
+}
+
+/* Hiệu ứng sáng dần khi hiển thị kết quả */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Hiệu ứng hover nổi lên */
+.hover-grow {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-grow:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* lịch sử tìm kiếm */
+
+.history-container {
+  margin-top: 10px;
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.history-item {
+  cursor: pointer;
+  padding: 5px;
+  transition: background 0.3s;
+}
+
+.history-item:hover {
+  background: #e6e6e6;
+}
+
+.clear-history-btn {
+  background: transparent;
+  border: none;
+  color: red;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+/* Hiệu ứng gradient chữ động khi hover */
+.blink-text.gradient-hover-animation {
+  background: linear-gradient(270deg, #ff6ec4, #7873f5, #4ade80, #ff6ec4);
+  background-size: 600% 600%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 4s ease infinite;
+}
+
+/* Sử dụng lại keyframe gradientShift đã có */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+
+
+
 /* Responsive design */
 @media (max-width: 992px) {
   .search-container {

@@ -9,24 +9,25 @@ import AddPost from './pages/AddPost';
 import Notification from './components/Notification';
 import StoryViewer from './components/StoryViewer';
 
-import Story from './pages/Story';
-import Search from './pages/Search';
-import FollowersList from './pages/FollowersList';
-import UserProfile from './pages/UserProfile';
+import Story from "./pages/Story";
+import Search from "./pages/Search";
+import FollowersList from "./pages/FollowersList";
+import UserProfile from "./pages/UserProfile";
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import 'bootstrap-icons/font/bootstrap-icons.min.css';
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import "bootstrap-icons/font/bootstrap-icons.min.css";
 import EditPost from "./pages/EditPost";
 import ListUser from "./pages/users/ListUser";
 import DetailUser from "./pages/users/DetailUser";
 import CreateUser from "./pages/users/CreateUser";
 import FriendRequest from "./pages/friends/Index";
+import EditStory from "./pages/EditStory";
 
 function AppLayout() {
-    const location = useLocation();
-    // Những path không muốn hiển thị sidebar
-    const hideSidebar = ['/', '/register'].includes(location.pathname);
+  const location = useLocation();
+  // Những path không muốn hiển thị sidebar
+  const hideSidebar = ["/", "/register"].includes(location.pathname);
 
     return (
         <Routes>
@@ -66,4 +67,5 @@ export default function App() {
             <AppLayout />
         </Router>
     );
+
 }

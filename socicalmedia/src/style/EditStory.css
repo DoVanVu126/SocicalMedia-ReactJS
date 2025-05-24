@@ -1,0 +1,342 @@
+.edit-story-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 70px;
+  margin-left: 500px;
+}
+
+.edit-story-header {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 16px;
+  text-align: left;
+}
+
+.edit-story-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.story-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 100px;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.story-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.visibility-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.visibility-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.visibility-select {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #f9f9f9;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.visibility-select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.media-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.preview-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+}
+
+.preview-media {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.file-inputs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.file-input-group {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.file-label {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #f9f9f9;
+  text-align: center;
+  cursor: pointer;
+  font-size: 14px;
+  color: #606770;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.file-label:hover {
+  background: #f0f2f5;
+  border-color: #007bff;
+}
+
+.file-input {
+  display: none;
+}
+
+.clear-file-btn {
+  position: absolute;
+  right: 8px;
+  background: #e0e0e0;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  color: #333;
+  transition: background 0.3s ease;
+}
+
+.clear-file-btn:hover {
+  background: #ccc;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.submit-button {
+  padding: 12px 20px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+.cancel-button {
+  padding: 12px 20px;
+  border: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+  color: #606770;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.cancel-button:hover {
+  background-color: #f0f2f5;
+  border-color: #ccc;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.blink-text-animation span {
+  opacity: 0;
+  animation: blinkFade 1.5s infinite;
+  display: inline-block;
+  will-change: opacity;
+}
+
+@keyframes blinkFade {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.gradient-hover-animation {
+  background: linear-gradient(45deg, #007bff, #00ffea, #ff00ea, #007bff);
+  background-size: 300% 300%;
+  animation: gradientTextShift 3s linear infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  cursor: pointer;
+}
+
+@keyframes gradientTextShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+.sparkle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, #ffffff 0%, transparent 70%);
+  pointer-events: none;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: sparkleFade 0.6s ease forwards;
+  transform-origin: center;
+  filter: drop-shadow(0 0 3px #fff);
+  z-index: 9999;
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  transform: scale(0);
+  animation: rippleEffect 0.6s linear;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes rippleEffect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes sparkleFade {
+  0% { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+.rainbow-smoke {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  opacity: 0.7;
+  animation: smokeRise 1s ease forwards;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.smoke-ff0000 { background: #FF0000; filter: drop-shadow(0 0 5px #FF0000); }
+.smoke-ffa500 { background: #FFA500; filter: drop-shadow(0 0 5px #FFA500); }
+.smoke-ffff00 { background: #FFFF00; filter: drop-shadow(0 0 5px #FFFF00); }
+.smoke-008000 { background: #008000; filter: drop-shadow(0 0 5px #008000); }
+.smoke-0000ff { background: #0000FF; filter: drop-shadow(0 0 5px #0000FF); }
+.smoke-4b0082 { background: #4B0082; filter: drop-shadow(0 0 5px #4B0082); }
+.smoke-ee82ee { background: #EE82EE; filter: drop-shadow(0 0 5px #EE82EE); }
+
+@keyframes smokeRise {
+  0% {
+    opacity: 0.7;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50px) scale(1.5) translateX(10px);
+  }
+}
+
+@media (max-width: 768px) {
+  .edit-story-container {
+    padding: 16px;
+    margin: 16px;
+  }
+
+  .edit-story-header {
+    font-size: 18px;
+  }
+
+  .story-input {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .visibility-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .visibility-select {
+    width: 100%;
+  }
+
+  .file-inputs {
+    flex-direction: column;
+  }
+
+  .file-input-group {
+    width: 100%;
+  }
+
+  .preview-media {
+    max-height: 150px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .submit-button,
+  .cancel-button {
+    width: 100%;
+    padding: 10px;
+  }
+}

@@ -5,11 +5,9 @@ import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import "../style/Home.css";
 import StoryViewer from "../components/StoryViewer";
-import { initBlinkText } from '../script';
-
+import { initBlinkText, sparkleMouseEffect } from '../script';
 
 export default function Home() {
-
   const [loading, setLoading] = useState(true);
   // Loader 3 giây chỉ khi lần đầu load trang
   useEffect(() => {
@@ -24,44 +22,206 @@ export default function Home() {
   const [editingIndex, setEditingIndex] = useState(null);
   const [editContent, setEditContent] = useState("");
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
+  const [selectedCommentId, setSelectedCommentId] = useState(null);
+  const [expandedPosts, setExpandedPosts] = useState({});
+  const [posts, setPosts] = useState([]);
+  const [comments, setComments] = useState({});
+  const [commentInputs, setCommentInputs] = useState({});
+  const [selectedCommentPostId, setSelectedCommentPostId] = useState(null);
+  const [error, setError] = useState(null);
+  const [showReactions, setShowReactions] = useState(null);
+  const [stories, setStories] = useState([]);
+  const [showMenu, setShowMenu] = useState(null);
+  const [reactionList, setReactionList] = useState({});
+  const [showReactionList, setShowReactionList] = useState(null);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [activeMenuPostId, setActiveMenuPostId] = useState(null);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userIDCMT = user?.id;
+  const menuRef = useRef(null);
+  const buttonRef = useRef(null);
+  const reactionListRef = useRef(null);
+  const storyListRef = useRef(null);
+  const [showNavButtons, setShowNavButtons] = useState({ left: false, right: false });
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    initBlinkText();
+  }, []);
+
+  useEffect(() => {
+    const removeSparkleListener = sparkleMouseEffect();
+    return () => {
+      if (typeof removeSparkleListener === "function") removeSparkleListener();
+    };
+  }, []);
+
+  useEffect(() => {
+    const start = Date.now();
+    setLoading(true);
+    const params = userIDCMT ? { user_id: userIDCMT } : {};
+    axios
+      .get("http://localhost:8000/api/stories", { params })
+      .then((res) => {
+        const elapsed = Date.now() - start;
+        const remainingTime = Math.max(3000 - elapsed, 0);
+        setTimeout(() => {
+          setStories(res.data);
+          setLoading(false);
+        }, remainingTime);
+      })
+      .catch((err) => {
+        console.error("Error fetching stories:", err);
+        setError("Unable to load stories");
+        setLoading(false);
+      });
+  }, [userIDCMT]);
+
+  useEffect(() => {
+    if (!userIDCMT) {
+      setError("Please log in to view posts");
+      return;
+    }
+    const start = Date.now();
+    setLoading(true);
+    axios
+      .get("http://localhost:8000/api/posts", { params: { user_id: userIDCMT } })
+      .then((res) => {
+        const elapsed = Date.now() - start;
+        const remainingTime = Math.max(3000 - elapsed, 0);
+        setTimeout(() => {
+          setPosts(res.data);
+          setLoading(false);
+        }, remainingTime);
+      })
+      .catch((err) => {
+        console.error("Error fetching posts:", err);
+        setError("Unable to load posts");
+        setLoading(false);
+      });
+  }, [userIDCMT]);
+
+  useEffect(() => {
+    const updateNavButtons = () => {
+      if (storyListRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = storyListRef.current;
+        setShowNavButtons({
+          left: scrollLeft > 0,
+          right: scrollLeft < scrollWidth - clientWidth - 1,
+        });
+      }
+    };
+    const storyList = storyListRef.current;
+    if (storyList) {
+      storyList.addEventListener("scroll", updateNavButtons);
+      updateNavButtons();
+    }
+    return () => {
+      if (storyList) {
+        storyList.removeEventListener("scroll", updateNavButtons);
+      }
+    };
+  }, [stories]);
+
+  useEffect(() => {
+    const storyList = storyListRef.current;
+    if (!storyList) return;
+
+    let isDragging = false;
+    let startX, scrollLeft;
+    let animationFrameId;
+
+    const startDragging = (e) => {
+      isDragging = true;
+      storyList.classList.add("dragging");
+      startX = (e.pageX || e.touches[0].pageX) - storyList.offsetLeft;
+      scrollLeft = storyList.scrollLeft;
+    };
+
+    const stopDragging = () => {
+      isDragging = false;
+      storyList.classList.remove("dragging");
+      cancelAnimationFrame(animationFrameId);
+    };
+
+    const drag = (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      const x = (e.pageX || e.touches[0].pageX) - storyList.offsetLeft;
+      const walk = (x - startX) * 1.5;
+
+      animationFrameId = requestAnimationFrame(() => {
+        storyList.scrollLeft = scrollLeft - walk;
+      });
+    };
+
+    storyList.addEventListener("mousedown", startDragging);
+    storyList.addEventListener("touchstart", startDragging);
+    storyList.addEventListener("mousemove", drag);
+    storyList.addEventListener("touchmove", drag);
+    storyList.addEventListener("mouseup", stopDragging);
+    storyList.addEventListener("mouseleave", stopDragging);
+    storyList.addEventListener("touchend", stopDragging);
+
+    return () => {
+      storyList.removeEventListener("mousedown", startDragging);
+      storyList.removeEventListener("touchstart", startDragging);
+      storyList.removeEventListener("mousemove", drag);
+      storyList.removeEventListener("touchmove", drag);
+      storyList.removeEventListener("mouseup", stopDragging);
+      storyList.removeEventListener("mouseleave", stopDragging);
+      storyList.removeEventListener("touchend", stopDragging);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  const scrollStories = (direction) => {
+    if (storyListRef.current) {
+      const storyItemWidth = storyListRef.current.querySelector('.story-item')?.offsetWidth || 120;
+      const scrollAmount = direction === "left" ? -storyItemWidth * 3 : storyItemWidth * 3;
+      storyListRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
   const toggleMenu = (index) => {
     setOpenMenuIndex(openMenuIndex === index ? null : index);
   };
+
   const handleEditClick = (index, currentContent, commentId) => {
     setEditingIndex(index);
     setEditContent(currentContent);
-    setOpenMenuIndex(null); // đóng menu
-    setSelectedCommentId(commentId); // Lưu trữ commentId
+    setOpenMenuIndex(null);
+    setSelectedCommentId(commentId);
   };
   const [selectedCommentId, setSelectedCommentId] = useState(null);
+
   const handleSaveEdit = async () => {
     if (editingIndex === null || selectedCommentPostId === null || selectedCommentId === null) {
       return;
     }
-
     try {
       const response = await fetch(
         `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${selectedCommentId}`,
         {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            content: editContent,
-            user_id: userIDCMT, // Đảm bảo bạn có userIDCMT từ localStorage hoặc state
-          }),
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: editContent, user_id: userIDCMT }),
         }
       );
-
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Lỗi sửa bình luận:', errorData);
-        setError('Không thể sửa bình luận.');
+        console.error("Error editing comment:", errorData);
+        setError("Unable to edit comment.");
         return;
       }
       const updatedComment = await response.json();
-      // Cập nhật state comments với nội dung đã sửa
       setComments(prevComments => {
         const updatedComments = { ...prevComments };
         if (updatedComments[selectedCommentPostId]) {
@@ -75,38 +235,34 @@ export default function Home() {
         return updatedComments;
       });
       setEditingIndex(null);
-      setEditContent('');
+      setEditContent("");
       setSelectedCommentId(null);
     } catch (error) {
-      console.error('Lỗi kết nối khi sửa bình luận:', error);
-      setError('Lỗi kết nối khi sửa bình luận.');
+      console.error("Error connecting while editing comment:", error);
+      setError("Error connecting while editing comment.");
     }
   };
   const handleDelete = async (commentId) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa bình luận này?")) {
+    if (!window.confirm("Are you sure you want to delete this comment?")) {
       return;
     }
     try {
       const response = await fetch(
         `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${commentId}`,
         {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            user_id: userIDCMT, // Đảm bảo bạn có userIDCMT
-          }),
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: userIDCMT }),
         }
       );
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Lỗi xóa bình luận:', errorData);
-        setError('Không thể xóa bình luận.');
+        console.error("Error deleting comment:", errorData);
+        setError("Unable to delete comment.");
         return;
       }
-      // Cập nhật state comments sau khi xóa thành công
       setComments(prevComments => {
+
         const updatedComments = { ...prevComments };
         if (updatedComments[selectedCommentPostId]) {
           updatedComments[selectedCommentPostId] = updatedComments[selectedCommentPostId].filter(
@@ -117,114 +273,53 @@ export default function Home() {
       });
       setOpenMenuIndex(null);
     } catch (error) {
-      console.error('Lỗi kết nối khi xóa bình luận:', error);
-      setError('Lỗi kết nối khi xóa bình luận.');
+      console.error("Error connecting while deleting comment:", error);
+      setError("Error connecting while deleting comment.");
     }
   };
-  const [expandedPosts, setExpandedPosts] = useState({}); // lưu trạng thái mở rộng của từng post theo id hoặc index
-  // Hàm toggle mở rộng ảnh cho post
+
   const toggleExpandImages = (postId) => {
-    setExpandedPosts(prev => ({
-      ...prev,
-      [postId]: !prev[postId],
-    }));
+    setExpandedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
   const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
   const handleEdit = (post) => {
     navigate(`/edit-post/${post.id}`, {
-      state: {
-        content: post.content,
-        imageUrl: post.imageurl,
-        videoUrl: post.videourl,
+      state: { content: post.content, imageUrl: post.imageurl, videoUrl: post.videourl },
+    });
+  };
+
+  const handleEditStory = (story) => {
+    if (!userIDCMT) {
+      setError("Please log in to edit a story");
+      return;
+    }
+    navigate(`/edit-story/${story.id}`, {
+      state: {  
+        id: story.id,
+        content: story.content,
+        imageurl: story.imageurl,
+        videourl: story.videourl,
+        visibility: story.visibility || "public",
       },
     });
   };
-  const [comments, setComments] = useState({});
-  const [commentInputs, setCommentInputs] = useState({});
-  const [selectedCommentPostId, setSelectedCommentPostId] = useState(null);
-  const menuRef = useRef(null);
-  const buttonRef = useRef(null);
-  const reactionListRef = useRef(null);
-  const [activeMenuPostId, setActiveMenuPostId] = useState(null);
-  const [error, setError] = useState(null);
-  const [showReactions, setShowReactions] = useState(null);
-  const [stories, setStories] = useState([]);
-  const [showMenu, setShowMenu] = useState(null);
-  const [reactionList, setReactionList] = useState({});
-  const [showReactionList, setShowReactionList] = useState(null);
-  const [isViewerOpen, setIsViewerOpen] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const user = JSON.parse(localStorage.getItem("user"));
-  const userIDCMT = user?.id;
-  useEffect(() => {
-    // Gọi initBlinkText khi component mount
-    initBlinkText();
-  }, []);
-  useEffect(() => {
-    if (!userIDCMT) return;
-
-    const start = Date.now(); // Ghi nhận thời điểm bắt đầu
-    setLoading(true);
-
-    axios
-      .get("http://localhost:8000/api/stories", {
-        params: { user_id: userIDCMT },
-      })
-      .then((res) => {
-        const elapsed = Date.now() - start;
-        const remainingTime = Math.max(3000 - elapsed, 0); // Đảm bảo loader ít nhất 3s
-
-        setTimeout(() => {
-          setStories(res.data);
-          setLoading(false);
-        }, remainingTime);
-      })
-      .catch((err) => {
-        console.error("Lỗi khi tải story:", err);
-        setError("Không thể tải story");
-        setLoading(false);
-      });
-  }, [userIDCMT]);
-
-  useEffect(() => {
-    if (!userIDCMT) {
-      setError("Vui lòng đăng nhập để thực hiện hành động này");
-      return;
-    }
-
-    const start = Date.now();
-    setLoading(true);
-
-    axios
-      .get("http://localhost:8000/api/posts", {
-        params: { user_id: userIDCMT },
-      })
-      .then((res) => {
-        const elapsed = Date.now() - start;
-        const remainingTime = Math.max(3000 - elapsed, 0);
-
-        setTimeout(() => {
-          setPosts(res.data);
-          setLoading(false);
-        }, remainingTime);
-      })
-      .catch((err) => {
-        console.error("Lỗi khi lấy bài viết:", err);
-        setError("Không thể tải bài viết");
-        setLoading(false);
-      });
-  }, [userIDCMT]);
 
   const handleDeleteStory = (id) => {
+    if (!userIDCMT) {
+      setError("Please log in to delete a story");
+      return;
+    }
     axios
-      .delete(`http://localhost:8000/api/stories/${id}`)
+      .delete(`http://localhost:8000/api/stories/${id}`, {
+        data: { user_id: userIDCMT },
+      })
       .then(() => {
         setStories(stories.filter((story) => story.id !== id));
       })
       .catch((err) => {
-        console.error("Lỗi khi xóa story:", err);
-        setError("Không thể xóa story");
+        console.error("Error deleting story:", err);
+        setError("Unable to delete story");
       });
   };
   const handleToggleMenu = (storyId) => {
@@ -235,19 +330,18 @@ export default function Home() {
     const now = new Date();
     const diffInSeconds = Math.floor((now - date) / 1000);
     if (diffInSeconds < 60) return `${diffInSeconds} giây trước`;
-    if (diffInSeconds < 3600)
-      return `${Math.floor(diffInSeconds / 60)} phút trước`;
-    if (diffInSeconds < 86400)
-      return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
-    return date.toLocaleString("vi-VN", {
-      dateStyle: "short",
-      timeStyle: "short",
-    });
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+    return date.toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
   };
   const handleCommentSubmit = async (postId) => {
+    if (!userIDCMT) {
+      setError("Please log in to comment");
+      return;
+    }
     const content = commentInputs[postId];
     if (!content) return;
-    try {
+    try 
       const res = await fetch(
         `http://localhost:8000/api/posts/${postId}/comments`,
         {
@@ -261,33 +355,30 @@ export default function Home() {
           }),
         }
       );
+
       if (!res.ok) {
         const errorText = await res.text();
-        throw new Error(`Lỗi từ server: ${res.status} - ${errorText}`);
+        throw new Error(`Server error: ${res.status} - ${errorText}`);
       }
       await fetchComments(postId);
       setCommentInputs({ ...commentInputs, [postId]: "" });
     } catch (error) {
-      console.error("Lỗi gửi bình luận:", error.message);
-      setError("Không thể gửi bình luận");
+      console.error("Error submitting comment:", error.message);
+      setError("Unable to submit comment");
     }
   };
   const fetchComments = async (postId) => {
-    const res = await fetch(
-      `http://localhost:8000/api/posts/${postId}/comments`
-    );
+    const res = await fetch(`http://localhost:8000/api/posts/${postId}/comments`);
     const data = await res.json();
     setComments((prev) => ({ ...prev, [postId]: data }));
   };
   const fetchReactionList = async (postId) => {
     try {
-      const res = await axios.get(
-        `http://localhost:8000/api/posts/${postId}/reactions`
-      );
+      const res = await axios.get(`http://localhost:8000/api/posts/${postId}/reactions`);
       setReactionList((prev) => ({ ...prev, [postId]: res.data }));
     } catch (err) {
-      console.error("Lỗi khi lấy danh sách cảm xúc:", err);
-      setError("Không thể tải danh sách cảm xúc");
+      console.error("Error fetching reaction list:", err);
+      setError("Unable to load reaction list");
     }
   };
   const handleReactionSummaryClick = (postId) => {
@@ -323,21 +414,11 @@ export default function Home() {
     };
   }, [activeMenuPostId, showReactionList]);
   const renderReaction = (type) => {
-    const icons = {
-      like: "👍",
-      love: "❤️",
-      haha: "😂",
-      wow: "😲",
-      sad: "😢",
-      angry: "😡",
-    };
+    const icons = { like: "👍", love: "❤️", haha: "😂", wow: "😲", sad: "😢", angry: "😡" };
     return icons[type] || "👍";
   };
   const renderButtonLabel = (userReaction) => {
-    if (!userReaction) {
-      return "👍 Like";
-    }
-    const type = userReaction.type;
+    if (!userReaction) return "👍 Like";
     const labels = {
       like: "👍 Like",
       love: "❤️ Love",
@@ -346,11 +427,11 @@ export default function Home() {
       sad: "😢 Sad",
       angry: "😡 Angry",
     };
-    return labels[type] || "👍 Like";
+    return labels[userReaction.type] || "👍 Like";
   };
   const handleReactionClick = async (postId, reactionType = null) => {
     if (!userIDCMT) {
-      setError("Vui lòng đăng nhập để thực hiện hành động này");
+      setError("Please log in to perform this action");
       return;
     }
     const post = posts.find((p) => p.id === postId);
@@ -364,24 +445,17 @@ export default function Home() {
           user_reaction: null,
           reaction_summary: {
             ...updatedPost.reaction_summary,
-            [userReaction.type]:
-              (updatedPost.reaction_summary[userReaction.type] || 1) - 1,
+            [userReaction.type]: (updatedPost.reaction_summary[userReaction.type] || 1) - 1,
           },
         };
       } else {
         updatedPost = {
           ...updatedPost,
-          user_reaction: {
-            user_id: userIDCMT,
-            post_id: postId,
-            type: reactionType,
-          },
+          user_reaction: { user_id: userIDCMT, post_id: postId, type: reactionType },
           reaction_summary: {
             ...updatedPost.reaction_summary,
-            [userReaction.type]:
-              (updatedPost.reaction_summary[userReaction.type] || 1) - 1,
-            [reactionType]:
-              (updatedPost.reaction_summary[reactionType] || 0) + 1,
+            [userReaction.type]: (updatedPost.reaction_summary[userReaction.type] || 1) - 1,
+            [reactionType]: (updatedPost.reaction_summary[reactionType] || 0) + 1,
           },
         };
       }
@@ -389,15 +463,10 @@ export default function Home() {
       const newReactionType = reactionType || "like";
       updatedPost = {
         ...updatedPost,
-        user_reaction: {
-          user_id: userIDCMT,
-          post_id: postId,
-          type: newReactionType,
-        },
+        user_reaction: { user_id: userIDCMT, post_id: postId, type: newReactionType },
         reaction_summary: {
           ...updatedPost.reaction_summary,
-          [newReactionType]:
-            (updatedPost.reaction_summary[newReactionType] || 0) + 1,
+          [newReactionType]: (updatedPost.reaction_summary[newReactionType] || 0) + 1,
         },
       };
     }
@@ -405,10 +474,7 @@ export default function Home() {
     setPosts(newPosts);
     setShowReactions(null);
     try {
-      if (
-        userReaction &&
-        (reactionType === null || userReaction.type === reactionType)
-      ) {
+      if (userReaction && (reactionType === null || userReaction.type === reactionType)) {
         await axios.delete(`http://localhost:8000/api/posts/${postId}/react`, {
           data: { user_id: userIDCMT },
         });
@@ -420,8 +486,8 @@ export default function Home() {
         });
       }
     } catch (err) {
-      console.error("Lỗi khi xử lý reaction:", err);
-      setError("Không thể xử lý reaction");
+      console.error("Error processing reaction:", err);
+      setError("Unable to process reaction");
       setPosts(posts);
     } finally {
       setLoading(false);
@@ -430,9 +496,51 @@ export default function Home() {
   const getTotalReactions = (summary) => {
     return Object.values(summary || {}).reduce((sum, count) => sum + count, 0);
   };
-  const handleOpenViewer = (index) => {
-    setSelectedIndex(index);
+  const handleOpenViewer = (userId) => {
+    if (!userIDCMT) {
+      setError("Please log in to view stories");
+      navigate("/login");
+      return;
+    }
+    setSelectedUserId(userId);
     setIsViewerOpen(true);
+  };
+
+  const getLatestStories = () => {
+    const userStories = {};
+    stories.forEach((story) => {
+      const userId = story.user?.id;
+      if (!userStories[userId] || new Date(story.created_at) > new Date(userStories[userId].created_at)) {
+        userStories[userId] = story;
+      }
+    });
+    return Object.values(userStories);
+  };
+
+  const filteredStories = getLatestStories();
+
+  const getUserStories = (userId) => {
+    return stories.filter((story) => story.user?.id === userId).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  };
+
+  const handleNextUser = () => {
+    const currentIndex = filteredStories.findIndex((story) => story.user.id === selectedUserId);
+    if (currentIndex < filteredStories.length - 1) {
+      setSelectedUserId(filteredStories[currentIndex + 1].user.id);
+    } else {
+      setIsViewerOpen(false);
+      setSelectedUserId(null);
+    }
+  };
+
+  const handlePrevUser = () => {
+    const currentIndex = filteredStories.findIndex((story) => story.user.id === selectedUserId);
+    if (currentIndex > 0) {
+      setSelectedUserId(filteredStories[currentIndex - 1].user.id);
+    } else {
+      setIsViewerOpen(false);
+      setSelectedUserId(null);
+    }
   };
   return (
     <div className="container">
@@ -442,91 +550,129 @@ export default function Home() {
         <div className="story-containers">
           <h3 className="story-header blink-text">Bảng tin</h3>
           {loading && <p className="loading">⏳ Đang tải...</p>}
-          <div className="story-list">
-            <div
-              className="story-item create-story"
-              onClick={() => navigate("/story")}
-            >
-              <div className="story-user-info">
-                <img
-                  src={
-                    user?.profilepicture
-                      ? `http://localhost:8000/storage/images/${user.profilepicture}`
-                      : "/default-avatar.png"
-                  }
-                  alt="Avatar"
-                  className="story-avatar"
-                />
-                <div className="story-user-details">
-                  <span className="story-username">Tạo tin ➕</span>
-                </div>
-              </div>
-            </div>
-            {stories.map((story, index) => (
-              <div
-                key={story.id}
-                className="story-item"
-                onClick={() => handleOpenViewer(index)}
-              >
-                <div className="story-user-info">
-                  <img
-                    src={
-                      story.user?.profilepicture
-                        ? `http://localhost:8000/storage/images/${story.user.profilepicture}`
-                        : "/default-avatar.png"
-                    }
-                    alt="Avatar"
-                    className="story-avatar"
-                  />
-                  <div className="story-user-details">
-                    <span className="story-username">{story.user?.username || "Người dùng"}</span>
-                    <span className="story-time">{formatTime(story.created_at)}</span>
-                  </div>
-                </div>
-                <button
-                  className="story-menu-btn"
-                  onClick={() => handleToggleMenu(story.id)}
-                >  ⋮
-
-                </button>
-                {showMenu === story.id && story.user?.id === user?.id && (
-                  <div className="story-menu" ref={menuRef}>
-                    <button
-                      className="story-menu-item"
-                      onClick={() => handleDeleteStory(story.id)}
-                    >
-                      🗑️ Xóa Story
-                    </button>
-                  </div>
-                )}
-                <div className="story-image-wrapper">
-                  {story.videourl?.match(/\.(mp4|webm)$/i) ? (
-                    <video
-                      src={`http://localhost:8000/storage/story_videos/${story.videourl}`}
-                      className="story-image"
-                      muted
-                    />
-                  ) : (
+          {!loading && filteredStories.length === 0 && userIDCMT && (
+            <p className="no-stories">Không có tin nào từ những người bạn theo dõi.</p>
+          )}
+          {!loading && !userIDCMT && (
+            <p className="no-stories">Vui lòng đăng nhập để xem tin.</p>
+          )}
+          <div className="story-list-container">
+            {showNavButtons.left && (
+              <button className="story-nav-btn story-nav-prev" onClick={() => scrollStories("left")}>
+                ❮
+              </button>
+            )}
+            {showNavButtons.right && (
+              <button className="story-nav-btn story-nav-next" onClick={() => scrollStories("right")}>
+                ❯
+              </button>
+            )}
+            <div className="story-list" ref={storyListRef}>
+              {userIDCMT && (
+                <div
+                  className="story-item create-story"
+                  onClick={() => navigate("/story")}
+                >
+                  <div className="story-user-info">
                     <img
-                      src={`http://localhost:8000/storage/story_images/${story.imageurl}`}
-                      alt="Story"
-                      className="story-image"
+                      src={
+                        user?.profilepicture
+                          ? `http://localhost:8000/storage/images/${user.profilepicture}`
+                          : "/default-avatar.png"
+                      }
+                      alt="Avatar"
+                      className="story-avatarst"
                     />
-                  )}
-                </div>
-                <div className="story-content">
-                  <p className="text">{story.content}</p>
-                  <div className="story-menu-wrapper" onClick={(e) => e.stopPropagation()}>
+                    <div className="story-user-details">
+                      <span className="story-username">Tạo tin ➕</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )}
+              {filteredStories.map((story) => (
+                <div
+                  key={story.user.id}
+                  className="story-item"
+                  onClick={() => handleOpenViewer(story.user.id)}
+                >
+                  <div className="story-user-info">
+                    <img
+                      src={
+                        story.user?.profilepicture
+                          ? `http://localhost:8000/storage/images/${story.user.profilepicture}`
+                          : "/default-avatar.png"
+                      }
+                      alt="Avatar"
+                      className="story-avatars"
+                    />
+                    <div className="story-user-details">
+                      <span className="story-username">{story.user?.username || "Người dùng"}</span>
+                      <span className="story-time">{formatTime(story.created_at)}</span>
+                    </div>
+                  </div>
+                  {userIDCMT && story.user?.id === userIDCMT && (
+                    <>
+                      <button
+                        className="story-menus-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggleMenu(story.id);
+                        }}
+                      >
+                        ⋮
+                      </button>
+                      {showMenu === story.id && (
+                        <div className="story-menu" ref={menuRef}>
+                          <button
+                            className="story-menu-item"
+                            onClick={() => handleEditStory(story)}
+                          >
+                            📝 Sửa
+                          </button>
+                          <button
+                            className="story-menu-item"
+                            onClick={() => handleDeleteStory(story.id)}
+                          >
+                            🗑️ Xóa Story
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                  <div className="story-image-wrapper">
+                    {story.videourl?.match(/\.(mp4|webm)$/i) ? (
+                      <video
+                        src={`http://localhost:8000/storage/story_videos/${story.videourl}`}
+                        className="story-image"
+                        muted
+                      />
+                    ) : (
+                      <img
+                        src={`http://localhost:8000/storage/story_images/${story.imageurl}`}
+                        alt="Story"
+                        className="story-image"
+                      />
+                    )}
+                  </div>
+                  <div className="story-content">
+                    <p className="text">{story.content}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          {isViewerOpen && (
+          {isViewerOpen && selectedUserId && (
             <StoryViewer
-              stories={stories}
-              onClose={() => setIsViewerOpen(false)}
-              initialIndex={selectedIndex}
+              stories={getUserStories(selectedUserId)}
+              onClose={() => {
+                setIsViewerOpen(false);
+                setSelectedUserId(null);
+              }}
+              initialIndex={0}
+              onNextUser={handleNextUser}
+              onPrevUser={handlePrevUser}
+              onDeleteStory={handleDeleteStory}
+              currentUserId={userIDCMT}
             />
           )}
         </div>
@@ -600,6 +746,7 @@ export default function Home() {
                                   .catch((err) => {
                                     console.error("Lỗi khi xóa bài viết:", err);
                                     setError("Không thể xóa bài viết");
+
                                   })
                                   .finally(() => setLoading(false));
                               }
@@ -615,6 +762,7 @@ export default function Home() {
                   <p className="post-content">{post.content}</p>
 
                   <div key={post.id} className="post-media">
+
                     {Array.isArray(post.imageurl) && (
                       <>
                         {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 4)).map((img, index) => (
@@ -623,12 +771,14 @@ export default function Home() {
                             <div className="media-overlay-black"></div>
                             <div className="media-overlay-hover"></div>
                             {/* Ảnh */}
+
                             <img
                               src={`http://localhost:8000/storage/images/${img}`}
                               alt={`Ảnh ${index + 1}`}
                               className="media-image"
                             />
                             {/* Overlay +x ảnh */}
+
                             {index === 3 && post.imageurl.length > 4 && !expandedPosts[post.id] && (
                               <div
                                 className="image-overlay"
@@ -639,8 +789,6 @@ export default function Home() {
                             )}
                           </div>
                         ))}
-
-                        {/* Nút thu gọn */}
                         {expandedPosts[post.id] && (
                           <button onClick={() => toggleExpandImages(post.id)} className="collapse-btn">
                             Thu gọn
@@ -648,7 +796,6 @@ export default function Home() {
                         )}
                       </>
                     )}
-                    {/* Video */}
                     {post.videourl && (
                       <div className="video-wrapper">
                         <div className="media-overlay-hover"></div>
@@ -687,8 +834,8 @@ export default function Home() {
                           <div className="reaction-list" ref={reactionListRef}>
                             <div className="reaction-list-header">
                               <span>
-                                {getTotalReactions(post.reaction_summary)} lượt thả
-                                cảm xúc
+
+                                {getTotalReactions(post.reaction_summary)} lượt thả cảm xúc
                               </span>
                               <button
                                 className="close-button"
@@ -698,14 +845,12 @@ export default function Home() {
                               </button>
                             </div>
                             <div className="reaction-counts">
-                              {Object.keys(post.reaction_summary).map(
-                                (type) =>
-                                  post.reaction_summary[type] > 0 && (
-                                    <span key={type} className="reaction-count">
-                                      {renderReaction(type)}{" "}
-                                      {post.reaction_summary[type]}
-                                    </span>
-                                  )
+                              {Object.keys(post.reaction_summary).map((type) =>
+                                post.reaction_summary[type] > 0 && (
+                                  <span key={type} className="reaction-count">
+                                    {renderReaction(type)} {post.reaction_summary[type]}
+                                  </span>
+                                )
                               )}
                             </div>
                             <div className="reaction-users">
@@ -742,27 +887,25 @@ export default function Home() {
                       onMouseLeave={() => setShowReactions(null)}
                     >
                       <button
-                        className={`like-button ${post.user_reaction ? "reacted" : ""
-                          }`}
+
+                        className={`like-button ${post.user_reaction ? "reacted" : ""}`}
+
                         onClick={() => handleReactionClick(post.id)}
                       >
                         {renderButtonLabel(post.user_reaction)}
                       </button>
                       {showReactions === post.id && (
                         <div className="reaction-icons">
-                          {["like", "love", "haha", "wow", "sad", "angry"].map(
-                            (type) => (
-                              <button
-                                key={type}
-                                className={`reaction-icon ${post.user_reaction?.type === type ? "selected" : ""
-                                  }`}
-                                onClick={() => handleReactionClick(post.id, type)}
-                                title={type.charAt(0).toUpperCase() + type.slice(1)}
-                              >
-                                {renderReaction(type)}
-                              </button>
-                            )
-                          )}
+                          {["like", "love", "haha", "wow", "sad", "angry"].map((type) => (
+                            <button
+                              key={type}
+                              className={`reaction-icon ${post.user_reaction?.type === type ? "selected" : ""}`}
+                              onClick={() => handleReactionClick(post.id, type)}
+                              title={type.charAt(0).toUpperCase() + type.slice(1)}
+                            >
+                              {renderReaction(type)}
+                            </button>
+                          ))}
                         </div>
                       )}
                     </div>
@@ -779,11 +922,7 @@ export default function Home() {
                     >
                       💬 Bình luận
                     </button>
-                    <button
-                      onClick={() =>
-                        alert("Chức năng chia sẻ chưa được triển khai")
-                      }
-                    >
+                    <button onClick={() => alert("Chức năng chia sẻ chưa được triển khai")}>
                       🔗 Chia sẻ
                     </button>
                   </div>
@@ -838,7 +977,6 @@ export default function Home() {
                           </div>
                         ))}
                       </div>
-
                     </>
                   )}
                 </div>
