@@ -9,6 +9,16 @@ import { initBlinkText, sparkleMouseEffect } from '../script';
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
+  // Loader 3 giây chỉ khi lần đầu load trang
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  //BÌNH LUẬN
   const [editingIndex, setEditingIndex] = useState(null);
   const [editContent, setEditContent] = useState("");
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
@@ -211,7 +221,7 @@ export default function Home() {
         return;
       }
       const updatedComment = await response.json();
-      setComments((prevComments) => {
+      setComments(prevComments => {
         const updatedComments = { ...prevComments };
         if (updatedComments[selectedCommentPostId]) {
           const commentIndex = updatedComments[selectedCommentPostId].findIndex(
@@ -231,7 +241,6 @@ export default function Home() {
       setError("Error connecting while editing comment.");
     }
   };
-
   const handleDelete = async (commentId) => {
     if (!window.confirm("Are you sure you want to delete this comment?")) {
       return;
@@ -251,7 +260,8 @@ export default function Home() {
         setError("Unable to delete comment.");
         return;
       }
-      setComments((prevComments) => {
+      setComments(prevComments => {
+
         const updatedComments = { ...prevComments };
         if (updatedComments[selectedCommentPostId]) {
           updatedComments[selectedCommentPostId] = updatedComments[selectedCommentPostId].filter(
@@ -270,9 +280,7 @@ export default function Home() {
   const toggleExpandImages = (postId) => {
     setExpandedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
-
   const navigate = useNavigate();
-
   const handleEdit = (post) => {
     navigate(`/edit-post/${post.id}`, {
       state: { content: post.content, imageUrl: post.imageurl, videoUrl: post.videourl },
@@ -312,11 +320,9 @@ export default function Home() {
         setError("Unable to delete story");
       });
   };
-
   const handleToggleMenu = (storyId) => {
     setShowMenu(showMenu === storyId ? null : storyId);
   };
-
   const formatTime = (createdAt) => {
     const date = new Date(createdAt);
     const now = new Date();
@@ -326,7 +332,6 @@ export default function Home() {
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
     return date.toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
   };
-
   const handleCommentSubmit = async (postId) => {
     if (!userIDCMT) {
       setError("Please log in to comment");
@@ -335,11 +340,20 @@ export default function Home() {
     const content = commentInputs[postId];
     if (!content) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/posts/${postId}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userIDCMT, content }),
-      });
+      const res = await fetch(
+        `http://localhost:8000/api/posts/${postId}/comments`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: userIDCMT,
+            content,
+          }),
+        }
+      );
+
       if (!res.ok) {
         const errorText = await res.text();
         throw new Error(`Server error: ${res.status} - ${errorText}`);
@@ -351,13 +365,11 @@ export default function Home() {
       setError("Unable to submit comment");
     }
   };
-
   const fetchComments = async (postId) => {
     const res = await fetch(`http://localhost:8000/api/posts/${postId}/comments`);
     const data = await res.json();
     setComments((prev) => ({ ...prev, [postId]: data }));
   };
-
   const fetchReactionList = async (postId) => {
     try {
       const res = await axios.get(`http://localhost:8000/api/posts/${postId}/reactions`);
@@ -367,7 +379,6 @@ export default function Home() {
       setError("Unable to load reaction list");
     }
   };
-
   const handleReactionSummaryClick = (postId) => {
     if (showReactionList === postId) {
       setShowReactionList(null);
@@ -376,7 +387,6 @@ export default function Home() {
       setShowReactionList(postId);
     }
   };
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -401,12 +411,10 @@ export default function Home() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [activeMenuPostId, showReactionList]);
-
   const renderReaction = (type) => {
     const icons = { like: "👍", love: "❤️", haha: "😂", wow: "😲", sad: "😢", angry: "😡" };
     return icons[type] || "👍";
   };
-
   const renderButtonLabel = (userReaction) => {
     if (!userReaction) return "👍 Like";
     const labels = {
@@ -419,7 +427,6 @@ export default function Home() {
     };
     return labels[userReaction.type] || "👍 Like";
   };
-
   const handleReactionClick = async (postId, reactionType = null) => {
     if (!userIDCMT) {
       setError("Please log in to perform this action");
@@ -484,11 +491,9 @@ export default function Home() {
       setLoading(false);
     }
   };
-
   const getTotalReactions = (summary) => {
     return Object.values(summary || {}).reduce((sum, count) => sum + count, 0);
   };
-
   const handleOpenViewer = (userId) => {
     if (!userIDCMT) {
       setError("Please log in to view stories");
@@ -535,7 +540,6 @@ export default function Home() {
       setSelectedUserId(null);
     }
   };
-
   return (
     <div className="container">
       <Header />
@@ -719,18 +723,28 @@ export default function Home() {
                           <button onClick={() => handleEdit(post)}>📝 Sửa</button>
                           <button
                             onClick={() => {
-                              if (window.confirm("Bạn có chắc muốn xóa bài viết này?")) {
+                              if (
+                                window.confirm(
+                                  "Bạn có chắc muốn xóa bài viết này?"
+                                )
+                              ) {
                                 setLoading(true);
                                 axios
-                                  .delete(`http://localhost:8000/api/posts/${post.id}`, {
-                                    data: { user_id: userIDCMT },
-                                  })
+                                  .delete(
+                                    `http://localhost:8000/api/posts/${post.id}`,
+                                    {
+                                      data: { user_id: userIDCMT },
+                                    }
+                                  )
                                   .then(() => {
-                                    setPosts(posts.filter((p) => p.id !== post.id));
+                                    setPosts(
+                                      posts.filter((p) => p.id !== post.id)
+                                    );
                                   })
                                   .catch((err) => {
-                                    console.error("Error deleting post:", err);
-                                    setError("Unable to delete post");
+                                    console.error("Lỗi khi xóa bài viết:", err);
+                                    setError("Không thể xóa bài viết");
+
                                   })
                                   .finally(() => setLoading(false));
                               }
@@ -745,18 +759,24 @@ export default function Home() {
 
                   <p className="post-content">{post.content}</p>
 
-                  <div className="post-media">
+                  <div key={post.id} className="post-media">
+
                     {Array.isArray(post.imageurl) && (
                       <>
                         {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 4)).map((img, index) => (
                           <div key={index} className="image-wrapper">
+                            {/* Overlay đen nhạt khi hover */}
                             <div className="media-overlay-black"></div>
                             <div className="media-overlay-hover"></div>
+                            {/* Ảnh */}
+
                             <img
                               src={`http://localhost:8000/storage/images/${img}`}
                               alt={`Ảnh ${index + 1}`}
                               className="media-image"
                             />
+                            {/* Overlay +x ảnh */}
+
                             {index === 3 && post.imageurl.length > 4 && !expandedPosts[post.id] && (
                               <div
                                 className="image-overlay"
@@ -812,6 +832,7 @@ export default function Home() {
                           <div className="reaction-list" ref={reactionListRef}>
                             <div className="reaction-list-header">
                               <span>
+
                                 {getTotalReactions(post.reaction_summary)} lượt thả cảm xúc
                               </span>
                               <button
@@ -864,7 +885,9 @@ export default function Home() {
                       onMouseLeave={() => setShowReactions(null)}
                     >
                       <button
+
                         className={`like-button ${post.user_reaction ? "reacted" : ""}`}
+
                         onClick={() => handleReactionClick(post.id)}
                       >
                         {renderButtonLabel(post.user_reaction)}
@@ -909,10 +932,15 @@ export default function Home() {
                           placeholder="Viết bình luận..."
                           value={commentInputs[post.id] || ""}
                           onChange={(e) =>
-                            setCommentInputs({ ...commentInputs, [post.id]: e.target.value })
+                            setCommentInputs({
+                              ...commentInputs,
+                              [post.id]: e.target.value,
+                            })
                           }
                         />
-                        <button onClick={() => handleCommentSubmit(post.id)}>Gửi</button>
+                        <button onClick={() => handleCommentSubmit(post.id)}>
+                          Gửi
+                        </button>
                       </div>
 
                       <div className="comments">
@@ -932,25 +960,14 @@ export default function Home() {
                             ) : (
                               comment.content
                             )}
+
                             <div className="comment-actions">
                               {comment.user?.id === userIDCMT && (
                                 <>
-                                  <button className="btn-more" onClick={() => toggleMenu(index)}>
-                                    ...
-                                  </button>
-                                  <div
-                                    className="comment-menu"
-                                    style={{ display: openMenuIndex === index ? "block" : "none" }}
-                                  >
-                                    <button
-                                      className="edit-btn"
-                                      onClick={() => handleEditClick(index, comment.content, comment.id)}
-                                    >
-                                      Sửa
-                                    </button>
-                                    <button className="delete-btn" onClick={() => handleDelete(comment.id)}>
-                                      Xóa
-                                    </button>
+                                  <button className="btn-more" onClick={() => toggleMenu(index)}>...</button>
+                                  <div className="comment-menu" style={{ display: openMenuIndex === index ? "block" : "none" }}>
+                                    <button className="edit-btn" onClick={() => handleEditClick(index, comment.content, comment.id)}>Sửa</button>
+                                    <button className="delete-btn" onClick={() => handleDelete(comment.id)}>Xóa</button>
                                   </div>
                                 </>
                               )}

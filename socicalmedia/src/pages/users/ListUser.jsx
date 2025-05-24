@@ -9,7 +9,6 @@ import "../../style/home-custom.css";
 export default function ListUser() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const handleDelete = async (id) => {
         setLoading(true)
         if (window.confirm('Bạn có chắc chắn muốn xóa?')) {
