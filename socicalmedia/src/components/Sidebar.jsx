@@ -24,18 +24,16 @@ function Sidebar() {
 
     return (
         <aside id="sidebar" className="sidebar">
-
             <ul className="sidebar-nav" id="sidebar-nav">
-
                 <li className="nav-item">
                     <a className="nav-link collapsed" href="/home">
                         <i className="bi bi-grid"></i>
-                        <span>Thống kê</span>
+                        <span>Trang chủ</span>
                     </a>
                 </li>
 
                 <li className="nav-item">
-                    <a className="nav-link collapsed" href="#">
+                    <a className="nav-link collapsed" href="/search">
                         <i className="bi bi-search"></i>
                         <span>Tìm kiếm</span>
                     </a>
@@ -69,9 +67,15 @@ function Sidebar() {
                     </a>
                 </li>
                 <li className="nav-item">
+                    <a className="nav-link collapsed" href="/friend-request/list">
+                        <i className="bi bi-people"></i>
+                        <span>Bạn bè</span>
+                    </a>
+                </li>
+                <li className="nav-item">
                     <a className="nav-link collapsed" data-bs-target="#users-nav" data-bs-toggle="collapse"
                        href="#">
-                        <i className="bi bi-people"></i><span>Quản lí tài khoản</span><i
+                        <i class="bi bi-person-vcard"></i><span>Quản lí tài khoản</span><i
                         className="bi bi-chevron-down ms-auto"></i>
                     </a>
                     <ul id="users-nav" className="nav-content collapse " data-bs-parent="#sidebar-nav">
@@ -98,14 +102,14 @@ function Sidebar() {
                 </li>
 
                 <li className="nav-item">
-                    <a className="nav-link collapsed" href="#">
+                    <a className="nav-link collapsed" href={`/users/${user.id}`}>
                         <i className="bi bi-person"></i>
                         <span>Trang cá nhân</span>
                     </a>
                 </li>
 
                 <li className="nav-item">
-                    <a className="nav-link collapsed" href="#">
+                    <a className="nav-link collapsed" href="/">
                         <i className="bi bi-box-arrow-right"></i>
                         <span>Đăng xuất</span>
                     </a>

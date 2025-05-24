@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 import {BASE_URL_SERVER} from "../config/server";
+import {initBlinkText} from '../script';
+import "../style/Home.css";
 
 const handleLogout = () => {
     localStorage.clear();
@@ -8,7 +10,6 @@ const handleLogout = () => {
     alert('Đăng xuất thành công!')
     window.location.href = `/`;
 }
-
 
 function Header() {
     const [user, setUser] = useState(null);
@@ -21,6 +22,11 @@ function Header() {
         }
     }, []);
 
+    useEffect(() => {
+        setTimeout(() => {
+            initBlinkText();
+        }, 100); // chờ 100ms để DOM render xong
+    }, []);
     const handleUserClick = () => {
         navigate('/user');
     };
@@ -37,9 +43,9 @@ function Header() {
             <header id="header" className="header fixed-top d-flex align-items-center">
 
                 <div className="d-flex align-items-center justify-content-between">
-                    <a href="/" className="logo d-flex align-items-center">
+                    <a href="/home" className="logo d-flex align-items-center">
                         <img src="/logo192.png" alt=""/>
-                        <span className="d-none d-lg-block">Social App</span>
+                        <span className="d-none d-lg-block blink-text">Socical App</span>
                     </a>
                     <i className="bi bi-list toggle-sidebar-btn"></i>
                 </div>
@@ -73,7 +79,7 @@ function Header() {
                                 </li>
 
                                 <li>
-                                    <a className="dropdown-item d-flex align-items-center" href="#">
+                                    <a className="dropdown-item d-flex align-items-center" href={`/users/${user.id}`}>
                                         <i className="bi bi-person"></i>
                                         <span>Trang cá nhân</span>
                                     </a>

@@ -1,48 +1,54 @@
 /* AddStory.css */
 
+
+
 .story-container {
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
-}
-
-.story-header {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.loading {
-  font-size: 16px;
-  text-align: center;
-  color: #999;
+  padding: 17px;
+  margin-top: 100px;
+  margin-left: 380px;
+  transition: all 0.3s ease-in-out;
 }
 
 .story-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 16 px;
 }
 
 .story-item {
-  width: calc(33% - 20px);
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: calc(33.333% - 20px);
+  border-radius: 10px;
+  background-color: #fff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  perspective: 1000px;
   overflow: hidden;
-  position: relative;
+}
+
+.story-item:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .story-image {
   width: 100%;
   height: 200px;
   object-fit: cover;
+  transition: transform 0.4s ease;
+  margin-top: 10px;
+}
+
+.story-item:hover .story-image {
+  transform: scale(1.05);
 }
 
 .story-content {
-  padding: 10px;
-  font-size: 16px;
+  padding: 15px;
   color: #333;
+  animation: fadeInUp 0.5s ease forwards;
 }
 
 .story-time {
@@ -50,40 +56,69 @@
   color: #888;
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .story-menu {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 55px;
+  z-index: 100;
 }
 
 .menu-button {
-  background: none;
+  background-color: transparent;
   border: none;
-  color: #333;
-  font-size: 18px;
-  cursor: pointer;
+  font-size: 10px;
+  color: #555;
+  transition: transform 0.2s ease;
+}
+
+.menu-button:hover {
+  color: #007bff;
+  transform: scale(1.1);
 }
 
 .menu-options {
   position: absolute;
-  top: 30px;
-  right: 0;
-  background-color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
-  padding: 10px;
-  width: 120px;
-  z-index: 10;
+  top: 32px;
+  left: 0;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 40px;
+  z-index: 1000;
+}
+
+.menu-options button {
+  width: 100%;
+  text-align: right;  
+  padding: 3px 6px;
+  background: none;
+  border: none;
+  font-size: 14px;
+}
+
+.menu-options button:hover {
+  background-color: #f1f1f1;
 }
 
 .edit-button,
 .delete-button {
-  background: none;
-  border: none;
-  padding: 5px;
   width: 100%;
-  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 5px 10px;
   text-align: left;
+  transition: background 0.2s;
 }
 
 .edit-button:hover {
@@ -95,53 +130,46 @@
 }
 
 .delete-button:hover {
-  background-color: #f8d7da;
+  background-color: #ffe5e5;
 }
 
 .add-story-header {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin: 40px 0 20px;
+  text-align: center;
 }
 
 .add-story-form {
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 0.6s ease forwards;
 }
 
-.story-input {
-  width: 100%;
-  padding: 10px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  margin-bottom: 10px;
-}
-
-.visibility-container {
-  margin-bottom: 15px;
-}
-
+.story-input,
 .visibility-select {
   width: 100%;
-  padding: 10px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-}
-
-.file-inputs {
   margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 
 .file-label {
   display: block;
-  background-color: #007bff;
+  background: #007bff;
   color: white;
-  padding: 10px;
-  border-radius: 4px;
-  cursor: pointer;
+  padding: 10px 15px;
+  border-radius: 6px;
   margin-bottom: 10px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.file-label:hover {
+  background: #0056b3;
 }
 
 .file-input {
@@ -149,16 +177,52 @@
 }
 
 .submit-button {
-  background-color: #28a745;
-  color: white;
-  padding: 10px 15px;
+  position: relative;
+  display: inline-block;
+  padding: 12px 20px;
+  background-color: #fff;
+  color: blue;
+  font-weight: bold;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
+  z-index: 1;
   cursor: pointer;
-  width: 100%;
+  transition: all 0.3s ease;
+  overflow: hidden;
 }
 
-.submit-button:hover {
-  background-color: #218838;
+.submit-button::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(120deg, #28a745, #20c997, #28a745);
+  background-size: 300% 300%;
+  border-radius: 10px;
+  z-index: -1;
+  animation: animateBorder 4s linear infinite;
 }
-    
+
+@keyframes animateBorder {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

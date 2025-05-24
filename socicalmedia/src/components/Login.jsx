@@ -1,15 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../style/Login.css';
 
 const Login = () => {
+  const [imageLoading, setImageLoading] = useState(true);
   const [form, setForm] = useState({ email: '', password: '' });
   const [otpForm, setOtpForm] = useState({ otp_code: '' });
   const [message, setMessage] = useState('');
   const [isOtpRequired, setIsOtpRequired] = useState(false);
   const [userId, setUserId] = useState(null);
   const navigate = useNavigate();
+  const [fireworks, setFireworks] = useState([]);
+  const fireworkContainerRef = useRef(null);
+
+  // Tạo pháo bông ngẫu nhiên trong khu vực ảnh
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const container = fireworkContainerRef.current;
+      if (!container) return;
+
+      const containerRect = container.getBoundingClientRect();
+
+      const x = Math.random() * container.offsetWidth;
+      const y = Math.random() * container.offsetHeight;
+
+      const offsetX = (Math.random() - 0.5) * 100;
+      const offsetY = (Math.random() - 0.5) * 100;
+
+      const fw = {
+        id: Date.now() + Math.random(),
+        x,
+        y,
+        offsetX,
+        offsetY,
+        color: `hsl(${Math.random() * 360}, 100%, 60%)`
+      };
+
+      setFireworks((prev) => [...prev, fw]);
+
+      // Xóa sau 1s để không bị tràn
+      setTimeout(() => {
+        setFireworks((prev) => prev.filter((f) => f.id !== fw.id));
+      }, 1000);
+    }, 400); // tạo mỗi 400ms
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Xử lý thay đổi input
   const handleChange = (e) => {
@@ -61,9 +98,12 @@ const Login = () => {
   };
 
   return (
-    <div className="login">
+    <div className="login" ref={fireworkContainerRef}>
       <div className="login-form-container">
         <form onSubmit={isOtpRequired ? handleOtpSubmit : handleSubmit} style={{ width: '100%', maxWidth: '400px' }}>
+          <div class="pow-container">
+            <span class="pow-letter">SocicalApp</span>
+          </div>
           <h2 className="login-title">Đăng nhập</h2>
 
           {!isOtpRequired ? (
@@ -86,7 +126,14 @@ const Login = () => {
                 onChange={handleChange}
                 required
               />
-              <button type="submit" className="submit-btn">Đăng nhập</button>
+              <div class="box">
+                <div class="canvas">
+                  <button type="submit" className="btn-login submit-btn0"></button>
+                  <button type="submit" className="btn-login submit-btn1">Đăng nhập</button>
+                  <button type="submit" className="btn-login submit-btn2">Đăng nhập</button>
+                  <button type="submit" className="btn-login submit-btn3"></button>
+                </div>
+              </div>
             </>
           ) : (
             <>
@@ -114,10 +161,39 @@ const Login = () => {
           )}
         </form>
       </div>
-
-      <div className="login-image-container">
-        <img src="http://localhost:8000/storage/image/login-image.jpg" alt="Login illustration" className="login-image" />
+      <div className="login-image-container" >
+        {imageLoading && (
+          <div className="image-loader">
+            <div className="circle-loader"></div>
+            <p className="text-loading">Đang tải ảnh...</p>
+          </div>
+        )}
+        <img
+          src="http://localhost:8000/storage/image/login-image2.jpg"
+          alt="Login illustration"
+          className="login-image"
+          onLoad={() => setImageLoading(false)}
+          onError={() => setImageLoading(false)}
+          style={{ display: imageLoading ? 'none' : 'block' }}
+        />
+        {!imageLoading && <div className="curved-line curved-line-1"></div>}
+        {!imageLoading && <div className="curved-line curved-line-2"></div>}
+        {!imageLoading && <div className="curved-line curved-line-3"></div>}
       </div>
+      {fireworks.map((fw) => (
+        <div
+          key={fw.id}
+          className="firework"
+          style={{
+            left: `${fw.x}px`,
+            top: `${fw.y}px`,
+            '--x': `${fw.offsetX}px`,
+            '--y': `${fw.offsetY}px`,
+            backgroundColor: fw.color
+          }}
+        />
+      ))}
+
     </div>
   );
 };

@@ -1,13 +1,15 @@
 .add-post-container {
-  margin-left: 200px;
+  margin-left: 100px; /* Bạn có thể giữ lại hoặc bỏ dòng này tùy thuộc vào layout tổng thể */
   padding: 20px;
   max-width: 800px;
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
-  min-height: 90vh;
+  min-height: 80vh;
+  transform: translate(300px, 80px); /* Thêm dòng này */
 }
 
+/* Các style khác giữ nguyên */
 .user-info {
   display: flex;
   align-items: center;
@@ -91,6 +93,7 @@ button:hover {
   .add-post-container {
     margin-left: 0;
     padding: 20px;
+    transform: translate(0, 200px); /* Điều chỉnh cho màn hình nhỏ hơn nếu cần */
   }
 }
 
