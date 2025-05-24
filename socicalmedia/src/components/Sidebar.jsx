@@ -25,6 +25,7 @@ function Sidebar() {
     return (
         <aside id="sidebar" className="sidebar">
             <ul className="sidebar-nav" id="sidebar-nav">
+
                 <li className="nav-item item-home">
                     <a className="nav-link collapsed link-home" href="/home">
                         <i className="bi bi-grid icon-home"></i>
@@ -36,6 +37,7 @@ function Sidebar() {
                     <a className="nav-link collapsed link-search" href="/search">
                         <i className="bi bi-search icon-search"></i>
                         <span className="text-search">Tìm kiếm</span>
+
                     </a>
                 </li>
 
@@ -67,11 +69,17 @@ function Sidebar() {
                     </a>
                 </li>
 
-                <li className="nav-item item-manage-accounts">
-                    <a className="nav-link collapsed link-manage-accounts" data-bs-target="#users-nav" data-bs-toggle="collapse" href="#">
-                        <i className="bi bi-people icon-manage-accounts"></i>
-                        <span className="text-manage-accounts">Quản lí tài khoản</span>
-                        <i className="bi bi-chevron-down ms-auto icon-chevron-down-accounts"></i>
+                <li className="nav-item">
+                    <a className="nav-link collapsed" href="/friend-request/list">
+                        <i className="bi bi-people"></i>
+                        <span>Bạn bè</span>
+                    </a>
+                </li>
+                <li className="nav-item">
+                    <a className="nav-link collapsed" data-bs-target="#users-nav" data-bs-toggle="collapse"
+                       href="#">
+                        <i class="bi bi-person-vcard"></i><span>Quản lí tài khoản</span><i
+                        className="bi bi-chevron-down ms-auto"></i>
                     </a>
                     <ul id="users-nav" className="nav-content collapse " data-bs-parent="#sidebar-nav">
                         <li>
@@ -97,7 +105,6 @@ function Sidebar() {
                         <span className="text-settings">Cài đặt</span>
                     </a>
                 </li>
-
                 <li className="nav-item item-profile">
                     <a className="nav-link collapsed link-profile" href={`/users/${user.id}`}>
                         <i className="bi bi-person icon-profile"></i>
@@ -109,6 +116,7 @@ function Sidebar() {
                     <a className="nav-link collapsed link-logout" href="/">
                         <i className="bi bi-box-arrow-right icon-logout"></i>
                         <span className="text-logout">Đăng xuất</span>
+
                     </a>
                 </li>
             </ul>
