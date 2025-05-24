@@ -13,8 +13,84 @@ const Login = () => {
   const navigate = useNavigate();
   const [fireworks, setFireworks] = useState([]);
   const fireworkContainerRef = useRef(null);
+  const emailInputRef = useRef(null); // Tạo ref cho email input
+  const passwordInputRef = useRef(null); // Tạo ref cho password input
 
-  // Tạo pháo bông ngẫu nhiên trong khu vực ảnh
+  function createFloatingChar(inputElement, char) {
+    const rect = inputElement.getBoundingClientRect();
+    const selectionStart = inputElement.selectionStart;
+    const tempSpan = document.createElement('span');
+    tempSpan.style.visibility = 'hidden';
+    tempSpan.style.position = 'absolute';
+    tempSpan.style.left = rect.left + 'px';
+    tempSpan.style.top = rect.top + 'px';
+    tempSpan.textContent = inputElement.value.substring(0, selectionStart);
+    document.body.appendChild(tempSpan);
+    const charRect = tempSpan.getBoundingClientRect();
+    document.body.removeChild(tempSpan);
+
+    const baseX = rect.left + (charRect.width * 0.8);
+    const baseY = rect.top + (rect.height / 2);
+
+    const numberOfSparks = 5; // Số lượng "tia" pháo bông
+    for (let i = 0; i < numberOfSparks; i++) {
+      const spark = document.createElement('div');
+      spark.classList.add('tiny-firework');
+      // Thêm class màu ngẫu nhiên (tùy chọn)
+      const colors = ['red', 'blue', 'green', 'yellow', 'orange', 'purple'];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      spark.classList.add(`tiny-firework-${randomColor}`);
+
+      const angle = Math.random() * 2 * Math.PI;
+      const distance = Math.random() * 10; // Khoảng cách "bay"
+
+      const x = baseX + Math.cos(angle) * distance;
+      const y = baseY + Math.sin(angle) * distance;
+
+      spark.style.left = `${x}px`;
+      spark.style.top = `${y}px`;
+      spark.style.animationDelay = `${Math.random() * 0.2}s`; // Tạo độ trễ ngẫu nhiên
+
+      document.body.appendChild(spark);
+
+      // Loại bỏ tia pháo bông sau khi animation kết thúc
+      spark.addEventListener('animationend', () => {
+        spark.remove();
+      });
+    }
+  }
+
+  useEffect(() => {
+    const emailInput = emailInputRef.current;
+    const passwordInput = passwordInputRef.current;
+
+    const handleInput = (event) => {
+      const lastChar = event.data;
+      if (lastChar && event.target === emailInput) {
+        createFloatingChar(emailInput, lastChar);
+      }
+      if (lastChar && event.target === passwordInput) {
+        createFloatingChar(passwordInput, lastChar);
+      }
+    };
+
+    if (emailInput) {
+      emailInput.addEventListener('input', handleInput);
+    }
+    if (passwordInput) {
+      passwordInput.addEventListener('input', handleInput);
+    }
+
+    return () => {
+      if (emailInput) {
+        emailInput.removeEventListener('input', handleInput);
+      }
+      if (passwordInput) {
+        passwordInput.removeEventListener('input', handleInput);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(() => {
       const container = fireworkContainerRef.current;
@@ -111,27 +187,31 @@ const Login = () => {
               <input
                 type="email"
                 name="email"
-                className="input-field"
+                className="input-field email-input"
                 placeholder="Email"
                 value={form.email}
                 onChange={handleChange}
                 required
+                ref={emailInputRef} // Gán ref cho email input
               />
               <input
                 type="password"
                 name="password"
-                className="input-field"
+                className="input-field password-input"
                 placeholder="Mật khẩu"
                 value={form.password}
                 onChange={handleChange}
                 required
+                ref={passwordInputRef}
               />
               <div class="box">
                 <div class="canvas">
-                  <button type="submit" className="btn-login submit-btn0"></button>
-                  <button type="submit" className="btn-login submit-btn1">Đăng nhập</button>
-                  <button type="submit" className="btn-login submit-btn2">Đăng nhập</button>
-                  <button type="submit" className="btn-login submit-btn3"></button>
+                  <button type="submit" className="btn-login-big submit-btn0"></button>
+                  <button type="submit" className="btn-login-big submit-btn1">Đăng nhập</button>
+                  <button type="submit" className="btn-login-big submit-btn2">Đăng nhập</button>
+                  <button type="submit" className="btn-login-big submit-btn3"></button>
+                  <button type="submit" className="btn-login-small submit-btn4"></button>
+                  <button type="submit" className="btn-login-small submit-btn5"></button>
                 </div>
               </div>
             </>
@@ -193,7 +273,6 @@ const Login = () => {
           }}
         />
       ))}
-
     </div>
   );
 };

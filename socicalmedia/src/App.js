@@ -1,5 +1,5 @@
 // src/App.js
-import {BrowserRouter as Router, Routes, Route, Navigate, useLocation} from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './components/Login';
 import Register from './components/Register';
@@ -28,29 +28,28 @@ function AppLayout() {
 
     return (
         <Routes>
-            <Route path="/" element={<Login/>}/>
-            <Route path="/register" element={<Register/>}/>
-            
+            <Route path="/" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-            <Route path="/profile/:userId" element={<UserProfile/>}/>
-            <Route path="/story" element={<Story/>}/> {/* Đường dẫn cho Story */}
+            <Route path="/profile/:userId" element={<UserProfile />} />
+            <Route path="/story" element={<Story />} /> {/* Đường dẫn cho Story */}
             <Route path="/storyviewer" element={<StoryViewer />} />
-            <Route path="/search" element={<Search/>}/>
-            <Route path="/home" element={<Home/>}/>
+            <Route path="/search" element={<Search />} />
+            <Route path="/home" element={<Home />} />
 
             <Route path="/users/:userId/followers" element={<FollowersList type="followers" />} />
-<Route path="/users/:userId/following" element={<FollowersList type="following" />} />
-<Route path="/users/:userId" element={<UserProfile />} />
+            <Route path="/users/:userId/following" element={<FollowersList type="following" />} />
+            <Route path="/users/:userId" element={<UserProfile />} />
 
-            <Route path="/add-post" element={<AddPost/>}/>
-            <Route path="/edit-post/:id" element={<EditPost/>}/>
-            <Route path="/notifications/:userId" element={<Notification/>}/>
+            <Route path="/add-post" element={<AddPost />} />
+            <Route path="/edit-post/:id" element={<EditPost />} />
+            <Route path="/notifications/:userId" element={<Notification />} />
             {/* Admin user */}
-            <Route path="/admin/users/list" element={<ListUser/>}/>
-            <Route path="/admin/users/create" element={<CreateUser/>}/>
-            <Route path="/admin/users/detail/:id" element={<DetailUser/>}/>
+            <Route path="/admin/users/list" element={<ListUser />} />
+            <Route path="/admin/users/create" element={<CreateUser />} />
+            <Route path="/admin/users/detail/:id" element={<DetailUser />} />
             {/* End admin user */}
-            <Route path="*" element={<Navigate to="/"/>}/>
+            <Route path="*" element={<Navigate to="/" />} />
         </Routes>
     );
 }
@@ -58,7 +57,7 @@ function AppLayout() {
 export default function App() {
     return (
         <Router>
-            <AppLayout/>
+            <AppLayout />
         </Router>
     );
 }
