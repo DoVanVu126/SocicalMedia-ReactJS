@@ -5,7 +5,7 @@ import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import "../style/Home.css";
 import StoryViewer from "../components/StoryViewer";
-import { initBlinkText, sparkleMouseEffect } from '../script';
+import { initBlinkText, sparkleMouseEffect } from "../script";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -43,7 +43,10 @@ export default function Home() {
   const buttonRef = useRef(null);
   const reactionListRef = useRef(null);
   const storyListRef = useRef(null);
-  const [showNavButtons, setShowNavButtons] = useState({ left: false, right: false });
+  const [showNavButtons, setShowNavButtons] = useState({
+    left: false,
+    right: false,
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -92,7 +95,9 @@ export default function Home() {
     const start = Date.now();
     setLoading(true);
     axios
-      .get("http://localhost:8000/api/posts", { params: { user_id: userIDCMT } })
+      .get("http://localhost:8000/api/posts", {
+        params: { user_id: userIDCMT },
+      })
       .then((res) => {
         const elapsed = Date.now() - start;
         const remainingTime = Math.max(3000 - elapsed, 0);
@@ -184,8 +189,10 @@ export default function Home() {
 
   const scrollStories = (direction) => {
     if (storyListRef.current) {
-      const storyItemWidth = storyListRef.current.querySelector('.story-item')?.offsetWidth || 120;
-      const scrollAmount = direction === "left" ? -storyItemWidth * 3 : storyItemWidth * 3;
+      const storyItemWidth =
+        storyListRef.current.querySelector(".story-item")?.offsetWidth || 120;
+      const scrollAmount =
+        direction === "left" ? -storyItemWidth * 3 : storyItemWidth * 3;
       storyListRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
   };
@@ -202,7 +209,11 @@ export default function Home() {
   };
 
   const handleSaveEdit = async () => {
-    if (editingIndex === null || selectedCommentPostId === null || selectedCommentId === null) {
+    if (
+      editingIndex === null ||
+      selectedCommentPostId === null ||
+      selectedCommentId === null
+    ) {
       return;
     }
     try {
@@ -221,14 +232,15 @@ export default function Home() {
         return;
       }
       const updatedComment = await response.json();
-      setComments(prevComments => {
+      setComments((prevComments) => {
         const updatedComments = { ...prevComments };
         if (updatedComments[selectedCommentPostId]) {
           const commentIndex = updatedComments[selectedCommentPostId].findIndex(
             (cmt) => cmt.id === selectedCommentId
           );
           if (commentIndex !== -1) {
-            updatedComments[selectedCommentPostId][commentIndex] = updatedComment;
+            updatedComments[selectedCommentPostId][commentIndex] =
+              updatedComment;
           }
         }
         return updatedComments;
@@ -260,13 +272,12 @@ export default function Home() {
         setError("Unable to delete comment.");
         return;
       }
-      setComments(prevComments => {
-
+      setComments((prevComments) => {
         const updatedComments = { ...prevComments };
         if (updatedComments[selectedCommentPostId]) {
-          updatedComments[selectedCommentPostId] = updatedComments[selectedCommentPostId].filter(
-            (comment) => comment.id !== commentId
-          );
+          updatedComments[selectedCommentPostId] = updatedComments[
+            selectedCommentPostId
+          ].filter((comment) => comment.id !== commentId);
         }
         return updatedComments;
       });
@@ -283,7 +294,11 @@ export default function Home() {
   const navigate = useNavigate();
   const handleEdit = (post) => {
     navigate(`/edit-post/${post.id}`, {
-      state: { content: post.content, imageUrl: post.imageurl, videoUrl: post.videourl },
+      state: {
+        content: post.content,
+        imageUrl: post.imageurl,
+        videoUrl: post.videourl,
+      },
     });
   };
 
@@ -293,7 +308,7 @@ export default function Home() {
       return;
     }
     navigate(`/edit-story/${story.id}`, {
-      state: {  
+      state: {
         id: story.id,
         content: story.content,
         imageurl: story.imageurl,
@@ -328,9 +343,14 @@ export default function Home() {
     const now = new Date();
     const diffInSeconds = Math.floor((now - date) / 1000);
     if (diffInSeconds < 60) return `${diffInSeconds} giây trước`;
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
-    return date.toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
+    if (diffInSeconds < 3600)
+      return `${Math.floor(diffInSeconds / 60)} phút trước`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+    return date.toLocaleString("vi-VN", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
   };
   const handleCommentSubmit = async (postId) => {
     if (!userIDCMT) {
@@ -366,13 +386,17 @@ export default function Home() {
     }
   };
   const fetchComments = async (postId) => {
-    const res = await fetch(`http://localhost:8000/api/posts/${postId}/comments`);
+    const res = await fetch(
+      `http://localhost:8000/api/posts/${postId}/comments`
+    );
     const data = await res.json();
     setComments((prev) => ({ ...prev, [postId]: data }));
   };
   const fetchReactionList = async (postId) => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/posts/${postId}/reactions`);
+      const res = await axios.get(
+        `http://localhost:8000/api/posts/${postId}/reactions`
+      );
       setReactionList((prev) => ({ ...prev, [postId]: res.data }));
     } catch (err) {
       console.error("Error fetching reaction list:", err);
@@ -412,7 +436,14 @@ export default function Home() {
     };
   }, [activeMenuPostId, showReactionList]);
   const renderReaction = (type) => {
-    const icons = { like: "👍", love: "❤️", haha: "😂", wow: "😲", sad: "😢", angry: "😡" };
+    const icons = {
+      like: "👍",
+      love: "❤️",
+      haha: "😂",
+      wow: "😲",
+      sad: "😢",
+      angry: "😡",
+    };
     return icons[type] || "👍";
   };
   const renderButtonLabel = (userReaction) => {
@@ -443,17 +474,24 @@ export default function Home() {
           user_reaction: null,
           reaction_summary: {
             ...updatedPost.reaction_summary,
-            [userReaction.type]: (updatedPost.reaction_summary[userReaction.type] || 1) - 1,
+            [userReaction.type]:
+              (updatedPost.reaction_summary[userReaction.type] || 1) - 1,
           },
         };
       } else {
         updatedPost = {
           ...updatedPost,
-          user_reaction: { user_id: userIDCMT, post_id: postId, type: reactionType },
+          user_reaction: {
+            user_id: userIDCMT,
+            post_id: postId,
+            type: reactionType,
+          },
           reaction_summary: {
             ...updatedPost.reaction_summary,
-            [userReaction.type]: (updatedPost.reaction_summary[userReaction.type] || 1) - 1,
-            [reactionType]: (updatedPost.reaction_summary[reactionType] || 0) + 1,
+            [userReaction.type]:
+              (updatedPost.reaction_summary[userReaction.type] || 1) - 1,
+            [reactionType]:
+              (updatedPost.reaction_summary[reactionType] || 0) + 1,
           },
         };
       }
@@ -461,10 +499,15 @@ export default function Home() {
       const newReactionType = reactionType || "like";
       updatedPost = {
         ...updatedPost,
-        user_reaction: { user_id: userIDCMT, post_id: postId, type: newReactionType },
+        user_reaction: {
+          user_id: userIDCMT,
+          post_id: postId,
+          type: newReactionType,
+        },
         reaction_summary: {
           ...updatedPost.reaction_summary,
-          [newReactionType]: (updatedPost.reaction_summary[newReactionType] || 0) + 1,
+          [newReactionType]:
+            (updatedPost.reaction_summary[newReactionType] || 0) + 1,
         },
       };
     }
@@ -472,7 +515,10 @@ export default function Home() {
     setPosts(newPosts);
     setShowReactions(null);
     try {
-      if (userReaction && (reactionType === null || userReaction.type === reactionType)) {
+      if (
+        userReaction &&
+        (reactionType === null || userReaction.type === reactionType)
+      ) {
         await axios.delete(`http://localhost:8000/api/posts/${postId}/react`, {
           data: { user_id: userIDCMT },
         });
@@ -508,7 +554,10 @@ export default function Home() {
     const userStories = {};
     stories.forEach((story) => {
       const userId = story.user?.id;
-      if (!userStories[userId] || new Date(story.created_at) > new Date(userStories[userId].created_at)) {
+      if (
+        !userStories[userId] ||
+        new Date(story.created_at) > new Date(userStories[userId].created_at)
+      ) {
         userStories[userId] = story;
       }
     });
@@ -518,11 +567,15 @@ export default function Home() {
   const filteredStories = getLatestStories();
 
   const getUserStories = (userId) => {
-    return stories.filter((story) => story.user?.id === userId).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    return stories
+      .filter((story) => story.user?.id === userId)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   };
 
   const handleNextUser = () => {
-    const currentIndex = filteredStories.findIndex((story) => story.user.id === selectedUserId);
+    const currentIndex = filteredStories.findIndex(
+      (story) => story.user.id === selectedUserId
+    );
     if (currentIndex < filteredStories.length - 1) {
       setSelectedUserId(filteredStories[currentIndex + 1].user.id);
     } else {
@@ -532,7 +585,9 @@ export default function Home() {
   };
 
   const handlePrevUser = () => {
-    const currentIndex = filteredStories.findIndex((story) => story.user.id === selectedUserId);
+    const currentIndex = filteredStories.findIndex(
+      (story) => story.user.id === selectedUserId
+    );
     if (currentIndex > 0) {
       setSelectedUserId(filteredStories[currentIndex - 1].user.id);
     } else {
@@ -549,19 +604,27 @@ export default function Home() {
           <h3 className="story-header blink-text">Bảng tin</h3>
           {loading && <p className="loading">⏳ Đang tải...</p>}
           {!loading && filteredStories.length === 0 && userIDCMT && (
-            <p className="no-stories">Không có tin nào từ những người bạn theo dõi.</p>
+            <p className="no-stories">
+              Không có tin nào từ những người bạn theo dõi.
+            </p>
           )}
           {!loading && !userIDCMT && (
             <p className="no-stories">Vui lòng đăng nhập để xem tin.</p>
           )}
           <div className="story-list-container">
             {showNavButtons.left && (
-              <button className="story-nav-btn story-nav-prev" onClick={() => scrollStories("left")}>
+              <button
+                className="story-nav-btn story-nav-prev"
+                onClick={() => scrollStories("left")}
+              >
                 ❮
               </button>
             )}
             {showNavButtons.right && (
-              <button className="story-nav-btn story-nav-next" onClick={() => scrollStories("right")}>
+              <button
+                className="story-nav-btn story-nav-next"
+                onClick={() => scrollStories("right")}
+              >
                 ❯
               </button>
             )}
@@ -604,8 +667,12 @@ export default function Home() {
                       className="story-avatars"
                     />
                     <div className="story-user-details">
-                      <span className="story-username">{story.user?.username || "Người dùng"}</span>
-                      <span className="story-time">{formatTime(story.created_at)}</span>
+                      <span className="story-username">
+                        {story.user?.username || "Người dùng"}
+                      </span>
+                      <span className="story-time">
+                        {formatTime(story.created_at)}
+                      </span>
                     </div>
                   </div>
                   {userIDCMT && story.user?.id === userIDCMT && (
@@ -686,11 +753,16 @@ export default function Home() {
         ) : (
           <>
             {error && <p className="error">{error}</p>}
-            {Array.isArray(posts) && posts.length > 0 && (
+            {Array.isArray(posts) &&
+              posts.length > 0 &&
               posts.map((post) => (
                 <div className="post" key={post.id}>
                   <div className="post-header">
-                    <div className="user-info">
+                    <div
+                      className="user-info"
+                      onClick={() => navigate(`/users/${post.user?.id}`)}
+                      style={{ cursor: "pointer" }}
+                    >
                       <img
                         src={
                           post.user?.profilepicture
@@ -703,7 +775,9 @@ export default function Home() {
                       <div>
                         <strong>{post.user?.username || "Người dùng"}</strong>
                         <br />
-                        <small>{new Date(post.created_at).toLocaleString()}</small>
+                        <small>
+                          {new Date(post.created_at).toLocaleString()}
+                        </small>
                       </div>
                     </div>
                     <div className="post-options">
@@ -718,52 +792,59 @@ export default function Home() {
                       >
                         ⋯
                       </button>
-                      {activeMenuPostId === post.id && post.user?.id === user?.id && (
-                        <div className="options-menu" ref={menuRef}>
-                          <button onClick={() => handleEdit(post)}>📝 Sửa</button>
-                          <button
-                            onClick={() => {
-                              if (
-                                window.confirm(
-                                  "Bạn có chắc muốn xóa bài viết này?"
-                                )
-                              ) {
-                                setLoading(true);
-                                axios
-                                  .delete(
-                                    `http://localhost:8000/api/posts/${post.id}`,
-                                    {
-                                      data: { user_id: userIDCMT },
-                                    }
+                      {activeMenuPostId === post.id &&
+                        post.user?.id === user?.id && (
+                          <div className="options-menu" ref={menuRef}>
+                            <button onClick={() => handleEdit(post)}>
+                              📝 Sửa
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (
+                                  window.confirm(
+                                    "Bạn có chắc muốn xóa bài viết này?"
                                   )
-                                  .then(() => {
-                                    setPosts(
-                                      posts.filter((p) => p.id !== post.id)
-                                    );
-                                  })
-                                  .catch((err) => {
-                                    console.error("Lỗi khi xóa bài viết:", err);
-                                    setError("Không thể xóa bài viết");
-
-                                  })
-                                  .finally(() => setLoading(false));
-                              }
-                            }}
-                          >
-                            🗑️ Xóa
-                          </button>
-                        </div>
-                      )}
+                                ) {
+                                  setLoading(true);
+                                  axios
+                                    .delete(
+                                      `http://localhost:8000/api/posts/${post.id}`,
+                                      {
+                                        data: { user_id: userIDCMT },
+                                      }
+                                    )
+                                    .then(() => {
+                                      setPosts(
+                                        posts.filter((p) => p.id !== post.id)
+                                      );
+                                    })
+                                    .catch((err) => {
+                                      console.error(
+                                        "Lỗi khi xóa bài viết:",
+                                        err
+                                      );
+                                      setError("Không thể xóa bài viết");
+                                    })
+                                    .finally(() => setLoading(false));
+                                }
+                              }}
+                            >
+                              🗑️ Xóa
+                            </button>
+                          </div>
+                        )}
                     </div>
                   </div>
 
                   <p className="post-content">{post.content}</p>
 
                   <div key={post.id} className="post-media">
-
                     {Array.isArray(post.imageurl) && (
                       <>
-                        {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 4)).map((img, index) => (
+                        {(expandedPosts[post.id]
+                          ? post.imageurl
+                          : post.imageurl.slice(0, 4)
+                        ).map((img, index) => (
                           <div key={index} className="image-wrapper">
                             {/* Overlay đen nhạt khi hover */}
                             <div className="media-overlay-black"></div>
@@ -777,18 +858,23 @@ export default function Home() {
                             />
                             {/* Overlay +x ảnh */}
 
-                            {index === 3 && post.imageurl.length > 4 && !expandedPosts[post.id] && (
-                              <div
-                                className="image-overlay"
-                                onClick={() => toggleExpandImages(post.id)}
-                              >
-                                +{post.imageurl.length - 4} ảnh
-                              </div>
-                            )}
+                            {index === 3 &&
+                              post.imageurl.length > 4 &&
+                              !expandedPosts[post.id] && (
+                                <div
+                                  className="image-overlay"
+                                  onClick={() => toggleExpandImages(post.id)}
+                                >
+                                  +{post.imageurl.length - 4} ảnh
+                                </div>
+                              )}
                           </div>
                         ))}
                         {expandedPosts[post.id] && (
-                          <button onClick={() => toggleExpandImages(post.id)} className="collapse-btn">
+                          <button
+                            onClick={() => toggleExpandImages(post.id)}
+                            className="collapse-btn"
+                          >
                             Thu gọn
                           </button>
                         )}
@@ -832,8 +918,8 @@ export default function Home() {
                           <div className="reaction-list" ref={reactionListRef}>
                             <div className="reaction-list-header">
                               <span>
-
-                                {getTotalReactions(post.reaction_summary)} lượt thả cảm xúc
+                                {getTotalReactions(post.reaction_summary)} lượt
+                                thả cảm xúc
                               </span>
                               <button
                                 className="close-button"
@@ -843,12 +929,14 @@ export default function Home() {
                               </button>
                             </div>
                             <div className="reaction-counts">
-                              {Object.keys(post.reaction_summary).map((type) =>
-                                post.reaction_summary[type] > 0 && (
-                                  <span key={type} className="reaction-count">
-                                    {renderReaction(type)} {post.reaction_summary[type]}
-                                  </span>
-                                )
+                              {Object.keys(post.reaction_summary).map(
+                                (type) =>
+                                  post.reaction_summary[type] > 0 && (
+                                    <span key={type} className="reaction-count">
+                                      {renderReaction(type)}{" "}
+                                      {post.reaction_summary[type]}
+                                    </span>
+                                  )
                               )}
                             </div>
                             <div className="reaction-users">
@@ -865,7 +953,8 @@ export default function Home() {
                                       className="reaction-user-avatar"
                                     />
                                     <span>
-                                      {reaction.user?.username || reaction.username}
+                                      {reaction.user?.username ||
+                                        reaction.username}
                                     </span>
                                     : {renderReaction(reaction.type)}
                                   </div>
@@ -885,25 +974,35 @@ export default function Home() {
                       onMouseLeave={() => setShowReactions(null)}
                     >
                       <button
-
-                        className={`like-button ${post.user_reaction ? "reacted" : ""}`}
-
+                        className={`like-button ${
+                          post.user_reaction ? "reacted" : ""
+                        }`}
                         onClick={() => handleReactionClick(post.id)}
                       >
                         {renderButtonLabel(post.user_reaction)}
                       </button>
                       {showReactions === post.id && (
                         <div className="reaction-icons">
-                          {["like", "love", "haha", "wow", "sad", "angry"].map((type) => (
-                            <button
-                              key={type}
-                              className={`reaction-icon ${post.user_reaction?.type === type ? "selected" : ""}`}
-                              onClick={() => handleReactionClick(post.id, type)}
-                              title={type.charAt(0).toUpperCase() + type.slice(1)}
-                            >
-                              {renderReaction(type)}
-                            </button>
-                          ))}
+                          {["like", "love", "haha", "wow", "sad", "angry"].map(
+                            (type) => (
+                              <button
+                                key={type}
+                                className={`reaction-icon ${
+                                  post.user_reaction?.type === type
+                                    ? "selected"
+                                    : ""
+                                }`}
+                                onClick={() =>
+                                  handleReactionClick(post.id, type)
+                                }
+                                title={
+                                  type.charAt(0).toUpperCase() + type.slice(1)
+                                }
+                              >
+                                {renderReaction(type)}
+                              </button>
+                            )
+                          )}
                         </div>
                       )}
                     </div>
@@ -920,7 +1019,11 @@ export default function Home() {
                     >
                       💬 Bình luận
                     </button>
-                    <button onClick={() => alert("Chức năng chia sẻ chưa được triển khai")}>
+                    <button
+                      onClick={() =>
+                        alert("Chức năng chia sẻ chưa được triển khai")
+                      }
+                    >
                       🔗 Chia sẻ
                     </button>
                   </div>
@@ -946,28 +1049,62 @@ export default function Home() {
                       <div className="comments">
                         {comments[post.id]?.map((comment, index) => (
                           <div key={index} className="comment">
-                            <strong>{comment.user?.username || "Người dùng"}:</strong>{" "}
+                            <strong>
+                              {comment.user?.username || "Người dùng"}:
+                            </strong>{" "}
                             {editingIndex === index ? (
                               <>
                                 <input
                                   type="text"
                                   value={editContent}
-                                  onChange={(e) => setEditContent(e.target.value)}
+                                  onChange={(e) =>
+                                    setEditContent(e.target.value)
+                                  }
                                 />
                                 <button onClick={handleSaveEdit}>Lưu</button>
-                                <button onClick={() => setEditingIndex(null)}>Hủy</button>
+                                <button onClick={() => setEditingIndex(null)}>
+                                  Hủy
+                                </button>
                               </>
                             ) : (
                               comment.content
                             )}
-
                             <div className="comment-actions">
                               {comment.user?.id === userIDCMT && (
                                 <>
-                                  <button className="btn-more" onClick={() => toggleMenu(index)}>...</button>
-                                  <div className="comment-menu" style={{ display: openMenuIndex === index ? "block" : "none" }}>
-                                    <button className="edit-btn" onClick={() => handleEditClick(index, comment.content, comment.id)}>Sửa</button>
-                                    <button className="delete-btn" onClick={() => handleDelete(comment.id)}>Xóa</button>
+                                  <button
+                                    className="btn-more"
+                                    onClick={() => toggleMenu(index)}
+                                  >
+                                    ...
+                                  </button>
+                                  <div
+                                    className="comment-menu"
+                                    style={{
+                                      display:
+                                        openMenuIndex === index
+                                          ? "block"
+                                          : "none",
+                                    }}
+                                  >
+                                    <button
+                                      className="edit-btn"
+                                      onClick={() =>
+                                        handleEditClick(
+                                          index,
+                                          comment.content,
+                                          comment.id
+                                        )
+                                      }
+                                    >
+                                      Sửa
+                                    </button>
+                                    <button
+                                      className="delete-btn"
+                                      onClick={() => handleDelete(comment.id)}
+                                    >
+                                      Xóa
+                                    </button>
                                   </div>
                                 </>
                               )}
@@ -978,8 +1115,7 @@ export default function Home() {
                     </>
                   )}
                 </div>
-              ))
-            )}
+              ))}
           </>
         )}
       </div>
