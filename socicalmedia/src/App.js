@@ -23,7 +23,6 @@ import DetailUser from "./pages/users/DetailUser";
 import CreateUser from "./pages/users/CreateUser";
 import FriendRequest from "./pages/friends/Index";
 import EditStory from "./pages/EditStory";
-
 function AppLayout() {
   const location = useLocation();
   // Những path không muốn hiển thị sidebar
@@ -39,6 +38,7 @@ function AppLayout() {
             <Route path="/profile/:userId" element={<UserProfile/>}/>
             <Route path="/story" element={<Story/>}/> {/* Đường dẫn cho Story */}
             <Route path="/storyviewer" element={<StoryViewer/>}/>
+            <Route path="/edit-story/:id" element={<EditStory />} />
             <Route path="/search" element={<Search/>}/>
             <Route path="/home" element={<Home/>}/>
 

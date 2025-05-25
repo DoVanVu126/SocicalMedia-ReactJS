@@ -200,7 +200,6 @@ export default function Home() {
     setOpenMenuIndex(null);
     setSelectedCommentId(commentId);
   };
-  const [selectedCommentId, setSelectedCommentId] = useState(null);
 
   const handleSaveEdit = async () => {
     if (editingIndex === null || selectedCommentPostId === null || selectedCommentId === null) {
@@ -281,7 +280,6 @@ export default function Home() {
   const toggleExpandImages = (postId) => {
     setExpandedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
-  const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
   const handleEdit = (post) => {
     navigate(`/edit-post/${post.id}`, {
@@ -341,7 +339,7 @@ export default function Home() {
     }
     const content = commentInputs[postId];
     if (!content) return;
-    try 
+    try {
       const res = await fetch(
         `http://localhost:8000/api/posts/${postId}/comments`,
         {

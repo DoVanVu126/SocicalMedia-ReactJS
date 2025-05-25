@@ -68,6 +68,13 @@
   align-items: center;
   transform: translateZ(25px);
   border-radius: 0;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+.btn-login-big.loading {
+  animation: rotate 1s linear infinite;
+  background-color: #999; /* Màu khi loading (tùy chọn) */
+  border-color: #999; /* Màu border khi loading (tùy chọn) */
+  color: #fff; /* Màu chữ khi loading (tùy chọn) */
 }
 .submit-btn0 {
   background-color: #ffffff;
@@ -125,7 +132,14 @@
   background-color: white;
   color: #6a11cb;
 }
-
+@keyframes rotate {
+  from {
+    transform: rotate(0deg) translateZ(25px);
+  }
+  to {
+    transform: rotate(360deg) translateZ(25px);
+  }
+}
 .signup-link {
   margin-top: 12px;
 }
@@ -367,8 +381,6 @@
     opacity: 0;
   }
 }
-
-
 
 .tiny-firework {
   position: absolute;
