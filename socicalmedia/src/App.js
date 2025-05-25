@@ -20,8 +20,19 @@ import EditPost from "./pages/EditPost";
 import ListUser from "./pages/users/ListUser";
 import DetailUser from "./pages/users/DetailUser";
 import CreateUser from "./pages/users/CreateUser";
+import axios from 'axios';
 import EditStory from "./pages/EditStory";
 
+
+
+// Set base URL and credentials
+axios.defaults.baseURL = 'http://localhost:8000/api';
+axios.defaults.withCredentials = true;
+
+// Fetch CSRF cookie on app load
+axios.get('/sanctum/csrf-cookie')
+  .then(() => console.log('CSRF cookie fetched'))
+  .catch(error => console.error('Error fetching CSRF cookie:', error));
 function AppLayout() {
   const location = useLocation();
   // Những path không muốn hiển thị sidebar

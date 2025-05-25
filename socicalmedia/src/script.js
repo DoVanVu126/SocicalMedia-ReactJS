@@ -227,3 +227,55 @@ export function initHeaderPulse() {
   });
   console.log('initHeaderPulse: Initialized');
 }
+
+
+//Ripple Effect
+export function initRippleEffect() {
+  const rippleButtons = document.querySelectorAll('.ripple-button');
+  if (!rippleButtons.length) {
+    console.warn('initRippleEffect: No elements with class .ripple-button found');
+    return;
+  }
+
+  rippleButtons.forEach(button => {
+    button.style.position = 'relative';
+    button.style.overflow = 'hidden';
+
+    button.addEventListener('click', function (e) {
+      const circle = document.createElement("span");
+      circle.classList.add("ripple");
+      
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      circle.style.width = circle.style.height = `${size}px`;
+      circle.style.left = `${e.clientX - rect.left - size / 2}px`;
+      circle.style.top = `${e.clientY - rect.top - size / 2}px`;
+
+      this.appendChild(circle);
+      setTimeout(() => circle.remove(), 600);
+    });
+  });
+
+  console.log('initRippleEffect: Initialized');
+}
+
+
+// Magnetic Button Hover
+export function initMagnetEffect() {
+  const magnets = document.querySelectorAll('.magnet');
+
+  magnets.forEach(magnet => {
+    magnet.addEventListener('mousemove', (e) => {
+      const rect = magnet.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      magnet.style.transform = `translate(${x * 0.6}px, ${y * 0.6}px)`;
+    });
+
+    magnet.addEventListener('mouseleave', () => {
+      magnet.style.transform = 'translate(0, 0)';
+    });
+  });
+
+  console.log('initMagnetEffect: Initialized');
+}

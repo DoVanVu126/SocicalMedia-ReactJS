@@ -47,6 +47,16 @@ html {
   box-shadow: none;
 }
 
+/* Magnet Effect Styles */
+.magnet-wrapper {
+  display: inline-block;
+  perspective: 1000px;
+}
+
+.magnet {
+  transition: transform 0.3s ease;
+}
+
 /* Main Content */
 .main-content {
   display: flex;
@@ -409,7 +419,7 @@ html {
   font-weight: 600;
   color: #1e293b;
   margin-bottom: 16px;
-  display: none; /* Hide h2 since text-p is used */
+  display: none;
 }
 
 .posts-lists {
@@ -764,7 +774,7 @@ html {
   border-top-color: #ff0000;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin: 100px auto; /* căn giữa */
+  margin: 100px auto;
 }
 
 @keyframes spin {
@@ -772,6 +782,7 @@ html {
     transform: rotate(360deg);
   }
 }
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-content {

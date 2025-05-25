@@ -1,0 +1,128 @@
+.home-notification-toggle {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.home-notification-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.home-unread-count {
+  background: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.home-notifications-container {
+  position: fixed;
+  top: 110px;
+  right: 20px;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.home-notifications-list {
+  list-style: none;
+  padding: 0;
+}
+
+.home-notification-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+.home-notification-item.home-unread {
+  background: #f0f8ff;
+}
+
+.home-notification-item.home-read {
+  background: #fff;
+}
+
+.home-mark-all-read-btn,
+.home-mark-as-read-btn,
+.home-delete-btn,
+.home-toggle-settings-btn {
+  margin-left: 10px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.home-mark-all-read-btn {
+  background: #28a745;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.home-toggle-settings-btn {
+  background: #ffc107;
+  color: black;
+  margin-bottom: 10px;
+}
+
+.home-mark-as-read-btn {
+  background: #007bff;
+  color: white;
+}
+
+.home-delete-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.home-status-message {
+  color: #28a745;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+/* Ripple Effect Styles */
+.ripple-button {
+  position: relative;
+  overflow: hidden;
+  background-color: #3498db; /* Match home-notification-btn */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+  animation: ripple-effect 0.6s linear;
+  transform: scale(0);
+}
+
+@keyframes ripple-effect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
