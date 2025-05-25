@@ -4,8 +4,10 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import "../style/Home.css";
+import "../style/Notification.css";
+import "../style/HomeNotification.css";
 import StoryViewer from "../components/StoryViewer";
-import { initBlinkText, sparkleMouseEffect } from '../script';
+import { initBlinkText, sparkleMouseEffect, initRippleEffect } from "../script";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
@@ -19,6 +21,12 @@ export default function Home() {
   }, []);
 
   //BÌNH LUẬN
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);
+  const [notificationStatusMessage, setNotificationStatusMessage] = useState("");
+
   const [editingIndex, setEditingIndex] = useState(null);
   const [editContent, setEditContent] = useState("");
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
@@ -43,7 +51,12 @@ export default function Home() {
   const buttonRef = useRef(null);
   const reactionListRef = useRef(null);
   const storyListRef = useRef(null);
-  const [showNavButtons, setShowNavButtons] = useState({ left: false, right: false });
+  const [showNavButtons, setShowNavButtons] = useState({
+    left: false,
+    right: false,
+  });
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -52,8 +65,35 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
+  const fetchNotifications = async () => {
+    if (!userIDCMT) {
+      setNotificationStatusMessage("Vui lòng đăng nhập để xem thông báo.");
+      return;
+    }
+    try {
+      const response = await axios.get(`/notifications/${userIDCMT}`);
+      setNotifications(response.data);
+      setUnreadCount(response.data.filter((n) => !n.is_read).length);
+      setNotificationStatusMessage("");
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      setNotificationStatusMessage(
+        error.response?.status === 404
+          ? "Không tìm thấy thông báo."
+          : "Có lỗi xảy ra khi tải thông báo."
+      );
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [userIDCMT]);
+
   useEffect(() => {
     initBlinkText();
+    initRippleEffect(); // Initialize ripple effect
   }, []);
 
   useEffect(() => {
@@ -68,7 +108,7 @@ export default function Home() {
     setLoading(true);
     const params = userIDCMT ? { user_id: userIDCMT } : {};
     axios
-      .get("http://localhost:8000/api/stories", { params })
+      .get("/stories", { params })
       .then((res) => {
         const elapsed = Date.now() - start;
         const remainingTime = Math.max(3000 - elapsed, 0);
@@ -79,20 +119,20 @@ export default function Home() {
       })
       .catch((err) => {
         console.error("Error fetching stories:", err);
-        setError("Unable to load stories");
+        setError("Không thể tải tin.");
         setLoading(false);
       });
   }, [userIDCMT]);
 
   useEffect(() => {
     if (!userIDCMT) {
-      setError("Please log in to view posts");
+      setError("Vui lòng đăng nhập để xem bài viết.");
       return;
     }
     const start = Date.now();
     setLoading(true);
     axios
-      .get("http://localhost:8000/api/posts", { params: { user_id: userIDCMT } })
+      .get("/posts", { params: { user_id: userIDCMT } })
       .then((res) => {
         const elapsed = Date.now() - start;
         const remainingTime = Math.max(3000 - elapsed, 0);
@@ -103,7 +143,7 @@ export default function Home() {
       })
       .catch((err) => {
         console.error("Error fetching posts:", err);
-        setError("Unable to load posts");
+        setError("Không thể tải bài viết.");
         setLoading(false);
       });
   }, [userIDCMT]);
@@ -182,10 +222,91 @@ export default function Home() {
     };
   }, []);
 
+  const markAsRead = async (id) => {
+    try {
+      await axios.post(`/notifications/${id}/read`, { user_id: userIDCMT });
+      setNotifications(
+        notifications.map((notification) =>
+          notification.id === id ? { ...notification, is_read: true } : notification
+        )
+      );
+      setUnreadCount((prev) => prev - 1);
+      setNotificationStatusMessage("Thông báo đã được đánh dấu đã đọc.");
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      setNotificationStatusMessage("Có lỗi khi đánh dấu thông báo đã đọc.");
+    }
+  };
+
+  const markAllAsRead = async () => {
+    setLoading(true);
+    try {
+      await axios.post("/notifications/mark-all-read", { user_id: userIDCMT });
+      setNotifications(notifications.map((notification) => ({ ...notification, is_read: true })));
+      setUnreadCount(0);
+      setNotificationStatusMessage("Tất cả thông báo đã được đánh dấu đã đọc.");
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+      setNotificationStatusMessage("Có lỗi khi đánh dấu tất cả thông báo đã đọc.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleNotifications = async () => {
+    setLoading(true);
+    try {
+      await axios.post("/notifications/settings", {
+        user_id: userIDCMT,
+        enabled: !isNotificationsEnabled,
+      });
+      setIsNotificationsEnabled(!isNotificationsEnabled);
+      setNotificationStatusMessage(
+        isNotificationsEnabled ? "Đã tắt thông báo" : "Đã bật thông báo"
+      );
+    } catch (error) {
+      console.error("Error toggling notifications:", error);
+      setNotificationStatusMessage("Có lỗi khi thay đổi cài đặt thông báo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteNotification = async (id) => {
+    setLoading(true);
+    try {
+      await axios.delete(`/notifications/${id}`, { data: { user_id: userIDCMT } });
+      setNotifications(notifications.filter((notification) => notification.id !== id));
+      setUnreadCount((prev) => prev - 1);
+      setNotificationStatusMessage("Thông báo đã được xóa.");
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      setNotificationStatusMessage("Có lỗi khi xóa thông báo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNotificationClick = (notification) => {
+    if (notification.notifiable_id) {
+      if (
+        notification.notification_content.includes("bình luận") ||
+        notification.notification_content.includes("thả cảm xúc")
+      ) {
+        navigate(`/posts/${notification.notifiable_id}`);
+      } else if (notification.notification_content.includes("theo dõi")) {
+        navigate(`/users/${notification.notifiable_id}`);
+      }
+      markAsRead(notification.id);
+    }
+  };
+
   const scrollStories = (direction) => {
     if (storyListRef.current) {
-      const storyItemWidth = storyListRef.current.querySelector('.story-item')?.offsetWidth || 120;
-      const scrollAmount = direction === "left" ? -storyItemWidth * 3 : storyItemWidth * 3;
+      const storyItemWidth =
+        storyListRef.current.querySelector(".story-item")?.offsetWidth || 120;
+      const scrollAmount =
+        direction === "left" ? -storyItemWidth * 3 : storyItemWidth * 3;
       storyListRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
   };
@@ -202,17 +323,17 @@ export default function Home() {
   };
 
   const handleSaveEdit = async () => {
-    if (editingIndex === null || selectedCommentPostId === null || selectedCommentId === null) {
+    if (
+      editingIndex === null ||
+      selectedCommentPostId === null ||
+      selectedCommentId === null
+    ) {
       return;
     }
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${selectedCommentId}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: editContent, user_id: userIDCMT }),
-        }
+      const response = await axios.put(
+        `/posts/${selectedCommentPostId}/comments/${selectedCommentId}`,
+        { content: editContent, user_id: userIDCMT }
       );
       if (!response.ok) {
         const errorData = await response.json();
@@ -228,7 +349,7 @@ export default function Home() {
             (cmt) => cmt.id === selectedCommentId
           );
           if (commentIndex !== -1) {
-            updatedComments[selectedCommentPostId][commentIndex] = updatedComment;
+            updatedComments[selectedCommentPostId][commentIndex] = response.data;
           }
         }
         return updatedComments;
@@ -237,12 +358,13 @@ export default function Home() {
       setEditContent("");
       setSelectedCommentId(null);
     } catch (error) {
-      console.error("Error connecting while editing comment:", error);
-      setError("Error connecting while editing comment.");
+      console.error("Error editing comment:", error);
+      setError("Không thể sửa bình luận.");
     }
   };
+
   const handleDelete = async (commentId) => {
-    if (!window.confirm("Are you sure you want to delete this comment?")) {
+    if (!window.confirm("Bạn có chắc muốn xóa bình luận này?")) {
       return;
     }
     try {
@@ -261,19 +383,18 @@ export default function Home() {
         return;
       }
       setComments(prevComments => {
-
         const updatedComments = { ...prevComments };
         if (updatedComments[selectedCommentPostId]) {
-          updatedComments[selectedCommentPostId] = updatedComments[selectedCommentPostId].filter(
-            (comment) => comment.id !== commentId
-          );
+          updatedComments[selectedCommentPostId] = updatedComments[
+            selectedCommentPostId
+          ].filter((comment) => comment.id !== commentId);
         }
         return updatedComments;
       });
       setOpenMenuIndex(null);
     } catch (error) {
-      console.error("Error connecting while deleting comment:", error);
-      setError("Error connecting while deleting comment.");
+      console.error("Error deleting comment:", error);
+      setError("Không thể xóa bình luận.");
     }
   };
 
@@ -283,17 +404,21 @@ export default function Home() {
   const navigate = useNavigate();
   const handleEdit = (post) => {
     navigate(`/edit-post/${post.id}`, {
-      state: { content: post.content, imageUrl: post.imageurl, videoUrl: post.videourl },
+      state: {
+        content: post.content,
+        imageUrl: post.imageurl,
+        videoUrl: post.videourl,
+      },
     });
   };
 
   const handleEditStory = (story) => {
     if (!userIDCMT) {
-      setError("Please log in to edit a story");
+      setError("Vui lòng đăng nhập để sửa tin.");
       return;
     }
     navigate(`/edit-story/${story.id}`, {
-      state: {  
+      state: {
         id: story.id,
         content: story.content,
         imageurl: story.imageurl,
@@ -305,11 +430,11 @@ export default function Home() {
 
   const handleDeleteStory = (id) => {
     if (!userIDCMT) {
-      setError("Please log in to delete a story");
+      setError("Vui lòng đăng nhập để xóa tin.");
       return;
     }
     axios
-      .delete(`http://localhost:8000/api/stories/${id}`, {
+      .delete(`/stories/${id}`, {
         data: { user_id: userIDCMT },
       })
       .then(() => {
@@ -317,24 +442,32 @@ export default function Home() {
       })
       .catch((err) => {
         console.error("Error deleting story:", err);
-        setError("Unable to delete story");
+        setError("Không thể xóa tin.");
       });
   };
+
   const handleToggleMenu = (storyId) => {
     setShowMenu(showMenu === storyId ? null : storyId);
   };
+
   const formatTime = (createdAt) => {
     const date = new Date(createdAt);
     const now = new Date();
     const diffInSeconds = Math.floor((now - date) / 1000);
     if (diffInSeconds < 60) return `${diffInSeconds} giây trước`;
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
-    return date.toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
+    if (diffInSeconds < 3600)
+      return `${Math.floor(diffInSeconds / 60)} phút trước`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+    return date.toLocaleString("vi-VN", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
   };
+
   const handleCommentSubmit = async (postId) => {
     if (!userIDCMT) {
-      setError("Please log in to comment");
+      setError("Vui lòng đăng nhập để bình luận.");
       return;
     }
     const content = commentInputs[postId];
@@ -360,25 +493,33 @@ export default function Home() {
       }
       await fetchComments(postId);
       setCommentInputs({ ...commentInputs, [postId]: "" });
+      fetchNotifications();
     } catch (error) {
-      console.error("Error submitting comment:", error.message);
-      setError("Unable to submit comment");
+      console.error("Error submitting comment:", error);
+      setError("Không thể gửi bình luận.");
     }
   };
+
   const fetchComments = async (postId) => {
-    const res = await fetch(`http://localhost:8000/api/posts/${postId}/comments`);
-    const data = await res.json();
-    setComments((prev) => ({ ...prev, [postId]: data }));
+    try {
+      const res = await axios.get(`/posts/${postId}/comments`);
+      setComments((prev) => ({ ...prev, [postId]: res.data }));
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      setError("Không thể tải bình luận.");
+    }
   };
+
   const fetchReactionList = async (postId) => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/posts/${postId}/reactions`);
+      const res = await axios.get(`/posts/${postId}/reactions`);
       setReactionList((prev) => ({ ...prev, [postId]: res.data }));
     } catch (err) {
       console.error("Error fetching reaction list:", err);
-      setError("Unable to load reaction list");
+      setError("Không thể tải danh sách cảm xúc.");
     }
   };
+
   const handleReactionSummaryClick = (postId) => {
     if (showReactionList === postId) {
       setShowReactionList(null);
@@ -387,6 +528,7 @@ export default function Home() {
       setShowReactionList(postId);
     }
   };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -411,10 +553,19 @@ export default function Home() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [activeMenuPostId, showReactionList]);
+
   const renderReaction = (type) => {
-    const icons = { like: "👍", love: "❤️", haha: "😂", wow: "😲", sad: "😢", angry: "😡" };
+    const icons = {
+      like: "👍",
+      love: "❤️",
+      haha: "😂",
+      wow: "😲",
+      sad: "😢",
+      angry: "😡",
+    };
     return icons[type] || "👍";
   };
+
   const renderButtonLabel = (userReaction) => {
     if (!userReaction) return "👍 Like";
     const labels = {
@@ -427,17 +578,19 @@ export default function Home() {
     };
     return labels[userReaction.type] || "👍 Like";
   };
+
   const handleReactionClick = async (postId, reactionType = null) => {
     if (!userIDCMT) {
-      setError("Please log in to perform this action");
+      setError("Vui lòng đăng nhập để thực hiện hành động này.");
       return;
     }
     const post = posts.find((p) => p.id === postId);
     const userReaction = post?.user_reaction;
     let newPosts = [...posts];
     let updatedPost = { ...post };
-    if (userReaction) {
-      if (reactionType === null || userReaction.type === reactionType) {
+
+    try {
+      if (userReaction && (reactionType === null || userReaction.type === reactionType)) {
         updatedPost = {
           ...updatedPost,
           user_reaction: null,
@@ -446,57 +599,50 @@ export default function Home() {
             [userReaction.type]: (updatedPost.reaction_summary[userReaction.type] || 1) - 1,
           },
         };
-      } else {
-        updatedPost = {
-          ...updatedPost,
-          user_reaction: { user_id: userIDCMT, post_id: postId, type: reactionType },
-          reaction_summary: {
-            ...updatedPost.reaction_summary,
-            [userReaction.type]: (updatedPost.reaction_summary[userReaction.type] || 1) - 1,
-            [reactionType]: (updatedPost.reaction_summary[reactionType] || 0) + 1,
-          },
-        };
-      }
-    } else if (reactionType || reactionType === null) {
-      const newReactionType = reactionType || "like";
-      updatedPost = {
-        ...updatedPost,
-        user_reaction: { user_id: userIDCMT, post_id: postId, type: newReactionType },
-        reaction_summary: {
-          ...updatedPost.reaction_summary,
-          [newReactionType]: (updatedPost.reaction_summary[newReactionType] || 0) + 1,
-        },
-      };
-    }
-    newPosts = newPosts.map((p) => (p.id === postId ? updatedPost : p));
-    setPosts(newPosts);
-    setShowReactions(null);
-    try {
-      if (userReaction && (reactionType === null || userReaction.type === reactionType)) {
-        await axios.delete(`http://localhost:8000/api/posts/${postId}/react`, {
+        newPosts = newPosts.map((p) => (p.id === postId ? updatedPost : p));
+        setPosts(newPosts);
+        await axios.delete(`/posts/${postId}/react`, {
           data: { user_id: userIDCMT },
         });
-      } else if (reactionType || reactionType === null) {
+      } else {
         const newReactionType = reactionType || "like";
-        await axios.post(`http://localhost:8000/api/posts/${postId}/react`, {
+        updatedPost = {
+          ...updatedPost,
+          user_reaction: {
+            user_id: userIDCMT,
+            post_id: postId,
+            type: newReactionType,
+          },
+          reaction_summary: {
+            ...updatedPost.reaction_summary,
+            [userReaction?.type]: userReaction
+              ? (updatedPost.reaction_summary[userReaction.type] || 1) - 1
+              : updatedPost.reaction_summary[userReaction?.type] || 0,
+            [newReactionType]: (updatedPost.reaction_summary[newReactionType] || 0) + 1,
+          },
+        };
+        newPosts = newPosts.map((p) => (p.id === postId ? updatedPost : p));
+        setPosts(newPosts);
+        await axios.post(`/posts/${postId}/react`, {
           user_id: userIDCMT,
           type: newReactionType,
         });
       }
+      setShowReactions(null);
+      await fetchNotifications();
     } catch (err) {
       console.error("Error processing reaction:", err);
-      setError("Unable to process reaction");
-      setPosts(posts);
-    } finally {
-      setLoading(false);
+      setError("Không thể xử lý cảm xúc.");
+      setPosts([...posts]);
     }
   };
+
   const getTotalReactions = (summary) => {
     return Object.values(summary || {}).reduce((sum, count) => sum + count, 0);
   };
   const handleOpenViewer = (userId) => {
     if (!userIDCMT) {
-      setError("Please log in to view stories");
+      setError("Vui lòng đăng nhập để xem tin.");
       navigate("/login");
       return;
     }
@@ -508,7 +654,10 @@ export default function Home() {
     const userStories = {};
     stories.forEach((story) => {
       const userId = story.user?.id;
-      if (!userStories[userId] || new Date(story.created_at) > new Date(userStories[userId].created_at)) {
+      if (
+        !userStories[userId] ||
+        new Date(story.created_at) > new Date(userStories[userId].created_at)
+      ) {
         userStories[userId] = story;
       }
     });
@@ -518,11 +667,15 @@ export default function Home() {
   const filteredStories = getLatestStories();
 
   const getUserStories = (userId) => {
-    return stories.filter((story) => story.user?.id === userId).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    return stories
+      .filter((story) => story.user?.id === userId)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   };
 
   const handleNextUser = () => {
-    const currentIndex = filteredStories.findIndex((story) => story.user.id === selectedUserId);
+    const currentIndex = filteredStories.findIndex(
+      (story) => story.user.id === selectedUserId
+    );
     if (currentIndex < filteredStories.length - 1) {
       setSelectedUserId(filteredStories[currentIndex + 1].user.id);
     } else {
@@ -532,7 +685,9 @@ export default function Home() {
   };
 
   const handlePrevUser = () => {
-    const currentIndex = filteredStories.findIndex((story) => story.user.id === selectedUserId);
+    const currentIndex = filteredStories.findIndex(
+      (story) => story.user.id === selectedUserId
+    );
     if (currentIndex > 0) {
       setSelectedUserId(filteredStories[currentIndex - 1].user.id);
     } else {
@@ -545,23 +700,99 @@ export default function Home() {
       <Header />
       <Sidebar />
       <div className="main">
+        {userIDCMT && (
+          <div className="home-notification-toggle">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="home-notification-btn ripple-button"
+            >
+              🔔 Thông báo {unreadCount > 0 && <span className="home-unread-count">{unreadCount}</span>}
+            </button>
+          </div>
+        )}
+
+        {showNotifications && userIDCMT && (
+          <div className="home-notifications-container">
+            <h2>Thông báo</h2>
+            {notificationStatusMessage && (
+              <div className="home-status-message">{notificationStatusMessage}</div>
+            )}
+            <button
+              onClick={markAllAsRead}
+              className="home-mark-all-read-btn"
+              disabled={loading}
+            >
+              {loading ? "Đang xử lý..." : "Đánh dấu tất cả đã đọc"}
+            </button>
+            <button
+              onClick={toggleNotifications}
+              className="home-toggle-settings-btn"
+              disabled={loading}
+            >
+              {loading ? "Đang xử lý..." : isNotificationsEnabled ? "Tắt thông báo" : "Bật thông báo"}
+            </button>
+            <ul className="home-notifications-list">
+              {notifications.length > 0 ? (
+                notifications.map((notification) => (
+                  <li
+                    key={notification.id}
+                    className={`home-notification-item ${notification.is_read ? "home-read" : "home-unread"}`}
+                    onClick={() => handleNotificationClick(notification)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <p>{notification.notification_content}</p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        markAsRead(notification.id);
+                      }}
+                      className="home-mark-as-read-btn"
+                    >
+                      {notification.is_read ? "Đã đọc" : "Đánh dấu đã đọc"}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteNotification(notification.id);
+                      }}
+                      className="home-delete-btn"
+                    >
+                      Xóa
+                    </button>
+                  </li>
+                ))
+              ) : (
+                <p>Không có thông báo mới</p>
+              )}
+            </ul>
+          </div>
+        )}
+
         <div className="story-containers">
           <h3 className="story-header blink-text">Bảng tin</h3>
           {loading && <p className="loading">⏳ Đang tải...</p>}
           {!loading && filteredStories.length === 0 && userIDCMT && (
-            <p className="no-stories">Không có tin nào từ những người bạn theo dõi.</p>
+            <p className="no-stories">
+              Không có tin nào từ những người bạn theo dõi.
+            </p>
           )}
           {!loading && !userIDCMT && (
             <p className="no-stories">Vui lòng đăng nhập để xem tin.</p>
           )}
           <div className="story-list-container">
             {showNavButtons.left && (
-              <button className="story-nav-btn story-nav-prev" onClick={() => scrollStories("left")}>
+              <button
+                className="story-nav-btn story-nav-prev"
+                onClick={() => scrollStories("left")}
+              >
                 ❮
               </button>
             )}
             {showNavButtons.right && (
-              <button className="story-nav-btn story-nav-next" onClick={() => scrollStories("right")}>
+              <button
+                className="story-nav-btn story-nav-next"
+                onClick={() => scrollStories("right")}
+              >
                 ❯
               </button>
             )}
@@ -604,8 +835,12 @@ export default function Home() {
                       className="story-avatars"
                     />
                     <div className="story-user-details">
-                      <span className="story-username">{story.user?.username || "Người dùng"}</span>
-                      <span className="story-time">{formatTime(story.created_at)}</span>
+                      <span className="story-username">
+                        {story.user?.username || "Người dùng"}
+                      </span>
+                      <span className="story-time">
+                        {formatTime(story.created_at)}
+                      </span>
                     </div>
                   </div>
                   {userIDCMT && story.user?.id === userIDCMT && (
@@ -686,11 +921,16 @@ export default function Home() {
         ) : (
           <>
             {error && <p className="error">{error}</p>}
-            {Array.isArray(posts) && posts.length > 0 && (
+            {Array.isArray(posts) &&
+              posts.length > 0 &&
               posts.map((post) => (
                 <div className="post" key={post.id}>
                   <div className="post-header">
-                    <div className="user-info">
+                    <div
+                      className="user-info"
+                      onClick={() => navigate(`/users/${post.user?.id}`)}
+                      style={{ cursor: "pointer" }}
+                    >
                       <img
                         src={
                           post.user?.profilepicture
@@ -711,9 +951,7 @@ export default function Home() {
                         ref={buttonRef}
                         className="options-btn"
                         onClick={() =>
-                          setActiveMenuPostId(
-                            activeMenuPostId === post.id ? null : post.id
-                          )
+                          setActiveMenuPostId(activeMenuPostId === post.id ? null : post.id)
                         }
                       >
                         ⋯
@@ -723,6 +961,7 @@ export default function Home() {
                           <button onClick={() => handleEdit(post)}>📝 Sửa</button>
                           <button
                             onClick={() => {
+
                               if (
                                 window.confirm(
                                   "Bạn có chắc muốn xóa bài viết này?"
@@ -744,6 +983,7 @@ export default function Home() {
                                   .catch((err) => {
                                     console.error("Lỗi khi xóa bài viết:", err);
                                     setError("Không thể xóa bài viết");
+
 
                                   })
                                   .finally(() => setLoading(false));
@@ -787,8 +1027,12 @@ export default function Home() {
                             )}
                           </div>
                         ))}
+
                         {expandedPosts[post.id] && (
-                          <button onClick={() => toggleExpandImages(post.id)} className="collapse-btn">
+                          <button
+                            onClick={() => toggleExpandImages(post.id)}
+                            className="collapse-btn"
+                          >
                             Thu gọn
                           </button>
                         )}
@@ -816,10 +1060,11 @@ export default function Home() {
                           onClick={() => handleReactionSummaryClick(post.id)}
                           style={{ cursor: "pointer" }}
                         >
-                          {Object.keys(post.reaction_summary).map((type) =>
-                            post.reaction_summary[type] > 0 ? (
-                              <span key={type}>{renderReaction(type)}</span>
-                            ) : null
+                          {Object.keys(post.reaction_summary).map(
+                            (type) =>
+                              post.reaction_summary[type] > 0 && (
+                                <span key={type}>{renderReaction(type)}</span>
+                              )
                           )}
                         </span>
                         <span
@@ -831,10 +1076,9 @@ export default function Home() {
                         {showReactionList === post.id && (
                           <div className="reaction-list" ref={reactionListRef}>
                             <div className="reaction-list-header">
-                              <span>
 
-                                {getTotalReactions(post.reaction_summary)} lượt thả cảm xúc
-                              </span>
+                              <span>{getTotalReactions(post.reaction_summary)} lượt thả cảm xúc</span>
+
                               <button
                                 className="close-button"
                                 onClick={() => setShowReactionList(null)}
@@ -843,12 +1087,13 @@ export default function Home() {
                               </button>
                             </div>
                             <div className="reaction-counts">
-                              {Object.keys(post.reaction_summary).map((type) =>
-                                post.reaction_summary[type] > 0 && (
-                                  <span key={type} className="reaction-count">
-                                    {renderReaction(type)} {post.reaction_summary[type]}
-                                  </span>
-                                )
+                              {Object.keys(post.reaction_summary).map(
+                                (type) =>
+                                  post.reaction_summary[type] > 0 && (
+                                    <span key={type} className="reaction-count">
+                                      {renderReaction(type)} {post.reaction_summary[type]}
+                                    </span>
+                                  )
                               )}
                             </div>
                             <div className="reaction-users">
@@ -864,10 +1109,8 @@ export default function Home() {
                                       alt="Avatar"
                                       className="reaction-user-avatar"
                                     />
-                                    <span>
-                                      {reaction.user?.username || reaction.username}
-                                    </span>
-                                    : {renderReaction(reaction.type)}
+                                    <span>{reaction.user?.username || reaction.username}</span>:{" "}
+                                    {renderReaction(reaction.type)}
                                   </div>
                                 ))
                               ) : (
@@ -887,7 +1130,6 @@ export default function Home() {
                       <button
 
                         className={`like-button ${post.user_reaction ? "reacted" : ""}`}
-
                         onClick={() => handleReactionClick(post.id)}
                       >
                         {renderButtonLabel(post.user_reaction)}
@@ -897,7 +1139,9 @@ export default function Home() {
                           {["like", "love", "haha", "wow", "sad", "angry"].map((type) => (
                             <button
                               key={type}
-                              className={`reaction-icon ${post.user_reaction?.type === type ? "selected" : ""}`}
+                              className={`reaction-icon ${
+                                post.user_reaction?.type === type ? "selected" : ""
+                              }`}
                               onClick={() => handleReactionClick(post.id, type)}
                               title={type.charAt(0).toUpperCase() + type.slice(1)}
                             >
@@ -938,15 +1182,19 @@ export default function Home() {
                             })
                           }
                         />
+
                         <button onClick={() => handleCommentSubmit(post.id)}>
                           Gửi
                         </button>
+
                       </div>
 
                       <div className="comments">
                         {comments[post.id]?.map((comment, index) => (
                           <div key={index} className="comment">
+
                             <strong>{comment.user?.username || "Người dùng"}:</strong>{" "}
+
                             {editingIndex === index ? (
                               <>
                                 <input
@@ -968,6 +1216,7 @@ export default function Home() {
                                   <div className="comment-menu" style={{ display: openMenuIndex === index ? "block" : "none" }}>
                                     <button className="edit-btn" onClick={() => handleEditClick(index, comment.content, comment.id)}>Sửa</button>
                                     <button className="delete-btn" onClick={() => handleDelete(comment.id)}>Xóa</button>
+
                                   </div>
                                 </>
                               )}
@@ -978,8 +1227,7 @@ export default function Home() {
                     </>
                   )}
                 </div>
-              ))
-            )}
+              ))}
           </>
         )}
       </div>
