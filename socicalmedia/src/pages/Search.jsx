@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import '../style/Search.css';
-import { initBlinkText, animateBackground, sparkleMouseEffect, initGradientTextHover } from '../script';
-
+import { animateBackground, sparkleMouseEffect, initGradientTextHover } from '../script';
 
 export default function Search() {
   const [keyword, setKeyword] = useState('');
@@ -17,10 +16,9 @@ export default function Search() {
 
   // Khởi tạo hiệu ứng và lịch sử
   useEffect(() => {
-      initBlinkText();
-  animateBackground();
-  sparkleMouseEffect();
-  initGradientTextHover();
+    animateBackground();
+    sparkleMouseEffect();
+    initGradientTextHover();
     const storedHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
     setSearchHistory(storedHistory);
 
@@ -85,13 +83,19 @@ export default function Search() {
     localStorage.removeItem('searchHistory');
   };
 
+  const titleText = "Tìm kiếm người dùng";
+
   return (
     <div className="container">
       <Header />
       <Sidebar />
       <div className="main">
         <div className="search-container">
-          <h2 className="blink-text">Tìm kiếm người dùng</h2>
+          <h2 className="netflix-text">
+            {titleText.split("").map((char, index) => (
+              <span key={index} style={{ "--i": index }}>{char}</span>
+            ))}
+          </h2>
 
           <div className="search-input-wrapper" ref={inputRef}>
             <input
@@ -148,7 +152,7 @@ export default function Search() {
             ))}
 
             {/* Không có kết quả */}
-            {results.length === 0 && keyword.length >= 4 && (
+            {results.length === 0 && keyword.length >= 10 && (
               <div className="no-results shake">Không tìm thấy người dùng phù hợp.</div>
             )}
           </ul>

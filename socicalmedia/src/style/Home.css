@@ -27,7 +27,7 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* Header*/
+/* Header */
 .post-header {
   display: flex;
   justify-content: space-between;
@@ -296,8 +296,6 @@
   margin-bottom: 8px;
 }
 
-
-
 /* Actions: Like */
 .actions {
   display: flex;
@@ -530,7 +528,7 @@
   padding-bottom: 10px;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-  will-change: scroll-position; /* Tối ưu hóa hiệu suất cuộn */
+  will-change: scroll-position;
 }
 
 .story-list::-webkit-scrollbar {
@@ -552,6 +550,21 @@
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.story-item.deleting {
+  animation: fallToTrash 1s ease forwards;
+}
+
+@keyframes fallToTrash {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(300px) scale(0.5);
+    opacity: 0;
+  }
 }
 
 .story-item:hover {
@@ -683,7 +696,7 @@
 .story-menu-btn {
   position: absolute;
   top: 44px;
-  right: 1px; 
+  right: 1px;
   background: rgba(0, 0, 0, 0.5);
   border: none;
   color: #ffffff;
@@ -732,14 +745,14 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.4s ease-in-out, transform 0.4s ease-in-out; /* Tăng thời gian và dùng ease-in-out */
+  transition: background 0.4s ease-in-out, transform 0.4s ease-in-out;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   z-index: 10;
 }
 
 .story-nav-btn:hover {
   background: #ffffff;
-  transform: translateY(-50%) scale(1.15); /* Tăng scale để nổi bật */
+  transform: translateY(-50%) scale(1.15);
 }
 
 .story-nav-btn:disabled {
@@ -882,6 +895,11 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+.story-avatars:hover {
+  transform: scale(1.1) translateY(-10px);
+  box-shadow: 0 0 15px rgba(220, 39, 67, 0.5);
+}
+
 .story-avatarst {
   width: 40px;
   height: 40px;
@@ -889,11 +907,12 @@
   border: 2px solid #fff;
   margin-top: -30px;
   margin-left: -35px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.story-avatars:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(220, 39, 67, 0.5);
+.story-avatarst:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
 }
 
 .add-friend-btn {
@@ -914,6 +933,43 @@
 
 .text {
   color: white;
+}
+
+/* Trash container and animation */
+.trash-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2000;
+  animation: showTrash 0.5s ease forwards;
+}
+
+.trash-bin {
+  font-size: 100px;
+  color: #333;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes showTrash {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -40%) scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
 }
 
 /* Responsive design */
@@ -947,7 +1003,7 @@
 }
 
 /* Loading */
-.neon-loader-home{
+.neon-loader-home {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -997,7 +1053,6 @@
   0% {
     transform: rotate(0deg);
   }
-
   100% {
     transform: rotate(360deg);
   }

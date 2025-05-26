@@ -12,6 +12,7 @@ import Story from "./pages/Story";
 import Search from "./pages/Search";
 import FollowersList from "./pages/FollowersList";
 import UserProfile from "./pages/UserProfile";
+import DinoGame from "./pages/DinoGame"; // Import DinoGame
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
@@ -30,9 +31,7 @@ axios.defaults.baseURL = 'http://localhost:8000/api';
 axios.defaults.withCredentials = true;
 
 // Fetch CSRF cookie on app load
-axios.get('/sanctum/csrf-cookie')
-  .then(() => console.log('CSRF cookie fetched'))
-  .catch(error => console.error('Error fetching CSRF cookie:', error));
+await axios.get('http://localhost:8000/sanctum/csrf-cookie');
 
 
 function AppLayout() {
@@ -47,6 +46,9 @@ function AppLayout() {
             <Route path="/" element={<Login/>}/>
             <Route path="/register" element={<Register/>}/>
 
+        
+            
+
 
             <Route path="/profile/:userId" element={<UserProfile/>}/>
             <Route path="/story" element={<Story/>}/> {/* Đường dẫn cho Story */}
@@ -54,6 +56,7 @@ function AppLayout() {
             <Route path="/edit-story/:id" element={<EditStory />} />
             <Route path="/search" element={<Search/>}/>
             <Route path="/home" element={<Home/>}/>
+            <Route path="/game" element={<DinoGame />} />
 
             <Route path="/users/:userId/followers" element={<FollowersList type="followers"/>}/>
             <Route path="/users/:userId/following" element={<FollowersList type="following"/>}/>

@@ -11,23 +11,9 @@ import { initBlinkText, sparkleMouseEffect, initRippleEffect } from "../script";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
-
-  const [notifications, setNotifications] = useState([]);
-  const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);
   const [notificationStatusMessage, setNotificationStatusMessage] = useState("");
-
-  // Loader 3 giây chỉ khi lần đầu load trang
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  //BÌNH LUẬN
   const [editingIndex, setEditingIndex] = useState(null);
   const [editContent, setEditContent] = useState("");
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
@@ -46,6 +32,8 @@ export default function Home() {
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [activeMenuPostId, setActiveMenuPostId] = useState(null);
+  const [deletingStoryId, setDeletingStoryId] = useState(null); // State để theo dõi story đang xóa
+  const [showTrash, setShowTrash] = useState(false); // State để hiển thị thùng rác
   const user = JSON.parse(localStorage.getItem("user"));
   const userIDCMT = user?.id;
   const menuRef = useRef(null);
@@ -66,35 +54,9 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  const fetchNotifications = async () => {
-    if (!userIDCMT) {
-      setNotificationStatusMessage("Vui lòng đăng nhập để xem thông báo.");
-      return;
-    }
-    try {
-      const response = await axios.get(`/notifications/${userIDCMT}`);
-      setNotifications(response.data);
-      setUnreadCount(response.data.filter((n) => !n.is_read).length);
-      setNotificationStatusMessage("");
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-      setNotificationStatusMessage(
-        error.response?.status === 404
-          ? "Không tìm thấy thông báo."
-          : "Có lỗi xảy ra khi tải thông báo."
-      );
-    }
-  };
-
-  useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
-  }, [userIDCMT]);
-
   useEffect(() => {
     initBlinkText();
-    initRippleEffect(); // Initialize ripple effect
+    initRippleEffect();
   }, []);
 
   useEffect(() => {
@@ -223,85 +185,6 @@ export default function Home() {
     };
   }, []);
 
-  const markAsRead = async (id) => {
-    try {
-      await axios.post(`/notifications/${id}/read`, { user_id: userIDCMT });
-      setNotifications(
-        notifications.map((notification) =>
-          notification.id === id ? { ...notification, is_read: true } : notification
-        )
-      );
-      setUnreadCount((prev) => prev - 1);
-      setNotificationStatusMessage("Thông báo đã được đánh dấu đã đọc.");
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
-      setNotificationStatusMessage("Có lỗi khi đánh dấu thông báo đã đọc.");
-    }
-  };
-
-  const markAllAsRead = async () => {
-    setLoading(true);
-    try {
-      await axios.post("/notifications/mark-all-read", { user_id: userIDCMT });
-      setNotifications(notifications.map((notification) => ({ ...notification, is_read: true })));
-      setUnreadCount(0);
-      setNotificationStatusMessage("Tất cả thông báo đã được đánh dấu đã đọc.");
-    } catch (error) {
-      console.error("Error marking all as read:", error);
-      setNotificationStatusMessage("Có lỗi khi đánh dấu tất cả thông báo đã đọc.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const toggleNotifications = async () => {
-    setLoading(true);
-    try {
-      await axios.post("/notifications/settings", {
-        user_id: userIDCMT,
-        enabled: !isNotificationsEnabled,
-      });
-      setIsNotificationsEnabled(!isNotificationsEnabled);
-      setNotificationStatusMessage(
-        isNotificationsEnabled ? "Đã tắt thông báo" : "Đã bật thông báo"
-      );
-    } catch (error) {
-      console.error("Error toggling notifications:", error);
-      setNotificationStatusMessage("Có lỗi khi thay đổi cài đặt thông báo.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteNotification = async (id) => {
-    setLoading(true);
-    try {
-      await axios.delete(`/notifications/${id}`, { data: { user_id: userIDCMT } });
-      setNotifications(notifications.filter((notification) => notification.id !== id));
-      setUnreadCount((prev) => prev - 1);
-      setNotificationStatusMessage("Thông báo đã được xóa.");
-    } catch (error) {
-      console.error("Error deleting notification:", error);
-      setNotificationStatusMessage("Có lỗi khi xóa thông báo.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleNotificationClick = (notification) => {
-    if (notification.notifiable_id) {
-      if (
-        notification.notification_content.includes("bình luận") ||
-        notification.notification_content.includes("thả cảm xúc")
-      ) {
-        navigate(`/posts/${notification.notifiable_id}`);
-      } else if (notification.notification_content.includes("theo dõi")) {
-        navigate(`/users/${notification.notifiable_id}`);
-      }
-      markAsRead(notification.id);
-    }
-  };
-
   const scrollStories = (direction) => {
     if (storyListRef.current) {
       const storyItemWidth =
@@ -336,15 +219,7 @@ export default function Home() {
         `/posts/${selectedCommentPostId}/comments/${selectedCommentId}`,
         { content: editContent, user_id: userIDCMT }
       );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error editing comment:", errorData);
-        setError("Unable to edit comment.");
-        return;
-      }
-      const updatedComment = await response.json();
-      setComments(prevComments => {
+      setComments((prevComments) => {
         const updatedComments = { ...prevComments };
         if (updatedComments[selectedCommentPostId]) {
           const commentIndex = updatedComments[selectedCommentPostId].findIndex(
@@ -384,7 +259,7 @@ export default function Home() {
         setError("Unable to delete comment.");
         return;
       }
-      setComments(prevComments => {
+      setComments((prevComments) => {
         const updatedComments = { ...prevComments };
         if (updatedComments[selectedCommentPostId]) {
           updatedComments[selectedCommentPostId] = updatedComments[
@@ -435,17 +310,28 @@ export default function Home() {
       setError("Vui lòng đăng nhập để xóa tin.");
       return;
     }
-    axios
-      .delete(`/stories/${id}`, {
-        data: { user_id: userIDCMT },
-      })
-      .then(() => {
-        setStories(stories.filter((story) => story.id !== id));
-      })
-      .catch((err) => {
-        console.error("Error deleting story:", err);
-        setError("Không thể xóa tin.");
-      });
+    if (!window.confirm("Bạn có chắc muốn xóa tin này?")) {
+      return;
+    }
+    setDeletingStoryId(id);
+    setShowTrash(true);
+    setTimeout(() => {
+      axios
+        .delete(`/stories/${id}`, {
+          data: { user_id: userIDCMT },
+        })
+        .then(() => {
+          setStories(stories.filter((story) => story.id !== id));
+          setShowTrash(false);
+          setDeletingStoryId(null);
+        })
+        .catch((err) => {
+          console.error("Error deleting story:", err);
+          setError("Không thể xóa tin.");
+          setShowTrash(false);
+          setDeletingStoryId(null);
+        });
+    }, 1000);
   };
 
   const handleToggleMenu = (storyId) => {
@@ -495,7 +381,6 @@ export default function Home() {
       }
       await fetchComments(postId);
       setCommentInputs({ ...commentInputs, [postId]: "" });
-      fetchNotifications();
     } catch (error) {
       console.error("Error submitting comment:", error);
       setError("Không thể gửi bình luận.");
@@ -631,7 +516,6 @@ export default function Home() {
         });
       }
       setShowReactions(null);
-      await fetchNotifications();
     } catch (err) {
       console.error("Error processing reaction:", err);
       setError("Không thể xử lý cảm xúc.");
@@ -642,6 +526,7 @@ export default function Home() {
   const getTotalReactions = (summary) => {
     return Object.values(summary || {}).reduce((sum, count) => sum + count, 0);
   };
+
   const handleOpenViewer = (userId) => {
     if (!userIDCMT) {
       setError("Vui lòng đăng nhập để xem tin.");
@@ -697,87 +582,15 @@ export default function Home() {
       setSelectedUserId(null);
     }
   };
+
   return (
     <div className="container">
       <Header />
       <Sidebar />
       <div className="main">
-        {userIDCMT && (
-          <div className="home-notification-toggle">
-            <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="home-notification-btn ripple-button"
-            >
-              🔔 Thông báo {unreadCount > 0 && <span className="home-unread-count">{unreadCount}</span>}
-            </button>
-          </div>
-        )}
-
-        {showNotifications && userIDCMT && (
-          <div className="home-notifications-container">
-            <h2>Thông báo</h2>
-            {notificationStatusMessage && (
-              <div className="home-status-message">{notificationStatusMessage}</div>
-            )}
-            <button
-              onClick={markAllAsRead}
-              className="home-mark-all-read-btn"
-              disabled={loading}
-            >
-              {loading ? "Đang xử lý..." : "Đánh dấu tất cả đã đọc"}
-            </button>
-            <button
-              onClick={toggleNotifications}
-              className="home-toggle-settings-btn"
-              disabled={loading}
-            >
-              {loading ? "Đang xử lý..." : isNotificationsEnabled ? "Tắt thông báo" : "Bật thông báo"}
-            </button>
-            <ul className="home-notifications-list">
-              {notifications.length > 0 ? (
-                notifications.map((notification) => (
-                  <li
-                    key={notification.id}
-                    className={`home-notification-item ${notification.is_read ? "home-read" : "home-unread"}`}
-                    onClick={() => handleNotificationClick(notification)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <p>{notification.notification_content}</p>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        markAsRead(notification.id);
-                      }}
-                      className="home-mark-as-read-btn"
-                    >
-                      {notification.is_read ? "Đã đọc" : "Đánh dấu đã đọc"}
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteNotification(notification.id);
-                      }}
-                      className="home-delete-btn"
-                    >
-                      Xóa
-                    </button>
-                  </li>
-                ))
-              ) : (
-                <p>Không có thông báo mới</p>
-              )}
-            </ul>
-          </div>
-        )}
-
         <div className="story-containers">
           <h3 className="story-header blink-text">Bảng tin</h3>
           {loading && <p className="loading">⏳ Đang tải...</p>}
-          {!loading && filteredStories.length === 0 && userIDCMT && (
-            <p className="no-stories">
-              Không có tin nào từ những người bạn theo dõi.
-            </p>
-          )}
           {!loading && !userIDCMT && (
             <p className="no-stories">Vui lòng đăng nhập để xem tin.</p>
           )}
@@ -823,7 +636,7 @@ export default function Home() {
               {filteredStories.map((story) => (
                 <div
                   key={story.user.id}
-                  className="story-item"
+                  className={`story-item ${deletingStoryId === story.id ? 'deleting' : ''}`}
                   onClick={() => handleOpenViewer(story.user.id)}
                 >
                   <div className="story-user-info">
@@ -895,6 +708,11 @@ export default function Home() {
                 </div>
               ))}
             </div>
+            {showTrash && (
+              <div className="trash-container">
+                <div className="trash-bin">🗑️</div>
+              </div>
+            )}
           </div>
           {isViewerOpen && selectedUserId && (
             <StoryViewer
@@ -975,7 +793,6 @@ export default function Home() {
                                   .catch((err) => {
                                     console.error("Lỗi khi xóa bài viết:", err);
                                     setError("Không thể xóa bài viết.");
-
                                   })
                                   .finally(() => setLoading(false));
                               }
@@ -991,33 +808,29 @@ export default function Home() {
                   <p className="post-content">{post.content}</p>
 
                   <div key={post.id} className="post-media">
-
                     {Array.isArray(post.imageurl) && (
                       <>
-                        {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 4)).map((img, index) => (
-                          <div key={index} className="image-wrapper">
-                            {/* Overlay đen nhạt khi hover */}
-                            <div className="media-overlay-black"></div>
-                            <div className="media-overlay-hover"></div>
-                            {/* Ảnh */}
-
-                            <img
-                              src={`http://localhost:8000/storage/images/${img}`}
-                              alt={`Ảnh ${index + 1}`}
-                              className="media-image"
-                            />
-                            {/* Overlay +x ảnh */}
-
-                            {index === 3 && post.imageurl.length > 4 && !expandedPosts[post.id] && (
-                              <div
-                                className="image-overlay"
-                                onClick={() => toggleExpandImages(post.id)}
-                              >
-                                +{post.imageurl.length - 4} ảnh
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                        {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 4)).map(
+                          (img, index) => (
+                            <div key={index} className="image-wrapper">
+                              <div className="media-overlay-black"></div>
+                              <div className="media-overlay-hover"></div>
+                              <img
+                                src={`http://localhost:8000/storage/images/${img}`}
+                                alt={`Ảnh ${index + 1}`}
+                                className="media-image"
+                              />
+                              {index === 3 && post.imageurl.length > 4 && !expandedPosts[post.id] && (
+                                <div
+                                  className="image-overlay"
+                                  onClick={() => toggleExpandImages(post.id)}
+                                >
+                                  +{post.imageurl.length - 4} ảnh
+                                </div>
+                              )}
+                            </div>
+                          )
+                        )}
                         {expandedPosts[post.id] && (
                           <button
                             onClick={() => toggleExpandImages(post.id)}

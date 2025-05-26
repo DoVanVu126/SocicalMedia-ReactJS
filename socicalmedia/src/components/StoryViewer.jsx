@@ -13,6 +13,7 @@ const StoryViewer = ({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [direction, setDirection] = useState(null);
   const [progress, setProgress] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false); // New state for delete animation
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const animationFrameRef = useRef(null);
@@ -49,7 +50,7 @@ const StoryViewer = ({
     if (currentStory?.videourl) {
       const video = videoRef.current;
       if (video) {
-        video.currentTime = 0; 
+        video.currentTime = 0;
         video.play().catch((error) => {
           console.error("Video play error:", error);
           goToNext();
@@ -60,7 +61,7 @@ const StoryViewer = ({
         };
         video.ontimeupdate = () => {
           const videoProgress = (video.currentTime / video.duration) * 100;
-          setProgress(videoProgress); 
+          setProgress(videoProgress);
         };
         video.onerror = () => {
           console.error("Video load error:", currentStory.videourl);
@@ -132,17 +133,21 @@ const StoryViewer = ({
 
   const handleDelete = () => {
     if (onDeleteStory && currentStory) {
-      onDeleteStory(currentStory.id);
-      if (stories.length === 1) {
-        onClose();
-      } else if (currentIndex === stories.length - 1) {
-        setDirection("left");
-        setCurrentIndex(currentIndex - 1);
-        setProgress(0);
-      } else {
-        setDirection("right");
-        setProgress(0);
-      }
+      setIsDeleting(true); // Trigger shatter animation
+      setTimeout(() => {
+        onDeleteStory(currentStory.id);
+        if (stories.length === 1) {
+          onClose();
+        } else if (currentIndex === stories.length - 1) {
+          setDirection("left");
+          setCurrentIndex(currentIndex - 1);
+          setProgress(0);
+        } else {
+          setDirection("right");
+          setProgress(0);
+        }
+        setIsDeleting(false); // Reset after animation
+      }, 800); // Match animation duration (0.8s)
     }
   };
 
@@ -166,7 +171,7 @@ const StoryViewer = ({
         </div>
 
         <div
-          className={`story-content-display ${direction ? `slide-${direction}` : ""}`}
+          className={`story-content-display ${direction ? `slide-${direction}` : ""} ${isDeleting ? "shatter" : ""}`}
           onClick={handleContainerClick}
         >
           <div className="story-user-info">

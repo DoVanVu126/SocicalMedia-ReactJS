@@ -6,17 +6,22 @@
   background: #f4f7fa;
   padding: 20px;
   margin-top: 50px;
-    margin-left: 300px;
+  margin-left: 300px;
+  position: relative;
+  overflow: hidden;
 }
 
 .notifications-container {
   max-width: 600px;
   width: 100%;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   padding: 20px;
   margin-top: 20px;
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(5px);
 }
 
 .notifications-header {
@@ -42,6 +47,7 @@
   font-weight: 500;
   padding: 4px 8px;
   border-radius: 12px;
+  animation: pulse 2s infinite;
 }
 
 .header-actions {
@@ -56,7 +62,7 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s, transform 0.2s;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
 }
 
 .mark-all-btn {
@@ -67,6 +73,7 @@
 .mark-all-btn:hover {
   background: #40a9ff;
   transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .toggle-btn {
@@ -77,6 +84,7 @@
 .toggle-btn:hover {
   background: #73d13d;
   transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .action-btn:disabled {
@@ -91,6 +99,7 @@
   border-radius: 8px;
   margin-bottom: 20px;
   text-align: center;
+  animation: fadeIn 0.5s ease-in;
 }
 
 .loading-spinner {
@@ -98,6 +107,7 @@
   color: #666;
   font-size: 16px;
   margin: 20px 0;
+  animation: spin 1s linear infinite;
 }
 
 .notifications-list {
@@ -113,11 +123,15 @@
   padding: 12px 16px;
   border-bottom: 1px solid #f0f0f0;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+  animation: fadeIn 0.5s ease-out forwards;
+  animation-delay: calc(var(--index) * 0.1s);
 }
 
 .notification-item:hover {
   background: #fafafa;
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .notification-item.unread {
@@ -132,6 +146,15 @@
 
 .notification-icon {
   font-size: 24px;
+  transition: transform 0.3s;
+}
+
+.notification-item.unread .notification-icon {
+  animation: shake 0.5s ease-in-out infinite;
+}
+
+.notification-item:hover .notification-icon {
+  transform: scale(1.2);
 }
 
 .notification-text p {
@@ -158,6 +181,7 @@
 .mark-read-btn:hover {
   background: #d9d9d9;
   transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .delete-btn {
@@ -168,6 +192,7 @@
 .delete-btn:hover {
   background: #ff7875;
   transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .no-notifications {
@@ -175,6 +200,7 @@
   color: #666;
   font-size: 16px;
   margin: 20px 0;
+  animation: fadeIn 0.5s ease-in;
 }
 
 /* Fancy Text Styles */
@@ -200,14 +226,20 @@
   animation: appear 0.5s forwards;
   animation-delay: calc(var(--i) * 0.05s);
   transition: transform 0.3s ease, color 0.3s ease;
-  text-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.7);
 }
 
 .fancy-text:hover span {
-  animation: wave 0.7s ease-in-out infinite alternate;
-  color: #8efcff;
+  animation: spread 0.5s ease-in-out forwards, wave 0.7s ease-in-out infinite alternate;
+  color: #ffffff;
+  transform: translateX(calc(var(--i) * 5px - 10px));
 }
 
+.fancy-text:not(:hover) span {
+  transform: translateX(0);
+}
+
+/* Keyframe Animations */
 @keyframes gradientShift {
   0% {
     background-position: 0% 50%;
@@ -239,6 +271,56 @@
   }
   to {
     transform: translateY(-10px) scale(1.1);
+  }
+}
+
+@keyframes spread {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(var(--i) * 5px - 10px));
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-2px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 
