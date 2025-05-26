@@ -32,7 +32,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 15px;
+  margin-top: 5px;
 }
 
 .user-info {
@@ -61,7 +61,7 @@
 
 .post-content {
   font-size: 1rem;
-  margin-top: -10px;
+  margin-top: -40px;
   margin-left: 5px;
   color: #333;
 }
@@ -226,7 +226,7 @@
 
 .comment {
   background-color: #fff;
-  padding: 8px 12px;
+  padding-left: 10px;
   margin-bottom: 12px;
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -295,6 +295,8 @@
 .comment-menu button:first-child {
   margin-bottom: 8px;
 }
+
+
 
 /* Actions: Like */
 .actions {
@@ -432,7 +434,7 @@
 
 .options-menu {
   position: absolute;
-  right: -80px;
+  right: 80px;
   top: 2rem;
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -942,7 +944,6 @@
     font-size: 11px;
     padding: 2px 6px;
   }
-
 }
 
 /* Loading */

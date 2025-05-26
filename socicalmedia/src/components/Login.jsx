@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import '../style/Login.css';
 
 const Login = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [form, setForm] = useState({ email: '', password: '' });
   const [otpForm, setOtpForm] = useState({ otp_code: '' });
@@ -136,6 +137,8 @@ const Login = () => {
   // BƯỚC 1: Gửi email + password
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true); // Bắt đầu loading
+
     try {
       const res = await axios.post('http://localhost:8000/api/login', form);
 
@@ -150,6 +153,8 @@ const Login = () => {
     } catch (err) {
       console.error('Login error:', err.response?.data || err.message);
       setMessage(err.response?.data?.message || 'Đăng nhập thất bại');
+    } finally {
+      setIsSubmitting(false); // Kết thúc loading
     }
   };
 
@@ -206,12 +211,12 @@ const Login = () => {
               />
               <div class="box">
                 <div class="canvas">
-                  <button type="submit" className="btn-login-big submit-btn0"></button>
-                  <button type="submit" className="btn-login-big submit-btn1">Đăng nhập</button>
-                  <button type="submit" className="btn-login-big submit-btn2">Đăng nhập</button>
-                  <button type="submit" className="btn-login-big submit-btn3"></button>
-                  <button type="submit" className="btn-login-small submit-btn4"></button>
-                  <button type="submit" className="btn-login-small submit-btn5"></button>
+                  <button type="submit" className={`btn-login-big submit-btn0 ${isSubmitting ? 'loading' : ''}`}></button>
+                  <button type="submit" className={`btn-login-big submit-btn1 ${isSubmitting ? 'loading' : ''}`}>Đăng nhập</button>
+                  <button type="submit" className={`btn-login-big submit-btn2 ${isSubmitting ? 'loading' : ''}`}>Đăng nhập</button>
+                  <button type="submit" className={`btn-login-big submit-btn3 ${isSubmitting ? 'loading' : ''}`}></button>
+                  <button type="submit" className={`btn-login-small submit-btn4 ${isSubmitting ? 'loading' : ''}`}></button>
+                  <button type="submit" className={`btn-login-small submit-btn5 ${isSubmitting ? 'loading' : ''}`}></button>
                 </div>
               </div>
             </>

@@ -11,11 +11,23 @@ import { initBlinkText, sparkleMouseEffect, initRippleEffect } from "../script";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
+
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);
   const [notificationStatusMessage, setNotificationStatusMessage] = useState("");
+
+  // Loader 3 giây chỉ khi lần đầu load trang
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  //BÌNH LUẬN
   const [editingIndex, setEditingIndex] = useState(null);
   const [editContent, setEditContent] = useState("");
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
@@ -324,7 +336,15 @@ export default function Home() {
         `/posts/${selectedCommentPostId}/comments/${selectedCommentId}`,
         { content: editContent, user_id: userIDCMT }
       );
-      setComments((prevComments) => {
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error editing comment:", errorData);
+        setError("Unable to edit comment.");
+        return;
+      }
+      const updatedComment = await response.json();
+      setComments(prevComments => {
         const updatedComments = { ...prevComments };
         if (updatedComments[selectedCommentPostId]) {
           const commentIndex = updatedComments[selectedCommentPostId].findIndex(
@@ -350,10 +370,21 @@ export default function Home() {
       return;
     }
     try {
-      await axios.delete(`/posts/${selectedCommentPostId}/comments/${commentId}`, {
-        data: { user_id: userIDCMT },
-      });
-      setComments((prevComments) => {
+      const response = await fetch(
+        `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${commentId}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: userIDCMT }),
+        }
+      );
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error deleting comment:", errorData);
+        setError("Unable to delete comment.");
+        return;
+      }
+      setComments(prevComments => {
         const updatedComments = { ...prevComments };
         if (updatedComments[selectedCommentPostId]) {
           updatedComments[selectedCommentPostId] = updatedComments[
@@ -444,10 +475,24 @@ export default function Home() {
     const content = commentInputs[postId];
     if (!content) return;
     try {
-      await axios.post(`/posts/${postId}/comments`, {
-        user_id: userIDCMT,
-        content,
-      });
+      const res = await fetch(
+        `http://localhost:8000/api/posts/${postId}/comments`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: userIDCMT,
+            content,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Server error: ${res.status} - ${errorText}`);
+      }
       await fetchComments(postId);
       setCommentInputs({ ...commentInputs, [postId]: "" });
       fetchNotifications();
@@ -597,7 +642,6 @@ export default function Home() {
   const getTotalReactions = (summary) => {
     return Object.values(summary || {}).reduce((sum, count) => sum + count, 0);
   };
-
   const handleOpenViewer = (userId) => {
     if (!userIDCMT) {
       setError("Vui lòng đăng nhập để xem tin.");
@@ -653,7 +697,6 @@ export default function Home() {
       setSelectedUserId(null);
     }
   };
-
   return (
     <div className="container">
       <Header />
@@ -932,6 +975,7 @@ export default function Home() {
                                   .catch((err) => {
                                     console.error("Lỗi khi xóa bài viết:", err);
                                     setError("Không thể xóa bài viết.");
+
                                   })
                                   .finally(() => setLoading(false));
                               }
@@ -947,29 +991,33 @@ export default function Home() {
                   <p className="post-content">{post.content}</p>
 
                   <div key={post.id} className="post-media">
+
                     {Array.isArray(post.imageurl) && (
                       <>
-                        {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 4)).map(
-                          (img, index) => (
-                            <div key={index} className="image-wrapper">
-                              <div className="media-overlay-black"></div>
-                              <div className="media-overlay-hover"></div>
-                              <img
-                                src={`http://localhost:8000/storage/images/${img}`}
-                                alt={`Ảnh ${index + 1}`}
-                                className="media-image"
-                              />
-                              {index === 3 && post.imageurl.length > 4 && !expandedPosts[post.id] && (
-                                <div
-                                  className="image-overlay"
-                                  onClick={() => toggleExpandImages(post.id)}
-                                >
-                                  +{post.imageurl.length - 4} ảnh
-                                </div>
-                              )}
-                            </div>
-                          )
-                        )}
+                        {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 4)).map((img, index) => (
+                          <div key={index} className="image-wrapper">
+                            {/* Overlay đen nhạt khi hover */}
+                            <div className="media-overlay-black"></div>
+                            <div className="media-overlay-hover"></div>
+                            {/* Ảnh */}
+
+                            <img
+                              src={`http://localhost:8000/storage/images/${img}`}
+                              alt={`Ảnh ${index + 1}`}
+                              className="media-image"
+                            />
+                            {/* Overlay +x ảnh */}
+
+                            {index === 3 && post.imageurl.length > 4 && !expandedPosts[post.id] && (
+                              <div
+                                className="image-overlay"
+                                onClick={() => toggleExpandImages(post.id)}
+                              >
+                                +{post.imageurl.length - 4} ảnh
+                              </div>
+                            )}
+                          </div>
+                        ))}
                         {expandedPosts[post.id] && (
                           <button
                             onClick={() => toggleExpandImages(post.id)}
@@ -1018,7 +1066,9 @@ export default function Home() {
                         {showReactionList === post.id && (
                           <div className="reaction-list" ref={reactionListRef}>
                             <div className="reaction-list-header">
-                              <span>{getTotalReactions(post.reaction_summary)} lượt thả cảm xúc</span>
+                              <span>
+                                {getTotalReactions(post.reaction_summary)} lượt thả cảm xúc
+                              </span>
                               <button
                                 className="close-button"
                                 onClick={() => setShowReactionList(null)}
@@ -1121,7 +1171,9 @@ export default function Home() {
                             })
                           }
                         />
-                        <button onClick={() => handleCommentSubmit(post.id)}>Gửi</button>
+                        <button onClick={() => handleCommentSubmit(post.id)}>
+                          Gửi
+                        </button>
                       </div>
 
                       <div className="comments">

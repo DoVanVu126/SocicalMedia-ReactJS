@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 import {BASE_URL_SERVER} from "../config/server";
-import { initBlinkText } from '../script';
+import {initBlinkText} from '../script';
 import "../style/Home.css";
 
 const handleLogout = () => {
@@ -10,9 +10,6 @@ const handleLogout = () => {
     alert('Đăng xuất thành công!')
     window.location.href = `/`;
 }
-
-
-
 
 function Header() {
     const [user, setUser] = useState(null);
