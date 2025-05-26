@@ -20,6 +20,7 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
+
   //BÌNH LUẬN
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -401,7 +402,6 @@ export default function Home() {
   const toggleExpandImages = (postId) => {
     setExpandedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
-  const navigate = useNavigate();
   const handleEdit = (post) => {
     navigate(`/edit-post/${post.id}`, {
       state: {
@@ -924,7 +924,12 @@ export default function Home() {
             {Array.isArray(posts) &&
               posts.length > 0 &&
               posts.map((post) => (
-                <div className="post" key={post.id}>
+                <div className="post" id={`post-${post.id}`} key={post.id}>
+                  <div className="slice slice1"></div>
+                  <div className="slice slice2"></div>
+                  <div className="slice slice3"></div>
+                  <div className="slice slice4"></div>
+                  <div className="slice slice5"></div>
                   <div className="post-header">
                     <div
                       className="user-info"
@@ -956,44 +961,57 @@ export default function Home() {
                       >
                         ⋯
                       </button>
+
                       {activeMenuPostId === post.id && post.user?.id === user?.id && (
                         <div className="options-menu" ref={menuRef}>
-                          <button onClick={() => handleEdit(post)}>📝 Sửa</button>
+                          <button onClick={() => handleEdit(post)}>Sửa</button>
+                          <div className="slice slice1"></div>
+                          <div className="slice slice2"></div>
+                          <div className="slice slice3"></div>
+                          <div className="slice slice4"></div>
+                          <div className="slice slice5"></div>
+
                           <button
                             onClick={() => {
+                              if (!window.confirm("Bạn có chắc muốn xóa bài viết này không?")) {
+                                return;
+                              }
+                              const postElement = document.getElementById(`post-${post.id}`);
 
-                              if (
-                                window.confirm(
-                                  "Bạn có chắc muốn xóa bài viết này?"
-                                )
-                              ) {
-                                setLoading(true);
-                                axios
-                                  .delete(
-                                    `http://localhost:8000/api/posts/${post.id}`,
-                                    {
-                                      data: { user_id: userIDCMT },
-                                    }
-                                  )
-                                  .then(() => {
-                                    setPosts(
-                                      posts.filter((p) => p.id !== post.id)
-                                    );
-                                  })
-                                  .catch((err) => {
-                                    console.error("Lỗi khi xóa bài viết:", err);
-                                    setError("Không thể xóa bài viết");
+                              if (postElement) {
+                                // Thêm class kích hoạt animation chém
+                                postElement.classList.add("sliced");
 
-
-                                  })
-                                  .finally(() => setLoading(false));
+                                // Sau khi animation kết thúc, gọi API xóa
+                                postElement.addEventListener(
+                                  "animationend",
+                                  () => {
+                                    setLoading(true);
+                                    axios
+                                      .delete(`http://localhost:8000/api/posts/${post.id}`, {
+                                        data: { user_id: userIDCMT },
+                                      })
+                                      .then(() => {
+                                        setPosts((prevPosts) =>
+                                          prevPosts.filter((p) => p.id !== post.id)
+                                        );
+                                      })
+                                      .catch((err) => {
+                                        console.error("Lỗi khi xóa bài viết:", err);
+                                        setError("Không thể xóa bài viết");
+                                      })
+                                      .finally(() => setLoading(false));
+                                  },
+                                  { once: true }
+                                );
                               }
                             }}
                           >
-                            🗑️ Xóa
+                            Xóa
                           </button>
                         </div>
                       )}
+
                     </div>
                   </div>
 
@@ -1139,9 +1157,8 @@ export default function Home() {
                           {["like", "love", "haha", "wow", "sad", "angry"].map((type) => (
                             <button
                               key={type}
-                              className={`reaction-icon ${
-                                post.user_reaction?.type === type ? "selected" : ""
-                              }`}
+                              className={`reaction-icon ${post.user_reaction?.type === type ? "selected" : ""
+                                }`}
                               onClick={() => handleReactionClick(post.id, type)}
                               title={type.charAt(0).toUpperCase() + type.slice(1)}
                             >

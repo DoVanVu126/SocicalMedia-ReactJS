@@ -1,22 +1,29 @@
 .add-post-container {
-  margin-left: 100px; /* Bạn có thể giữ lại hoặc bỏ dòng này tùy thuộc vào layout tổng thể */
+  margin: 100px auto 0 350px;
   padding: 20px;
   max-width: 800px;
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
-  min-height: 80vh;
-  transform: translate(300px, 80px); /* Thêm dòng này */
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  align-items: center;
 }
 
-/* Các style khác giữ nguyên */
-.user-info {
+.add-post-main-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.add-post-user-info {
   display: flex;
   align-items: center;
-  margin-bottom: 25px;
 }
 
-.user-avatar {
+.add-post-user-avatar {
   width: 55px;
   height: 55px;
   border-radius: 50%;
@@ -25,40 +32,40 @@
   border: 2px solid #007bff;
 }
 
-.user-name {
+.add-post-user-name {
   font-size: 1.25rem;
   font-weight: 600;
   color: #333;
 }
 
-form {
+.add-post-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 15px;
 }
 
-textarea {
+.add-post-textarea {
   padding: 12px;
   font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 8px;
   resize: vertical;
   outline: none;
-  min-height: 120px;
+  min-height: 100px;
   transition: border 0.2s;
 }
 
-input[type="file"] {
+.add-post-file-input {
   display: none;
 }
 
-.file-inputs {
+.add-post-file-inputs {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.file-label {
+.add-post-file-label {
   padding: 12px;
   font-size: 1rem;
   color: #007bff;
@@ -66,15 +73,16 @@ input[type="file"] {
   border: 1px solid #ccc;
   border-radius: 8px;
   cursor: pointer;
+  text-align: center;
   transition: background-color 0.2s, color 0.2s;
 }
 
-.file-label:hover {
+.add-post-file-label:hover {
   background-color: #007bff;
   color: #fff;
 }
 
-button {
+.add-post-submit-button {
   padding: 12px;
   font-size: 1rem;
   background-color: #007bff;
@@ -85,25 +93,93 @@ button {
   transition: background-color 0.3s;
 }
 
-button:hover {
+.add-post-submit-button:hover {
   background-color: #0056b3;
 }
 
-@media screen and (max-width: 768px) {
-  .add-post-container {
-    margin-left: 0;
-    padding: 20px;
-    transform: translate(0, 200px); /* Điều chỉnh cho màn hình nhỏ hơn nếu cần */
-  }
-}
-
-
-.visibility-selector {
+.add-post-visibility-selector {
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
-.visibility-selector label {
+.add-post-visibility-selector label {
   margin-right: 8px;
   font-weight: bold;
+}
+
+.add-post-visibility-selector select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 0.95rem;
+}
+
+.add-post-preview-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.add-post-preview-section h2 {
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+  color: #333;
+  text-align: center;
+}
+
+/* --- Thay đổi cho hiển thị ngang --- */
+.add-post-image-preview-list {
+  display: flex;
+  flex-direction: row; /* Sắp xếp các ảnh theo hàng ngang */
+  flex-wrap: nowrap; /* NGĂN KHÔNG CHO ẢNH XUỐNG DÒNG */
+  gap: 10px; /* Khoảng cách giữa các ảnh */
+  overflow-x: auto; /* THÊM THANH CUỘN NGANG */
+  padding-bottom: 10px; /* Thêm padding để thanh cuộn không che mất ảnh */
+}
+
+.add-post-image-preview-item {
+  flex-shrink: 0; /* NGĂN ẢNH CO LẠI */
+  width: 150px; /* ĐẶT CHIỀU RỘNG CỐ ĐỊNH CHO MỖI ẢNH */
+  height: auto; /* Chiều cao tự động theo tỷ lệ khung hình */
+  max-height: 200px; /* Giới hạn chiều cao tối đa của mỗi ảnh */
+  object-fit: cover; /* Lấp đầy khung ảnh, có thể bị cắt */
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+/* --- Kết thúc thay đổi cho hiển thị ngang --- */
+
+
+.add-post-video-preview-wrapper {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.add-post-video-preview {
+  display: block;
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+}
+
+@media screen and (max-width: 768px) {
+  .add-post-container {
+    margin: 20px auto;
+    padding: 15px;
+    max-width: 95%;
+  }
+
+  .add-post-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  /* Trên màn hình nhỏ, ảnh sẽ tự động xếp dọc do width: 100% */
+  .add-post-image-preview-item {
+    width: 100%;
+  }
 }

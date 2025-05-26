@@ -3,9 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
-import StoryViewer from "../components/StoryViewer";
+import StoryViewer from "../components/StoryViewer"; // Import StoryViewer
 import "../style/UserProfile.css";
-import { initMagnetEffect } from "../script"; // Import initMagnetEffect
 
 export default function UserProfile() {
   const { userId } = useParams();
@@ -30,19 +29,14 @@ export default function UserProfile() {
   const [reactionList, setReactionList] = useState({});
   const [showReactionList, setShowReactionList] = useState(null);
   const [activeMenuPostId, setActiveMenuPostId] = useState(null);
-  const [stories, setStories] = useState([]);
-  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [stories, setStories] = useState([]); // State for stories
+  const [isViewerOpen, setIsViewerOpen] = useState(false); // State for StoryViewer
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
   const reactionListRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Initialize magnet effect
-  useEffect(() => {
-    initMagnetEffect();
-  }, []);
-
-  // Get current user ID from localStorage
+  // Lấy ID người dùng hiện tại từ localStorage
   useEffect(() => {
     const savedUserId = localStorage.getItem('user_id');
     if (savedUserId) {
@@ -54,7 +48,7 @@ export default function UserProfile() {
     }
   }, []);
 
-  // Fetch user data
+  // Lấy thông tin người dùng
   const fetchUserData = async () => {
     if (!userId) return;
     setLoading(true);
@@ -73,7 +67,7 @@ export default function UserProfile() {
     }
   };
 
-  // Fetch user posts
+  // Lấy bài viết của người dùng
   const fetchUserPosts = async () => {
     if (!userId) return;
     try {
@@ -90,13 +84,13 @@ export default function UserProfile() {
     }
   };
 
-  // Call both functions when userId changes
+  // Gọi cả hai hàm khi userId thay đổi
   useEffect(() => {
     fetchUserData();
     fetchUserPosts();
   }, [userId]);
 
-  // Check follow status
+  // Kiểm tra trạng thái follow
   useEffect(() => {
     if (!user || !currentUserId || user.id === currentUserId) return;
 
@@ -110,13 +104,14 @@ export default function UserProfile() {
     .catch(() => setIsFollowing(false));
   }, [user, currentUserId]);
 
-  // Fetch user stories
+  // Lấy danh sách stories của user
   const fetchUserStories = async () => {
     if (!userId || !currentUserId) return;
     try {
       const res = await axios.get("http://localhost:8000/api/stories", {
-        params: { user_id: currentUserId },
+        params: { user_id: currentUserId }, // Pass currentUserId to check follow status
       });
+      // Filter stories for the specific user
       const userStories = res.data.filter(story => story.user_id === parseInt(userId, 10));
       setStories(userStories);
     } catch (err) {
@@ -125,7 +120,7 @@ export default function UserProfile() {
     }
   };
 
-  // Follow or unfollow
+  // Theo dõi hoặc hủy theo dõi
   const toggleFollow = () => {
     if (processing || !currentUserId) return;
     setProcessing(true);
@@ -148,7 +143,7 @@ export default function UserProfile() {
     .finally(() => setProcessing(false));
   };
 
-  // Edit bio
+  // Chỉnh sửa tiểu sử
   const handleBioEdit = () => setIsEditingBio(true);
 
   const handleBioSave = () => {
@@ -159,38 +154,40 @@ export default function UserProfile() {
         setUser(prev => ({ ...prev, bio }));
         setIsEditingBio(false);
       })
-    .catch(() => {
-      alert('Lỗi khi lưu tiểu sử');
-    })
-    .finally(() => setProcessing(false));
+      .catch(() => {
+        alert('Lỗi khi lưu tiểu sử');
+      })
+      .finally(() => setProcessing(false));
   };
 
   const handleBioChange = (e) => setBio(e.target.value);
 
-  // Handle avatar click and view stories
-  const handleAvatarClick = () => {
-    if (user?.has_active_stories && (currentUserId === user.id || isFollowing)) {
-      fetchUserStories();
-    } else if (currentUserId === user.id) {
-      if (fileInputRef.current) {
-        fileInputRef.current.click();
-      }
-    } else if (user?.has_active_stories && !isFollowing) {
-      alert("Hãy theo dõi người dùng này để xem tin của họ!");
+  // Xử lý tải ảnh avatar và xem stories
+ const handleAvatarClick = () => {
+  if (user?.has_active_stories && (currentUserId === user.id || isFollowing)) {
+    fetchUserStories(); // Chỉ gọi fetchUserStories
+  } else if (currentUserId === user.id) {
+    // Cho phép tải ảnh đại diện
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
-  };
+  } else if (user?.has_active_stories && !isFollowing) {
+    alert("Hãy theo dõi người dùng này để xem tin của họ!");
+  }
+};
 
-  // Open StoryViewer when stories are updated
-  useEffect(() => {
-    if (stories.length > 0) {
-      setIsViewerOpen(true);
-    }
-  }, [stories]);
+// Thêm useEffect để mở StoryViewer khi stories được cập nhật
+useEffect(() => {
+  if (stories.length > 0) {
+    setIsViewerOpen(true);
+  }
+}, [stories]);
 
   const handleAvatarUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
+    // Validate file type and size
     const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
     if (!validTypes.includes(file.type)) {
       setError('Vui lòng chọn file ảnh (JPEG, PNG, JPG)');
@@ -215,12 +212,12 @@ export default function UserProfile() {
     } finally {
       setProcessing(false);
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = ''; // Reset file input
       }
     }
   };
 
-  // Handle comment submission
+  // Xử lý bình luận
   const handleCommentSubmit = async (postId) => {
     const content = commentInputs[postId];
     if (!content) return;
@@ -246,7 +243,7 @@ export default function UserProfile() {
     setComments((prev) => ({ ...prev, [postId]: data }));
   };
 
-  // Handle reactions
+  // Xử lý cảm xúc
   const fetchReactionList = async (postId) => {
     try {
       const res = await axios.get(`http://localhost:8000/api/posts/${postId}/reactions`);
@@ -355,7 +352,7 @@ export default function UserProfile() {
     });
   };
 
-  // Handle click outside to close menu
+  // Xử lý click ngoài để đóng menu
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -380,14 +377,16 @@ export default function UserProfile() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [activeMenuPostId, showReactionList]);
 
-  if (loading)
+   if (loading)
     return (
       <>
-        <div className="youtube-loader"></div>
-        <div className="spinner"></div>
+       <div className="youtube-loader"></div>
+<div className="spinner"></div>
       </>
     );
   if (error) return <p className="error-text">{error}</p>;
+
+  
 
   return (
     <div className="app-container">
@@ -411,16 +410,14 @@ export default function UserProfile() {
                 />
                 {currentUserId === user.id && (
                   <>
-                    <div className="magnet-wrapper">
-                      <button
-                        className="avatar-upload-btn magnet"
-                        onClick={() => fileInputRef.current.click()}
-                        disabled={processing}
-                        title="Thay đổi ảnh đại diện"
-                      >
-                        +
-                      </button>
-                    </div>
+                    <button
+                      className="avatar-upload-btn"
+                      onClick={() => fileInputRef.current.click()}
+                      disabled={processing}
+                      title="Thay đổi ảnh đại diện"
+                    >
+                      +
+                    </button>
                     <input
                       type="file"
                       ref={fileInputRef}
@@ -744,8 +741,8 @@ export default function UserProfile() {
                 setStories([]);
               }}
               initialIndex={0}
-              onNextUser={() => setIsViewerOpen(false)}
-              onPrevUser={() => setIsViewerOpen(false)}
+              onNextUser={() => setIsViewerOpen(false)} // No next user in profile context
+              onPrevUser={() => setIsViewerOpen(false)} // No previous user in profile context
               onDeleteStory={(id) => {
                 setStories(stories.filter(story => story.id !== id));
                 if (stories.length === 1) {

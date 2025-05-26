@@ -1,90 +1,417 @@
+/* src/components/Login.css */
 .register {
-    display: flex;
-    width: 100%;
-    height: 100vh;
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  /* <- rất quan trọng */
+  overflow: hidden;
 }
 
 .register-form-container {
-    flex: 1;
-    background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
-    width: 50%;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  flex: 1;
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+  width: 50%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .register-title {
-    font-size: 24px;
-    color: #6a11cb;
-    font-weight: bold;
-    margin-bottom: 20px;
+  font-size: 24px;
+  color: #6a11cb;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 
 .input-field {
-    width: 100%;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    font-size: 16px;
-    transition: border-color 0.3s ease;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
 }
 
-.input-field:focus {
-    border-color: #6a11cb;
-    outline: none;
+
+.box {
+  perspective: 800px;
+  transform-style: preserve-3d;
+  transform: rotateY(30deg) ;
+}
+.canvas {
+  position: relative;
+  margin-bottom: 100px;
+  margin-left: 100px;
+  transition: 1s;
+  transform-style: preserve-3d;
+  transform: rotateX(-20deg);
+}
+.canvas:hover {
+  transform: rotateX(-110deg) translateZ(30px);
+  margin-left: 120px;
+}
+.btn-register-big {
+  position: absolute;
+  width: 200px;
+  height: 50px;
+  background-color: #6a11cb;
+  color: white;
+  border: 1px solid rgb(0, 0, 0);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translateZ(25px);
+  border-radius: 0;
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+.btn-register-big.loading {
+  animation: rotate 1s linear infinite;
+  background-color: #999; /* Màu khi loading (tùy chọn) */
+  border-color: #999; /* Màu border khi loading (tùy chọn) */
+  color: #fff; /* Màu chữ khi loading (tùy chọn) */
+}
+.submit-btn0 {
+  background-color: #ffffff;
+  color: white;
+  border: 1px solid rgb(0, 0, 0);
+  transform: rotateX(90deg) translateZ(-25px);
+}
+.submit-btn1 {
+  background-color: #6a11cb;
+  color: white;
+  border: 1px solid white;
+  transform: translateZ(25px);
+}
+.submit-btn2 {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+  transform: rotateX(90deg) translateZ(25px);
+}
+.submit-btn3 {
+  background-color: #6a11cb;
+  color: black;
+  border: 1px solid black;
+  transform: translateZ(-25px) ;
+}
+.btn-register-small {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background-color: #6a11cb;
+  color: white;
+  border: 1px solid rgb(0, 0, 0);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translateZ(25px);
+  border-radius: 0;
+}
+.submit-btn4 {
+  background-color: #ffffff;
+  color: black;
+  border: 1px solid black;
+  transform: translateX(-25px) rotateY(90deg);
+}
+.submit-btn5 {
+  background-color: #ff0000;
+  color: black;
+  border: 1px solid black;
+  transform: translateX(175px) rotateY(90deg);
+}
+.submit-btn1:hover {
+  background-color: #6a11cb;
+}
+.submit-btn2:hover {
+  background-color: white;
+  color: #6a11cb;
+}
+@keyframes rotate {
+  from {
+    transform: rotate(0deg) translateZ(25px);
+  }
+  to {
+    transform: rotate(360deg) translateZ(25px);
+  }
+}
+.signup-link {
+  margin-top: 12px;
 }
 
-.submit-btn {
-    display: block;
-    margin: 0 auto;
-    width: 40%;
-    background-color: #6a11cb;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+.signup-text {
+  font-size: 14px;
+  color: #666;
 }
 
-.submit-btn:hover {
-    background-color: #2575fc;
+.signup-link-text {
+  font-size: 14px;
+  font-weight: bold;
+  color: #6a11cb;
+  text-decoration: none;
 }
 
-.login-link {
-    margin-top: 12px;
-}
-
-.login-text {
-    font-size: 14px;
-    color: #666;
-}
-
-.login-link-text {
-    font-size: 14px;
-    font-weight: bold;
-    color: #6a11cb;
-    text-decoration: none;
-}
-
-.login-link-text:hover {
-    text-decoration: underline;
+.signup-link-text:hover {
+  text-decoration: underline;
 }
 
 .register-image-container {
-    flex: 1;
-    background-color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  flex: 1;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .register-image {
-    width: 80%;
-    max-width: 1000px;
-    height: auto;
-    border-radius: 10px;
+  width: 80%;
+  max-width: 600px;
+  height: auto;
+  border-radius: 10px;
+  animation: subtleScale 3s ease-in-out infinite alternate;
+  /* Áp dụng animation */
+  transform-origin: center center;
+  /* Đảm bảo phóng to/thu nhỏ từ tâm */
+}
+
+@keyframes subtleScale {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.image-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  /* hoặc chiều cao phù hợp với vùng ảnh */
+}
+
+.circle-loader {
+  width: 40px;
+  height: 40px;
+  border: 5px solid #ccc;
+  border-top: 5px solid #00f;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+.text-loading {
+  font-size: 14px;
+  color: #777;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pow-container {
+  display: inline-block;
+  margin-bottom: 100px;
+  border-radius: 5px;
+  font-size: 2rem;
+}
+
+.pow-letter {
+  font-size: 2em;
+  font-weight: bold;
+  color: #6a11cb;
+  /* Màu chữ gốc */
+  margin-right: 5px;
+  text-shadow: 1px 1px white, 2px 2px orange, 3px 3px red;
+  /* Hiệu ứng bóng đổ nhiều lớp */
+}
+
+.register-image-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.firework {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  animation: explode 1s ease-out forwards;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes explode {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(var(--x), var(--y)) scale(2);
+    opacity: 0;
+  }
+}
+
+.curved-line {
+  position: absolute;
+  background-color: #6a11cb;
+  border-radius: 15px;
+  transform-origin: left center;
+  z-index: 10;
+}
+
+.curved-line-1 {
+  top: 100px;
+  left: 50px;
+  width: 10px;
+  height: 10px;
+  animation: followCurve1 3s ease-in-out infinite;
+}
+
+.curved-line-2 {
+  top: 100px;
+  left: 50px;
+  width: 5px;
+  height: 5px;
+  animation: followCurve2 3s ease-in-out infinite;
+}
+
+.curved-line-3 {
+  top: 100px;
+  left: 50px;
+  width: 10px;
+  height: 10px;
+  animation: followCurve3 3s ease-in-out infinite;
+}
+
+@keyframes followCurve1 {
+  0% {
+    transform: rotate(0deg) translateX(50px) rotate(270deg);
+    width: 0px;
+    height: 0px;
+    opacity: 1;
+  }
+
+  50% {
+    transform: rotate(-80deg) translateX(60px) rotate(270deg);
+    width: 30px;
+    height: 30px;
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: rotate(-70deg) translateX(70px) rotate(270deg);
+    width: 30px;
+    height: 30px;
+    opacity: 0.8;
+  }
+}
+
+@keyframes followCurve2 {
+  0% {
+    transform: rotate(0deg) translateX(50px) rotate(270deg);
+    width: 0px;
+    height: 0px;
+    opacity: 1;
+  }
+
+  70% {
+    transform: rotate(60deg) translateX(80px) rotate(270deg);
+    width: 20px;
+    height: 20px;
+    opacity: 0.8;
+  }
+
+  90% {
+    transform: rotate(60deg) translateX(90px) rotate(270deg);
+    width: 20px;
+    height: 20px;
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: rotate(61deg) translateX(90px) rotate(270deg);
+    width: 20px;
+    height: 20px;
+    opacity: 0;
+  }
+}
+
+@keyframes followCurve3 {
+  0% {
+    transform: rotate(0deg) translateX(50px) rotate(270deg);
+    width: 0px;
+    height: 0px;
+    opacity: 1;
+  }
+
+  90% {
+    transform: rotate(50deg) translateX(80px) rotate(270deg);
+    width: 10px;
+    height: 10px;
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: rotate(51deg) translateX(80px) rotate(270deg);
+    width: 10px;
+    height: 10px;
+    opacity: 0;
+  }
+}
+
+.tiny-firework {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: yellow; /* Màu mặc định */
+  opacity: 1;
+  animation: twinkle 1s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes twinkle {
+  0% {
+    transform: translate(-2px, -2px) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(5px, -20px) scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Các biến thể màu sắc (tùy chọn) */
+.tiny-firework-red {
+  background-color: red;
+}
+
+.tiny-firework-blue {
+  background-color: blue;
+}
+
+.tiny-firework-green {
+  background-color: green;
 }

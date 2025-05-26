@@ -39,12 +39,12 @@
 }
 
 
-.box {
+.box-login {
   perspective: 800px;
   transform-style: preserve-3d;
   transform: rotateY(30deg) ;
 }
-.canvas {
+.canvas-login {
   position: relative;
   margin-bottom: 100px;
   margin-left: 100px;
@@ -52,7 +52,7 @@
   transform-style: preserve-3d;
   transform: rotateX(-20deg);
 }
-.canvas:hover {
+.canvas-login:hover {
   transform: rotateX(-110deg) translateZ(30px);
   margin-left: 120px;
 }
@@ -70,34 +70,25 @@
   border-radius: 0;
   transition: transform 0.3s ease, background-color 0.3s ease;
 }
-.btn-login-big.loading {
-  animation: rotate 1s linear infinite;
-  background-color: #999; /* Màu khi loading (tùy chọn) */
-  border-color: #999; /* Màu border khi loading (tùy chọn) */
-  color: #fff; /* Màu chữ khi loading (tùy chọn) */
+.canvas-login.loading {
+  animation: rotate-login 1s linear infinite;
 }
-.submit-btn0 {
-  background-color: #ffffff;
-  color: white;
-  border: 1px solid rgb(0, 0, 0);
+.submit-btn0-login {
+  background-color: #6a11cb;
   transform: rotateX(90deg) translateZ(-25px);
 }
-.submit-btn1 {
+.submit-btn1-login {
   background-color: #6a11cb;
-  color: white;
-  border: 1px solid white;
+  color: rgb(255, 255, 255);
   transform: translateZ(25px);
 }
-.submit-btn2 {
-  background-color: white;
-  color: black;
-  border: 1px solid black;
+.submit-btn2-login {
+  background-color: #6a11cb;
+  color: rgb(255, 255, 255);
   transform: rotateX(90deg) translateZ(25px);
 }
-.submit-btn3 {
+.submit-btn3-login {
   background-color: #6a11cb;
-  color: black;
-  border: 1px solid black;
   transform: translateZ(-25px) ;
 }
 .btn-login-small {
@@ -105,41 +96,43 @@
   width: 50px;
   height: 50px;
   background-color: #6a11cb;
-  color: white;
-  border: 1px solid rgb(0, 0, 0);
+  border: 1px solid rgb(255, 255, 255);
   display: flex;
   justify-content: center;
   align-items: center;
   transform: translateZ(25px);
   border-radius: 0;
 }
-.submit-btn4 {
-  background-color: #ffffff;
-  color: black;
-  border: 1px solid black;
+.submit-btn4-login {
+  background-color: #6a11cb;
   transform: translateX(-25px) rotateY(90deg);
 }
-.submit-btn5 {
-  background-color: #ff0000;
-  color: black;
-  border: 1px solid black;
+.submit-btn5-login {
+  background-color: #6a11cb;
   transform: translateX(175px) rotateY(90deg);
 }
-.submit-btn1:hover {
+.submit-btn1-login:hover {
   background-color: #6a11cb;
+  color: #000000;
 }
-.submit-btn2:hover {
-  background-color: white;
-  color: #6a11cb;
+.submit-btn2-login:hover {
+  background-color: #6a11cb;
+  color: #000000;
 }
-@keyframes rotate {
+@keyframes rotate-login {
   from {
-    transform: rotate(0deg) translateZ(25px);
+    transform:rotateX(0deg) translateZ(30px);
   }
   to {
-    transform: rotate(360deg) translateZ(25px);
+    transform:rotateX(360deg) translateZ(30px);
   }
 }
+.btn-login-big,
+.btn-login-small {
+  background: linear-gradient(to right, #6a11cb, #2575fc);
+  box-shadow: 0 4px 10px rgba(191, 129, 224, 0.8);
+}
+
 .signup-link {
   margin-top: 12px;
 }
@@ -241,7 +234,6 @@
   color: #6a11cb;
   /* Màu chữ gốc */
   margin-right: 5px;
-  /* Khoảng cách giữa các chữ */
   text-shadow: 1px 1px white, 2px 2px orange, 3px 3px red;
   /* Hiệu ứng bóng đổ nhiều lớp */
 }
