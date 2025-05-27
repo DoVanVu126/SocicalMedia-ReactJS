@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../style/Notification.css';
@@ -11,33 +11,22 @@ const NotificationComponent = () => {
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
+  const [showIntro, setShowIntro] = useState(true);
   const navigate = useNavigate();
   
   const user = JSON.parse(localStorage.getItem('user'));
   const userId = user?.id;
 
-  const fancyTextRef = useRef(null);
-  const text = "Thông báo";
-  let index = 0;
+  // Split "Notification" into individual letters for intro animation
+  const title = "Notification";
+  const letters = title.split('');
 
   useEffect(() => {
-    if (!fancyTextRef.current) return;
-
-    const typeText = () => {
-      if (index < text.length) {
-        const span = document.createElement("span");
-        span.textContent = text[index];
-        span.style.setProperty('--i', index);
-        fancyTextRef.current.appendChild(span);
-        index++;
-        setTimeout(typeText, 70);
-      }
-    };
-
-    // Clear previous content
-    fancyTextRef.current.innerHTML = '';
-    index = 0;
-    typeText();
+    // Hide intro after 1.8 seconds (0.5s bell shake + 1s letters + 0.3s buffer)
+    const introTimer = setTimeout(() => {
+      setShowIntro(false);
+    }, 1800);
+    return () => clearTimeout(introTimer);
   }, []);
 
   useEffect(() => {
@@ -137,7 +126,6 @@ const NotificationComponent = () => {
         user_id: userId,
         enabled: !isNotificationsEnabled,
       });
-      console.log('Toggle notifications response:', response.data);
       setIsNotificationsEnabled(!isNotificationsEnabled);
       setStatusMessage(isNotificationsEnabled ? 'Đã tắt thông báo' : 'Đã bật thông báo');
     } catch (error) {
@@ -145,7 +133,6 @@ const NotificationComponent = () => {
         message: error.message,
         status: error.response?.status,
         data: error.response?.data,
-        request: error.request,
       });
       setStatusMessage(
         error.response?.status === 404
@@ -195,6 +182,25 @@ const NotificationComponent = () => {
     }
   };
 
+  if (showIntro) {
+    return (
+      <div className="notification-intro-container">
+        <div className="notification-bell">🔔</div>
+        <div className="notification-intro-text">
+          {letters.map((letter, index) => (
+            <span
+              key={index}
+              className="notification-intro-letter"
+              style={{ animationDelay: `${0.5 + index * 0.1}s` }}
+            >
+              {letter === ' ' ? '\u00A0' : letter}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container">
       <Header />
@@ -203,7 +209,7 @@ const NotificationComponent = () => {
         <div className="notifications-container">
           <div className="notifications-header">
             <div className="fancy-container">
-              <div className="fancy-text" ref={fancyTextRef}></div>
+              <div className="fancy-text">Thông báo</div>
               {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}
             </div>
             <div className="header-actions">

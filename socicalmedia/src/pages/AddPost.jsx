@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import '../style/AddPost.css';
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
+
 const AddPost = () => {
   const [form, setForm] = useState({
     content: '',
@@ -13,11 +14,21 @@ const AddPost = () => {
   });
 
   const [user, setUser] = useState(null);
+  const [showIntro, setShowIntro] = useState(true);
   const navigate = useNavigate();
 
+  // Fetch user data
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) setUser(JSON.parse(storedUser));
+  }, []);
+
+  // Hide intro after 1.8 seconds (0.8s animation + 1s display)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowIntro(false);
+    }, 1800); // 800ms for animation + 1000ms display
+    return () => clearTimeout(timer);
   }, []);
 
   const handleChange = (e) => {
@@ -40,11 +51,10 @@ const AddPost = () => {
     const data = new FormData();
     data.append('user_id', user.id);
     data.append('content', form.content);
-
-    data.append('visibility', form.visibility); // Thêm quyền riêng tư
+    data.append('visibility', form.visibility);
 
     form.images.forEach((image, index) => {
-      data.append(`images[]`, image); // Laravel expects an array
+      data.append(`images[]`, image);
     });
     if (form.video) data.append('video', form.video);
 
@@ -60,15 +70,37 @@ const AddPost = () => {
     }
   };
 
-
   if (!user) return <p>Đang tải thông tin người dùng…</p>;
 
   const avatarUrl = user.profilepicture
     ? `http://localhost:8000/storage/images/${user.profilepicture}`
     : '/default-avatar.png';
 
+  // Split "Add Post" into individual letters for animation
+  const title = "Add Post";
+  const letters = title.split('');
+
+  if (showIntro) {
+    return (
+      <div className="add-post-intro-container">
+        <div className="add-post-intro-text">
+          {letters.map((letter, index) => (
+            <span
+              key={index}
+              className="add-post-intro-letter"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              {letter === ' ' ? '\u00A0' : letter}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <><Header />
+    <>
+      <Header />
       <Sidebar />
       <div className="add-post-container">
         <div className="user-info">
@@ -82,7 +114,6 @@ const AddPost = () => {
             value={form.content}
             onChange={handleChange}
           />
-          {/* Quyền riêng tư */}
           <div className="visibility-selector">
             <label htmlFor="visibility">Quyền riêng tư:</label>
             <select
@@ -95,8 +126,6 @@ const AddPost = () => {
               <option value="private">Riêng tư</option>
             </select>
           </div>
-
-          {/* Ảnh và video */}
           <div className="file-inputs">
             <label htmlFor="images" className="file-label">
               {form.images.length > 0 ? `${form.images.length} ảnh đã chọn` : 'Chọn ảnh'}
@@ -110,7 +139,6 @@ const AddPost = () => {
               onChange={handleChange}
               className="file-input"
             />
-
             <label htmlFor="video" className="file-label">
               {form.video ? form.video.name : 'Chọn video'}
             </label>

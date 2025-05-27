@@ -352,3 +352,25 @@
     padding: 10px;
   }
 }
+
+
+
+/* Thêm vào cuối file EditStory.css */
+
+/* Hiệu ứng phân tách */
+.disintegrate-particle {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes disintegrate {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--dx) * 1px), calc(var(--dy) * 1px)) scale(0.5);
+  }
+}

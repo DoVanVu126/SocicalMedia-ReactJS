@@ -1,15 +1,91 @@
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body {
+  background: #f9fafb;
+  min-height: 100vh;
+  color: #1e293b;
+}
+
+/* Add Post Intro Animation */
+.add-post-intro-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #10b981, #34d399); /* Different gradient from UserProfile */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: addPostFadeOut 0.3s ease 1.5s forwards; /* Start fade-out after 1.5s */
+}
+
+.add-post-intro-text {
+  display: flex;
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.add-post-intro-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: scale(0.5);
+  animation: addPostFadeInScale 0.8s ease forwards; /* 0.8s animation */
+}
+
+@keyframes addPostFadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes addPostFadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Ensure main content is hidden during intro */
 .add-post-container {
-  margin-left: 100px; /* Bạn có thể giữ lại hoặc bỏ dòng này tùy thuộc vào layout tổng thể */
+  opacity: 0;
+  animation: addPostFadeIn 0.3s ease 1.8s forwards; /* Start fade-in after 1.8s */
+  margin-left: 100px;
   padding: 20px;
   max-width: 800px;
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
   min-height: 80vh;
-  transform: translate(300px, 80px); /* Thêm dòng này */
+  transform: translate(300px, 80px);
 }
 
-/* Các style khác giữ nguyên */
+@keyframes addPostFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* User Info */
 .user-info {
   display: flex;
   align-items: center;
@@ -31,6 +107,7 @@
   color: #333;
 }
 
+/* Form Styles */
 form {
   display: flex;
   flex-direction: column;
@@ -46,6 +123,10 @@ textarea {
   outline: none;
   min-height: 120px;
   transition: border 0.2s;
+}
+
+textarea:focus {
+  border-color: #007bff;
 }
 
 input[type="file"] {
@@ -89,15 +170,7 @@ button:hover {
   background-color: #0056b3;
 }
 
-@media screen and (max-width: 768px) {
-  .add-post-container {
-    margin-left: 0;
-    padding: 20px;
-    transform: translate(0, 200px); /* Điều chỉnh cho màn hình nhỏ hơn nếu cần */
-  }
-}
-
-
+/* Visibility Selector */
 .visibility-selector {
   margin-top: 10px;
   margin-bottom: 10px;
@@ -106,4 +179,31 @@ button:hover {
 .visibility-selector label {
   margin-right: 8px;
   font-weight: bold;
+}
+
+.visibility-selector select {
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 768px) {
+  .add-post-container {
+    margin-left: 0;
+    padding: 20px;
+    transform: translate(0, 200px);
+  }
+
+  .add-post-intro-text {
+    font-size: 24px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .add-post-intro-text {
+    font-size: 18px;
+  }
 }

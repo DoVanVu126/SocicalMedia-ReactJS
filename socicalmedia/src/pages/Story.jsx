@@ -9,11 +9,33 @@ import {
   sparkleMouseEffect,
   initTypewriterPlaceholder,
   initGradientTextHover,
-  initRainbowSmokeEffect,
   initButtonRipple,
   initHeaderPulse,
   initStoryParallax,
+  initRainbowSmokeEffect,
 } from '../script';
+
+// StoryIntro component for the animated intro
+const StoryIntro = ({ onComplete }) => {
+  const title = "Add Story";
+  const letters = title.split('');
+
+  return (
+    <div className="story-intro-container">
+      <div className="story-intro-text">
+        {letters.map((letter, index) => (
+          <span
+            key={index}
+            className="story-intro-letter"
+            style={{ animationDelay: `${index * 0.1}s` }}
+          >
+            {letter === ' ' ? '\u00A0' : letter}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const Story = () => {
   const [stories, setStories] = useState([]);
@@ -27,13 +49,49 @@ const Story = () => {
   });
   const [showMenu, setShowMenu] = useState(null);
   const [showNavButtons, setShowNavButtons] = useState({ left: false, right: false });
-  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission animation
-  const [showMergeEffect, setShowMergeEffect] = useState(false); // Track merge animation
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showMergeEffect, setShowMergeEffect] = useState(false);
+  const [animateImage, setAnimateImage] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
   const storyListRef = useRef(null);
 
   const user = JSON.parse(localStorage.getItem("user"));
   const userIDCMT = user?.id;
   const navigate = useNavigate();
+
+  // Hide intro after 1.8 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowIntro(false);
+    }, 1800); // 800ms for animation + 1000ms display
+    return () => clearTimeout(timer);
+  }, []);
+
+  const triggerSparkleEffect = () => {
+    const createSparkle = () => {
+      const sparkle = document.createElement('div');
+      sparkle.className = 'sparkle-star';
+      sparkle.style.left = `${Math.random() * 100}vw`;
+      sparkle.style.top = `${Math.random() * 100}vh`;
+      const colors = ['#ffffff', '#ffeb3b', '#ff6b6b', '#4dd0e1', '#b388ff'];
+      sparkle.style.background = colors[Math.floor(Math.random() * colors.length)];
+      document.body.appendChild(sparkle);
+      setTimeout(() => sparkle.remove(), 1000);
+    };
+
+    const sparkleCount = 20;
+    for (let i = 0; i < sparkleCount; i++) {
+      setTimeout(createSparkle, i * 50);
+    }
+  };
+
+  useEffect(() => {
+    triggerSparkleEffect();
+
+    return () => {
+      document.querySelectorAll('.sparkle-star').forEach((sparkle) => sparkle.remove());
+    };
+  }, []);
 
   useEffect(() => {
     if (!userIDCMT) {
@@ -155,10 +213,16 @@ const Story = () => {
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
-    setFormData({
-      ...formData,
-      [name]: files[0],
-    });
+    if (files[0]) {
+      setFormData({
+        ...formData,
+        [name]: files[0],
+      });
+      if (name === "image") {
+        setAnimateImage(true);
+        setTimeout(() => setAnimateImage(false), 1000);
+      }
+    }
   };
 
   const handleAddStory = async (e) => {
@@ -167,7 +231,7 @@ const Story = () => {
       setError("Vui lòng đăng nhập để thêm story");
       return;
     }
-    setIsSubmitting(true); // Trigger gathering animation
+    setIsSubmitting(true);
     setTimeout(async () => {
       const formDataObj = new FormData();
       formDataObj.append("user_id", userIDCMT);
@@ -178,7 +242,8 @@ const Story = () => {
 
       try {
         const res = await axios.post("http://localhost:8000/api/stories", formDataObj);
-        setShowMergeEffect(true); // Trigger merge animation
+        setShowMergeEffect(true);
+        triggerSparkleEffect();
         setTimeout(() => {
           const updatedStories = [res.data.story, ...stories];
           setStories(updatedStories);
@@ -192,13 +257,13 @@ const Story = () => {
           setIsSubmitting(false);
           setShowMergeEffect(false);
           navigate("/home");
-        }, 1000); // Match merge animation duration
+        }, 1000);
       } catch (err) {
         console.error("Lỗi khi thêm story:", err);
         setError("Không thể thêm story");
         setIsSubmitting(false);
       }
-    }, 800); // Match gathering animation duration
+    }, 800);
   };
 
   const handleEditStory = (story) => {
@@ -247,6 +312,10 @@ const Story = () => {
         <div className="spinner"></div>
       </>
     );
+
+  if (showIntro) {
+    return <StoryIntro onComplete={() => setShowIntro(false)} />;
+  }
 
   return (
     <div className="story-container">
@@ -324,7 +393,6 @@ const Story = () => {
         </div>
       </div>
 
-      <h4 className="add-story-header blink-text">Thêm Story mới</h4>
       <form onSubmit={handleAddStory} className="add-story-form">
         <textarea
           id="content"
@@ -373,7 +441,7 @@ const Story = () => {
             <img
               src={URL.createObjectURL(formData.image)}
               alt="Preview"
-              className={`preview-media ${isSubmitting ? 'gathering' : ''}`}
+              className={`preview-media ${isSubmitting ? 'gathering' : ''} ${animateImage ? 'fall-in' : ''}`}
             />
           )}
           {formData.video && (

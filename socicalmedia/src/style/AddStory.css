@@ -1,3 +1,4 @@
+/* Existing styles from your AddStory.css */
 .story-container {
   width: 100%;
   max-width: 800px;
@@ -95,32 +96,6 @@
 
 .delete-button:hover {
   background-color: #ffe5e5;
-}
-
-.add-story-header {
-  font-size: 24px;
-  font-weight: bold;
-  margin: 40px 0 20px;
-  text-align: center;
-  color: #333;
-}
-
-.header-pulse {
-  animation: headerPulse 2s ease-in-out infinite;
-}
-
-.blink-text-animation span {
-  animation: blink 0.5s ease-in-out;
-  display: inline-block;
-}
-
-.gradient-hover-animation {
-  background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff);
-  background-size: 400%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: gradientText 3s ease infinite;
 }
 
 .add-story-form {
@@ -632,4 +607,134 @@
   0% { box-shadow: 0 0 0 rgba(0,255,255,0); }
   50% { box-shadow: 0 0 12px rgba(0,255,255,0.5); }
   100% { box-shadow: 0 0 0 rgba(0,255,255,0); }
+}
+
+/* Sparkling star effect */
+.sparkle-star {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: sparkleStar 1s ease forwards;
+  pointer-events: none;
+  z-index: 2000;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes sparkleStar {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.5) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2) rotate(180deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8) rotate(360deg);
+  }
+}
+
+/* New styles for StoryIntro component */
+.story-intro-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #ff6b6b, #ffd93d, #6bcb77); /* Distinct from AddPost */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: storyFadeOut 0.3s ease 1.5s forwards; /* Fade out after 1.5s */
+}
+
+.story-intro-container::before,
+.story-intro-container::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 255, 255, 0.8);
+  animation: slash 0.8s ease forwards;
+}
+
+.story-intro-container::before {
+  width: 100%;
+  height: 10px;
+  transform: rotate(45deg);
+  top: 20%;
+  left: -100%;
+  animation-delay: 0s;
+}
+
+.story-intro-container::after {
+  width: 100%;
+  height: 10px;
+  transform: rotate(-45deg);
+  bottom: 20%;
+  right: -100%;
+  animation-delay: 0.2s;
+}
+
+.story-intro-text {
+  display: flex;
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.story-intro-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: scale(0.5);
+  animation: storyFadeInScale 0.8s ease forwards;
+}
+
+@keyframes slash {
+  0% {
+    transform: translateX(0) rotate(45deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(150%) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+@keyframes storyFadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes storyFadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Ensure main content is hidden during intro */
+.story-container {
+  opacity: 0;
+  animation: storyFadeIn 0.3s ease 1.8s forwards; /* Fade in after 1.8s */
+}
+
+@keyframes storyFadeIn {
+  to {
+    opacity: 1;
+  }
 }

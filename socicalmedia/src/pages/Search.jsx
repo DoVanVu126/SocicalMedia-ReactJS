@@ -10,11 +10,12 @@ export default function Search() {
   const [results, setResults] = useState([]);
   const [searchHistory, setSearchHistory] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
   const navigate = useNavigate();
   const inputRef = useRef(null);
   const historyRef = useRef(null);
 
-  // Khởi tạo hiệu ứng và lịch sử
+  // Initialize effects and history
   useEffect(() => {
     animateBackground();
     sparkleMouseEffect();
@@ -37,7 +38,15 @@ export default function Search() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Tìm kiếm có debounce
+  // Hide intro after 2.2 seconds (1.2s animation + 1s display)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowIntro(false);
+    }, 2200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Search with debounce
   useEffect(() => {
     if (keyword.trim().length < 2) {
       setResults([]);
@@ -51,7 +60,7 @@ export default function Search() {
           setResults(data);
           setIsFocused(false);
 
-          // Chỉ lưu keyword nếu nó KHÔNG nằm trong kết quả (tránh double)
+          // Only save keyword if it doesn't match a result
           const matched = data.some(user => user.username === keyword);
           if (!matched && keyword && !searchHistory.includes(keyword)) {
             const updatedHistory = [keyword, ...searchHistory.slice(0, 4)];
@@ -63,10 +72,9 @@ export default function Search() {
     }, 300);
 
     return () => clearTimeout(delayDebounce);
-  }, [keyword]);
+  }, [keyword, searchHistory]);
 
   const handleUserClick = (user) => {
-    // Không thêm lại vào lịch sử nếu đã chọn từ danh sách
     const updatedHistory = [user.username, ...searchHistory.filter(h => h !== user.username)].slice(0, 5);
     setSearchHistory(updatedHistory);
     localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
@@ -83,7 +91,26 @@ export default function Search() {
     localStorage.removeItem('searchHistory');
   };
 
-  const titleText = "Tìm kiếm người dùng";
+  const titleText = "Search";
+  const letters = titleText.split('');
+
+  if (showIntro) {
+    return (
+      <div className="search-intro-container">
+        <div className="search-intro-text">
+          {letters.map((letter, index) => (
+            <span
+              key={index}
+              className={`search-intro-letter ${index === 0 ? 'search-s' : 'search-rest'}`}
+              style={{ animationDelay: `${index * 0.15}s` }}
+            >
+              {letter === ' ' ? '\u00A0' : letter}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container">
@@ -108,7 +135,6 @@ export default function Search() {
             />
           </div>
 
-          {/* Hiển thị lịch sử tìm kiếm */}
           {isFocused && searchHistory.length > 0 && results.length === 0 && (
             <div className="history-container" ref={historyRef}>
               <div className="history-header">
@@ -129,7 +155,6 @@ export default function Search() {
             </div>
           )}
 
-          {/* Kết quả tìm kiếm */}
           <ul className="search-results fade-in">
             {results.map(user => (
               <li
@@ -151,7 +176,6 @@ export default function Search() {
               </li>
             ))}
 
-            {/* Không có kết quả */}
             {results.length === 0 && keyword.length >= 10 && (
               <div className="no-results shake">Không tìm thấy người dùng phù hợp.</div>
             )}

@@ -9,7 +9,7 @@ import {
   initGradientTextHover,
   sparkleMouseEffect,
   initRainbowSmokeEffect,
-} from '../script';
+} from "../script";
 
 const EditStory = () => {
   const navigate = useNavigate();
@@ -42,8 +42,9 @@ const EditStory = () => {
   });
 
   const [error, setError] = useState(null);
-
   const currentPreviewUrl = useRef(null);
+  const imageRef = useRef(null); // Ref cho ảnh preview
+  const previewContainerRef = useRef(null); // Ref cho container của preview
 
   useEffect(() => {
     if (!userIDCMT || !story.id) {
@@ -75,8 +76,16 @@ const EditStory = () => {
 
     if (formData.image) {
       const url = URL.createObjectURL(formData.image);
-      setPreview({ type: "image", url });
-      currentPreviewUrl.current = url;
+      // Nếu có ảnh cũ, chạy hiệu ứng phân tách trước khi cập nhật ảnh mới
+      if (preview.url && preview.type === "image" && imageRef.current) {
+        disintegrateImage(() => {
+          setPreview({ type: "image", url });
+          currentPreviewUrl.current = url;
+        });
+      } else {
+        setPreview({ type: "image", url });
+        currentPreviewUrl.current = url;
+      }
     } else if (formData.video) {
       const url = URL.createObjectURL(formData.video);
       setPreview({ type: "video", url });
@@ -98,6 +107,53 @@ const EditStory = () => {
       }
     };
   }, [formData.image, formData.video, story.imageurl, story.videourl]);
+
+  // Hàm tạo hiệu ứng phân tách
+  const disintegrateImage = (callback) => {
+    const img = imageRef.current;
+    const container = previewContainerRef.current;
+    if (!img || !container) return callback();
+
+    const rect = img.getBoundingClientRect();
+    const particleCount = 50; // Số lượng particle
+    const particles = [];
+
+    // Tạo các particle
+    for (let i = 0; i < particleCount; i++) {
+      const particle = document.createElement("div");
+      particle.className = "disintegrate-particle";
+      particle.style.width = "8px";
+      particle.style.height = "8px";
+      particle.style.background = `url(${img.src})`;
+      particle.style.backgroundSize = `${rect.width}px ${rect.height}px`;
+      particle.style.backgroundPosition = `${-Math.random() * rect.width}px ${
+        -Math.random() * rect.height
+      }px`;
+      particle.style.position = "absolute";
+      particle.style.left = `${Math.random() * rect.width}px`;
+      particle.style.top = `${Math.random() * rect.height}px`;
+      particle.style.opacity = "1";
+      container.appendChild(particle);
+      particles.push(particle);
+    }
+
+    // Ẩn ảnh gốc
+    img.style.opacity = "0";
+
+    // Áp dụng hiệu ứng phân tách
+    particles.forEach((particle, index) => {
+      particle.style.animation = `disintegrate 0.8s ease forwards ${
+        index * 0.02
+      }s`;
+    });
+
+    // Xóa particles và gọi callback sau khi hoàn thành
+    setTimeout(() => {
+      particles.forEach((particle) => particle.remove());
+      img.style.opacity = "1"; // Khôi phục opacity cho ảnh mới
+      callback();
+    }, 1000); // Đợi hiệu ứng hoàn tất
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -200,7 +256,7 @@ const EditStory = () => {
         </div>
 
         {preview.url && (
-          <div className="media-preview">
+          <div className="media-preview" ref={previewContainerRef}>
             <h5 className="preview-title">Xem trước</h5>
             {preview.type === "video" ? (
               <video
@@ -215,6 +271,7 @@ const EditStory = () => {
                 src={preview.url}
                 alt="Story preview"
                 className="preview-media"
+                ref={imageRef}
                 aria-label="Ảnh story hiện tại"
               />
             )}
