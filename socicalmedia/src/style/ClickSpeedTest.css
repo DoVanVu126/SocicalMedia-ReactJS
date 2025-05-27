@@ -1,0 +1,58 @@
+.reaction-multi {
+  text-align: center;
+  font-family: sans-serif;
+  padding: 220px;
+}
+
+.multi-box-grid {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+.box {
+  width: 120px;
+  height: 120px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.box.waiting {
+  background-color: #555;
+}
+
+.box.now {
+  background-color: #4caf50;
+}
+
+.box.done {
+  background-color: #2196f3;
+}
+
+.box.tooSoon {
+  background-color: #e91e63;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px 25px;
+  font-size: 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}

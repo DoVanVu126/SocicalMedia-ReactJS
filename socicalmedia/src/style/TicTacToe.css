@@ -1,0 +1,48 @@
+.ttt-container {
+  text-align: center;
+  padding-top: 120px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.ttt-board .ttt-cell {
+  background-color: #f0f0f0;
+  border: 2px solid #007bff;
+  border-radius: 8px;
+  font-size: 2rem;
+  height: 100px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.ttt-board .ttt-cell:hover {
+  background-color: #cce5ff;
+  transform: scale(1.05);
+}
+
+.ttt-board .ttt-cell:disabled {
+  cursor: default;
+  background-color: #e0e0e0;
+  color: #555;
+}
+
+.ttt-reset-btn {
+  margin-top: 15px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #007bff;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.ttt-reset-btn:hover {
+  background-color: #0056b3;
+}
+
+.ttt-status {
+  margin-top: 15px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}

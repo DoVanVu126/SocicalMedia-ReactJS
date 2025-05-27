@@ -14,7 +14,12 @@ import Story from "./pages/Story";
 import Search from "./pages/Search";
 import FollowersList from "./pages/FollowersList";
 import UserProfile from "./pages/UserProfile";
-import DinoGame from "./pages/DinoGame"; // Import DinoGame
+import DinoGame from "./pages/DinoGame";
+import MiniGame from "./pages/MiniGame";
+import MemoryGame from "./pages/MemoryGame";
+import TicTacToe from "./pages/TicTacToe";
+import ClickSpeedTest from "./pages/ClickSpeedTest";
+
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
@@ -72,6 +77,12 @@ function AppLayout() {
 
             <Route path="/friends" element={<FriendRequest />} />
             {/* End admin user */}
+            <Route path="/dinogame" element={<DinoGame />} />
+            <Route path="/minigame" element={<MiniGame />} />
+            <Route path="/memorygame" element={<MemoryGame />} />
+            <Route path="/tictactoe" element={<TicTacToe />} />
+            <Route path="/clickspeedtest" element={<ClickSpeedTest />} />
+
             <Route path="*" element={<Navigate to="/" />} />
         </Routes>
     );
