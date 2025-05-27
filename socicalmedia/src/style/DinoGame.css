@@ -1,7 +1,74 @@
-
-/* src/style/DinoGame.css */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
+/* Intro Animation */
+.dino-intro-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #4caf50, #81c784); /* Green gradient for dino theme */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: dinoFadeOut 0.3s ease 1.5s forwards;
+}
+
+.dino-icon {
+  font-size: 48px;
+  color: #ffffff;
+  animation: dinoIconScale 0.5s ease-in-out;
+  margin-bottom: 20px;
+}
+
+.dino-intro-text {
+  display: flex;
+  font-family: 'Poppins', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.dino-intro-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: scale(0.5);
+  animation: dinoFadeInScale 0.8s ease forwards;
+}
+
+@keyframes dinoIconScale {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.5); }
+  100% { transform: scale(1.2); }
+}
+
+@keyframes dinoFadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes dinoFadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Ensure main content is hidden during intro */
 .dino-main {
   position: relative;
   min-height: 100vh;
@@ -11,14 +78,23 @@
   padding: 20px;
   background: linear-gradient(135deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1));
   overflow: hidden;
+  opacity: 0;
+  animation: dinoFadeIn 0.3s ease 1.8s forwards;
 }
 
+@keyframes dinoFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Existing styles (unchanged) */
 .dino-container {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-left: 300px; /* Match Sidebar width */
+  margin-left: 300px;
 }
 
 .dino-card {
@@ -33,7 +109,7 @@
   transform: perspective(1000px) rotateX(5deg);
   animation: cardFadeIn 1s ease-out;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  overflow: hidden; /* Prevent canvas overflow */
+  overflow: hidden;
 }
 
 .dino-card:hover {
@@ -213,7 +289,7 @@
 /* Responsive */
 @media (max-width: 768px) {
   .dino-container {
-    margin-left: 0; /* Remove sidebar offset on mobile */
+    margin-left: 0;
   }
 
   .dino-card {
@@ -236,5 +312,19 @@
 
   .score-text {
     font-size: 1rem;
+  }
+
+  .dino-intro-text {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dino-intro-text {
+    font-size: 18px;
+  }
+
+  .dino-icon {
+    font-size: 36px;
   }
 }

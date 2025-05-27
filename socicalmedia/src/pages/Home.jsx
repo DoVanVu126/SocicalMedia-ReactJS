@@ -46,8 +46,9 @@ export default function Home() {
   const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [activeMenuPostId, setActiveMenuPostId] = useState(null);
-  const [deletingStoryId, setDeletingStoryId] = useState(null); // State để theo dõi story đang xóa
-  const [showTrash, setShowTrash] = useState(false); // State để hiển thị thùng rác
+  const [deletingStoryId, setDeletingStoryId] = useState(null);
+  const [showTrash, setShowTrash] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
   const user = JSON.parse(localStorage.getItem("user"));
   const userIDCMT = user?.id;
   const menuRef = useRef(null);
@@ -60,6 +61,12 @@ export default function Home() {
   });
 
   const navigate = useNavigate();
+
+  // Split intro text into letters for animation
+  const introText = "SocialMediaApp".split("").map((letter, index) => ({
+    letter,
+    delay: index * 0.05,
+  }));
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -81,11 +88,18 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const introTimer = setTimeout(() => {
+      setShowIntro(false);
+    }, 1500);
+    return () => clearTimeout(introTimer);
+  }, []);
+
+  useEffect(() => {
     const start = Date.now();
     setLoading(true);
     const params = userIDCMT ? { user_id: userIDCMT } : {};
     axios
-      .get("/stories", { params })
+      .get("http://localhost:8000/api/stories", { params })
       .then((res) => {
         const elapsed = Date.now() - start;
         const remainingTime = Math.max(3000 - elapsed, 0);
@@ -109,7 +123,7 @@ export default function Home() {
     const start = Date.now();
     setLoading(true);
     axios
-      .get("/posts", { params: { user_id: userIDCMT } })
+      .get("http://localhost:8000/api/posts", { params: { user_id: userIDCMT } })
       .then((res) => {
         const elapsed = Date.now() - start;
         const remainingTime = Math.max(3000 - elapsed, 0);
@@ -230,7 +244,7 @@ export default function Home() {
     }
     try {
       const response = await axios.put(
-        `/posts/${selectedCommentPostId}/comments/${selectedCommentId}`,
+        `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${selectedCommentId}`,
         { content: editContent, user_id: userIDCMT }
       );
       if (!response.ok) {
@@ -338,7 +352,7 @@ export default function Home() {
     setShowTrash(true);
     setTimeout(() => {
       axios
-        .delete(`/stories/${id}`, {
+        .delete(`http://localhost:8000/api/stories/${id}`, {
           data: { user_id: userIDCMT },
         })
         .then(() => {
@@ -410,7 +424,7 @@ export default function Home() {
 
   const fetchComments = async (postId) => {
     try {
-      const res = await axios.get(`/posts/${postId}/comments`);
+      const res = await axios.get(`http://localhost:8000/api/posts/${postId}/comments`);
       setComments((prev) => ({ ...prev, [postId]: res.data }));
     } catch (error) {
       console.error("Error fetching comments:", error);
@@ -420,7 +434,7 @@ export default function Home() {
 
   const fetchReactionList = async (postId) => {
     try {
-      const res = await axios.get(`/posts/${postId}/reactions`);
+      const res = await axios.get(`http://localhost:8000/api/posts/${postId}/reactions`);
       setReactionList((prev) => ({ ...prev, [postId]: res.data }));
     } catch (err) {
       console.error("Error fetching reaction list:", err);
@@ -509,7 +523,7 @@ export default function Home() {
         };
         newPosts = newPosts.map((p) => (p.id === postId ? updatedPost : p));
         setPosts(newPosts);
-        await axios.delete(`/posts/${postId}/react`, {
+        await axios.delete(`http://localhost:8000/api/posts/${postId}/react`, {
           data: { user_id: userIDCMT },
         });
       } else {
@@ -531,7 +545,7 @@ export default function Home() {
         };
         newPosts = newPosts.map((p) => (p.id === postId ? updatedPost : p));
         setPosts(newPosts);
-        await axios.post(`/posts/${postId}/react`, {
+        await axios.post(`http://localhost:8000/api/posts/${postId}/react`, {
           user_id: userIDCMT,
           type: newReactionType,
         });
@@ -604,6 +618,24 @@ export default function Home() {
   };
   return (
     <div className="container">
+      {showIntro && (
+        <div className="home-intro-overlay">
+          <div className="home-intro-text">
+            {introText.map(({ letter, delay }, index) => (
+              <span
+                key={index}
+                className="home-intro-letter"
+                style={{
+                  animationDelay: `${delay}s`,
+                  "--index": index,
+                }}
+              >
+                {letter}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
       <Header />
       <Sidebar />
       <div className="main">
@@ -627,7 +659,7 @@ export default function Home() {
                 className="story-nav-btn story-nav-next"
                 onClick={() => scrollStories("right")}
               >
-                ❯
+                ›
               </button>
             )}
             <div className="story-list" ref={storyListRef}>
@@ -859,7 +891,6 @@ export default function Home() {
                   <p className="post-content">{post.content}</p>
 
                   <div key={post.id} className="post-media">
-
 
                     {Array.isArray(post.imageurl) && (
                       <>

@@ -1,3 +1,4 @@
+
 // src/pages/UserProfile.js
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -34,7 +35,7 @@ export default function UserProfile() {
   const [activeMenuPostId, setActiveMenuPostId] = useState(null);
   const [stories, setStories] = useState([]);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
-  const [showIntro, setShowIntro] = useState(true); // State to control intro animation
+  const [showIntro, setShowIntro] = useState(true);
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
   const reactionListRef = useRef(null);
@@ -45,11 +46,12 @@ export default function UserProfile() {
     initMagnetEffect();
   }, []);
 
-  // Hide intro animation after 3.5 seconds
+  // Hide intro animation after 1 second
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowIntro(false);
-    }, 3500); // Matches animation duration
+      setLoading(false);
+    }, 1700);
     return () => clearTimeout(timer);
   }, []);
 
@@ -68,9 +70,6 @@ export default function UserProfile() {
   // Fetch user data
   const fetchUserData = async () => {
     if (!userId) return;
-    setLoading(true);
-    setError(null);
-
     try {
       const res = await fetch(`http://localhost:8000/api/users/${userId}`);
       if (!res.ok) throw new Error('Không tìm thấy người dùng');
@@ -98,8 +97,6 @@ export default function UserProfile() {
     } catch (err) {
       console.error('Lỗi khi lấy bài viết:', err);
       setError('Không thể tải bài viết');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -411,11 +408,24 @@ export default function UserProfile() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [activeMenuPostId, showReactionList]);
 
-  if (loading) {
+  // Split "Personal Page" into individual letters for animation
+  const title = "Personal Page";
+  const letters = title.split('');
+
+  if (showIntro) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-        <div className="youtube-loader"></div>
-        <div className="spinner"></div>
+      <div className="profile-intro-container">
+        <div className="profile-intro-text">
+          {letters.map((letter, index) => (
+            <span
+              key={index}
+              className="profile-intro-letter"
+              style={{ animationDelay: `${index * 0.05}s` }}
+            >
+              {letter === ' ' ? '\u00A0' : letter}
+            </span>
+          ))}
+        </div>
       </div>
     );
   }

@@ -1,4 +1,88 @@
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body {
+  background: #f9fafb;
+  min-height: 100vh;
+  color: #1e293b;
+}
+
+/* Notification Intro Animation */
+.notification-intro-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #ff4d4f, #ff7875);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: notificationFadeOut 0.3s ease 1.5s forwards;
+}
+
+.notification-bell {
+  font-size: 48px;
+  color: #ffffff;
+  animation: notificationBellShake 0.5s ease-in-out;
+  margin-bottom: 20px;
+}
+
+.notification-intro-text {
+  display: flex;
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.notification-intro-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: scale(0.5);
+  animation: notificationFadeInScale 0.8s ease forwards;
+}
+
+@keyframes notificationBellShake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(15deg); }
+  75% { transform: rotate(-15deg); }
+}
+
+@keyframes notificationFadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes notificationFadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Ensure main content is hidden during intro */
 .notifications-wrapper {
+  opacity: 0;
+  animation: notificationFadeIn 0.3s ease 1.8s forwards;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -11,6 +95,37 @@
   overflow: hidden;
 }
 
+@keyframes notificationFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Fancy Text Styles for Header (Simplified to Plain Text) */
+.fancy-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.fancy-text {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+.unread-badge {
+  background: #ff4d4f;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  animation: pulse 2s infinite;
+}
+
+/* Remaining styles (unchanged) */
 .notifications-container {
   max-width: 600px;
   width: 100%;
@@ -29,25 +144,6 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-}
-
-.notifications-header h2 {
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.unread-badge {
-  background: #ff4d4f;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 4px 8px;
-  border-radius: 12px;
-  animation: pulse 2s infinite;
 }
 
 .header-actions {
@@ -203,93 +299,44 @@
   animation: fadeIn 0.5s ease-in;
 }
 
-/* Fancy Text Styles */
-.fancy-container {
-  display: flex;
-  align-items: center;
-  position: relative;
+/* Keyframe Animations (Removed unused ones for fancy-text) */
+@keyframes notificationBellShake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(15deg); }
+  75% { transform: rotate(-15deg); }
 }
 
-.fancy-text {
-  font-size: 2.5rem;
-  white-space: nowrap;
-  background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffee, #ffcc00);
-  background-size: 400% 100%;
-  animation: gradientShift 10s linear infinite, glowPulse 2s infinite;
-  clip-path: polygon(0 0, 100% 0, 100% 85%, 0% 100%);
-}
-
-.fancy-text span {
-  display: inline-block;
-  opacity: 0;
-  transform: translateY(20px);
-  animation: appear 0.5s forwards;
-  animation-delay: calc(var(--i) * 0.05s);
-  transition: transform 0.3s ease, color 0.3s ease;
-  text-shadow: 0 0 4px rgba(255, 255, 255, 0.7);
-}
-
-.fancy-text:hover span {
-  animation: spread 0.5s ease-in-out forwards, wave 0.7s ease-in-out infinite alternate;
-  color: #ffffff;
-  transform: translateX(calc(var(--i) * 5px - 10px));
-}
-
-.fancy-text:not(:hover) span {
-  transform: translateX(0);
-}
-
-/* Keyframe Animations */
-@keyframes gradientShift {
+@keyframes notificationFadeInScale {
   0% {
-    background-position: 0% 50%;
-  }
-  100% {
-    background-position: 100% 50%;
-  }
-}
-
-@keyframes appear {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes glowPulse {
-  0%, 100% {
-    text-shadow: 0 0 10px #fff, 0 0 20px #ff00ff, 0 0 30px #00ffff;
+    opacity: 0;
+    transform: scale(0.5);
   }
   50% {
-    text-shadow: 0 0 20px #ff00ff, 0 0 40px #00ffff, 0 0 60px #ff00ff;
-  }
-}
-
-@keyframes wave {
-  from {
-    transform: translateY(0) scale(1);
-  }
-  to {
-    transform: translateY(-10px) scale(1.1);
-  }
-}
-
-@keyframes spread {
-  0% {
-    transform: translateX(0);
+    opacity: 0.5;
+    transform: scale(1.2);
   }
   100% {
-    transform: translateX(calc(var(--i) * 5px - 10px));
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes notificationFadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes notificationFadeIn {
+  to {
+    opacity: 1;
   }
 }
 
 @keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
 @keyframes fadeIn {
@@ -304,34 +351,29 @@
 }
 
 @keyframes shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  10%, 30%, 50%, 70%, 90% {
-    transform: translateX(-2px);
-  }
-  20%, 40%, 60%, 80% {
-    transform: translateX(2px);
-  }
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Responsive */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .notifications-wrapper {
+    margin-left: 0;
+    padding: 15px;
+  }
+
   .notifications-container {
     padding: 15px;
   }
 
-  .notifications-header h2 {
-    font-size: 20px;
+  .fancy-text {
+    font-size: 2rem;
   }
 
   .action-btn {
@@ -348,5 +390,19 @@
   .notification-actions {
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .notification-intro-text {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .notification-intro-text {
+    font-size: 18px;
+  }
+
+  .notification-bell {
+    font-size: 36px;
   }
 }

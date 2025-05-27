@@ -1,3 +1,71 @@
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body {
+  background: #f9fafb;
+  min-height: 100vh;
+  color: #1e293b;
+}
+
+/* Add Post Intro Animation */
+.add-post-intro-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #10b981, #34d399); /* Different gradient from UserProfile */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: addPostFadeOut 0.3s ease 1.5s forwards; /* Start fade-out after 1.5s */
+}
+
+.add-post-intro-text {
+  display: flex;
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.add-post-intro-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: scale(0.5);
+  animation: addPostFadeInScale 0.8s ease forwards; /* 0.8s animation */
+}
+
+@keyframes addPostFadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes addPostFadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Ensure main content is hidden during intro */
 .add-post-container {
   margin: 100px auto 0 350px;
   padding: 20px;
@@ -106,6 +174,7 @@
   margin-right: 8px;
   font-weight: bold;
 }
+
 
 .add-post-visibility-selector select {
   padding: 8px;
@@ -309,3 +378,4 @@
   50% { transform: scale(1.03); }
   100% { filter: url(#water-effect); transform: scale(1); }
 }
+

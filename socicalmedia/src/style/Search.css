@@ -1,3 +1,124 @@
+/* Reset and Base Styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+} */
+
+/* Search Intro Animation */
+.search-intro-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #141414, #1c2526); /* Netflix-style dark background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: searchFadeOut 0.4s ease 1.8s forwards;
+  will-change: opacity;
+}
+
+.search-intro-text {
+  display: flex;
+  font-size: 60px;
+  font-weight: 900;
+  color: #e50914; /* Netflix red */
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  perspective: 1000px;
+}
+
+.search-intro-letter.search-s {
+  display: inline-block;
+  opacity: 0;
+  transform: scale(0.2) rotateY(90deg);
+  animation: netflixSGrow 1.2s ease forwards;
+  text-shadow: 
+    0 0 20px rgba(229, 9, 20, 0.8),
+    0 0 40px rgba(229, 9, 20, 0.6),
+    0 0 60px rgba(229, 9, 20, 0.4);
+  will-change: transform, opacity, text-shadow;
+}
+
+.search-intro-letter.search-rest {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(40px);
+  animation: searchLetterFade 0.6s ease forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes netflixSGrow {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotateY(90deg);
+    text-shadow: 
+      0 0 20px rgba(229, 9, 20, 0),
+      0 0 40px rgba(229, 9, 20, 0),
+      0 0 60px rgba(229, 9, 20, 0);
+  }
+  40% {
+    opacity: 0.6;
+    transform: scale(1.4) rotateY(-10deg);
+    text-shadow: 
+      0 0 30px rgba(229, 9, 20, 0.9),
+      0 0 50px rgba(229, 9, 20, 0.7),
+      0 0 70px rgba(229, 9, 20, 0.5);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.1) rotateY(5deg);
+    text-shadow: 
+      0 0 25px rgba(229, 9, 20, 0.8),
+      0 0 45px rgba(229, 9, 20, 0.6),
+      0 0 65px rgba(229, 9, 20, 0.4);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateY(0deg);
+    text-shadow: 
+      0 0 20px rgba(229, 9, 20, 0.8),
+      0 0 40px rgba(229, 9, 20, 0.6),
+      0 0 60px rgba(229, 9, 20, 0.4);
+  }
+}
+
+@keyframes searchLetterFade {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes searchFadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Ensure main content is hidden during intro */
+.container {
+  opacity: 0;
+  animation: searchFadeIn 0.4s ease 2.2s forwards;
+  will-change: opacity;
+}
+
+@keyframes searchFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Search Container */
 .search-container {
   max-width: 1000px;
   margin: 80px 20px;
@@ -13,17 +134,17 @@
 .search-container h2 {
   font-size: 26px;
   margin-bottom: 15px;
-  color: #e50914; /* Màu đỏ Netflix */
+  color: #e50914;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .netflix-text span {
   display: inline-block;
   opacity: 0;
-  transform: translateY(20px) scale(0.7); /* Bắt đầu nhỏ hơn */
+  transform: translateY(20px) scale(0.7);
   animation: netflixFade 0.5s ease-in-out forwards;
   animation-delay: calc(var(--i) * 0.1s);
-  text-shadow: 0 0 10px rgba(229, 9, 20, 0.7), 0 0 20px rgba(229, 9, 20, 0.5); /* Bóng đỏ Netflix */
+  text-shadow: 0 0 10px rgba(229, 9, 20, 0.7), 0 0 20px rgba(229, 9, 20, 0.5);
   transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
@@ -88,7 +209,6 @@
   object-fit: cover;
   border: 2px solid #3399ff;
   transition: transform 0.4s ease, box-shadow 0.4s ease;
-  box-shadow: none;
 }
 
 .search-item:hover .search-avatar {
@@ -169,7 +289,7 @@
   }
   100% {
     opacity: 1;
-    transform: translateY(0) translateX(0) scale(1.2); /* Phóng to */
+    transform: translateY(0) translateX(0) scale(1.2);
   }
 }
 
@@ -227,7 +347,7 @@
   }
 
   .search-container h2 {
-    font-size: 20px; /* Điều chỉnh cỡ chữ trên mobile */
+    font-size: 20px;
   }
 
   .search-input {
@@ -252,5 +372,29 @@
 
   .search-username {
     font-size: 11px;
+  }
+
+  .search-intro-text {
+    font-size: 40px;
+    letter-spacing: 2px;
+  }
+
+  .search-intro-letter.search-s {
+    text-shadow: 
+      0 0 15px rgba(229, 9, 20, 0.8),
+      0 0 30px rgba(229, 9, 20, 0.6); /* Reduced shadow for mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .search-intro-text {
+    font-size: 28px;
+    letter-spacing: 1.5px;
+  }
+
+  .search-intro-letter.search-s {
+    text-shadow: 
+      0 0 10px rgba(229, 9, 20, 0.8),
+      0 0 20px rgba(229, 9, 20, 0.6); /* Further reduced for smaller screens */
   }
 }

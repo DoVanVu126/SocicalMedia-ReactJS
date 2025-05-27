@@ -1,4 +1,3 @@
-  
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
@@ -7,10 +6,15 @@ import "../style/DinoGame.css";
 
 export default function DinoGame() {
   const canvasRef = useRef(null);
-  const cardRef = useRef(null); // Ref for the card container
+  const cardRef = useRef(null);
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
+  const [showIntro, setShowIntro] = useState(true);
   const navigate = useNavigate();
+
+  // Split "Play Game" into individual letters for intro animation
+  const title = "Play Game";
+  const letters = title.split('');
 
   // Use refs to persist game state across renders
   const dinoRef = useRef({
@@ -28,25 +32,35 @@ export default function DinoGame() {
   const animationFrameRef = useRef(null);
   const spawnTimerRef = useRef(null);
 
+  // Intro animation timing
+  useEffect(() => {
+    const introTimer = setTimeout(() => {
+      setShowIntro(false);
+    }, 1800); // 0.5s icon + 1s text + 0.3s buffer
+    return () => clearTimeout(introTimer);
+  }, []);
+
   // Check if user is logged in
   useEffect(() => {
+    if (showIntro) return; // Skip until intro is done
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user) {
-      navigate("/"); // Redirect to login if not authenticated
+      navigate("/");
     }
-  }, [navigate]);
+  }, [navigate, showIntro]);
 
   // Resize canvas to fit card
   useEffect(() => {
+    if (showIntro) return; // Skip until intro is done
     const resizeCanvas = () => {
       const canvas = canvasRef.current;
       const card = cardRef.current;
       if (canvas && card) {
-        const cardWidth = card.offsetWidth - 40; // Subtract padding (20px each side)
-        const maxCanvasWidth = Math.min(cardWidth, 800); // Cap at original width
+        const cardWidth = card.offsetWidth - 40;
+        const maxCanvasWidth = Math.min(cardWidth, 800);
         canvas.style.width = `${maxCanvasWidth}px`;
-        canvas.style.height = `${(maxCanvasWidth * 200) / 800}px`; // Maintain aspect ratio
-        canvas.width = maxCanvasWidth; // Set internal resolution
+        canvas.style.height = `${(maxCanvasWidth * 200) / 800}px`;
+        canvas.width = maxCanvasWidth;
         canvas.height = (maxCanvasWidth * 200) / 800;
       }
     };
@@ -54,13 +68,12 @@ export default function DinoGame() {
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
     return () => window.removeEventListener("resize", resizeCanvas);
-  }, []);
+  }, [showIntro]);
 
   const resetGame = () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
 
-    // Reset game state
     dinoRef.current = {
       x: 50,
       y: 150,
@@ -75,9 +88,8 @@ export default function DinoGame() {
     scoreCounterRef.current = 0;
     setScore(0);
     setGameOver(false);
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Restart spawn timer and game loop
     if (spawnTimerRef.current) clearInterval(spawnTimerRef.current);
     spawnTimerRef.current = setInterval(spawnCactus, 1500);
     update();
@@ -98,7 +110,6 @@ export default function DinoGame() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Dino physics
     dinoRef.current.vy += dinoRef.current.gravity;
     dinoRef.current.y += dinoRef.current.vy;
 
@@ -108,7 +119,6 @@ export default function DinoGame() {
       dinoRef.current.grounded = true;
     }
 
-    // Draw dino
     ctx.fillStyle = "#444";
     ctx.fillRect(
       dinoRef.current.x,
@@ -117,15 +127,13 @@ export default function DinoGame() {
       dinoRef.current.height
     );
 
-    // Cactus logic
     for (let i = cactusArrayRef.current.length - 1; i >= 0; i--) {
       const c = cactusArrayRef.current[i];
-      c.x -= 6; // cactusSpeed
+      c.x -= 6;
 
       ctx.fillStyle = "#228b22";
       ctx.fillRect(c.x, c.y, c.width, c.height);
 
-      // Collision check
       if (
         dinoRef.current.x < c.x + c.width &&
         dinoRef.current.x + dinoRef.current.width > c.x &&
@@ -138,7 +146,6 @@ export default function DinoGame() {
         return;
       }
 
-      // Remove off-screen cacti
       if (c.x + c.width < 0) {
         cactusArrayRef.current.splice(i, 1);
       }
@@ -154,9 +161,15 @@ export default function DinoGame() {
     animationFrameRef.current = requestAnimationFrame(update);
   };
 
+  // Game initialization
   useEffect(() => {
+    if (showIntro) return; // Skip until intro is done
+
     const canvas = canvasRef.current;
+    if (!canvas) return; // Guard against null canvas
+
     const ctx = canvas.getContext("2d");
+    if (!ctx) return; // Guard against null context
 
     const handleKeyDown = (e) => {
       if (e.code === "Space" && dinoRef.current.grounded && !gameOver) {
@@ -181,7 +194,26 @@ export default function DinoGame() {
       }
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [gameOver, showIntro]);
+
+  if (showIntro) {
+    return (
+      <div className="dino-intro-container">
+        <div className="dino-icon">🦖</div>
+        <div className="dino-intro-text">
+          {letters.map((letter, index) => (
+            <span
+              key={index}
+              className="dino-intro-letter"
+              style={{ animationDelay: `${0.5 + index * 0.1}s` }}
+            >
+              {letter === ' ' ? '\u00A0' : letter}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="main dino-main">

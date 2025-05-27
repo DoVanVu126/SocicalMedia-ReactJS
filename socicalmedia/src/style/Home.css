@@ -1,3 +1,80 @@
+/* Intro animation */
+.home-intro-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+}
+
+.home-intro-text {
+  font-size: 3rem;
+  font-family: "Arial", sans-serif;
+  color: #030303;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+}
+
+.home-intro-letter {
+  display: inline-block;
+  animation: home-scatter 0.6s ease-out forwards,
+    home-converge 0.6s 0.6s ease-in forwards, home-stay 1s 1.2s forwards,
+    home-fadeOut 0.3s 2.2s forwards;
+  transform-origin: center;
+}
+
+@keyframes home-scatter {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  100% {
+    opacity: 0.7;
+    transform: translate(
+        calc((var(--index) % 2 - 0.5) * 80vw + (var(--index) * 5 - 30) * 1vw),
+        calc((var(--index) % 3 - 1) * 80vh + (var(--index) * 3 - 20) * 1vh)
+      )
+      rotate(calc((var(--index) * 20 - 180) * 1deg));
+  }
+}
+
+@keyframes home-converge {
+  0% {
+    opacity: 0.7;
+    transform: translate(
+        calc((var(--index) % 2 - 0.5) * 80vw + (var(--index) * 5 - 30) * 1vw),
+        calc((var(--index) % 3 - 1) * 80vh + (var(--index) * 3 - 20) * 1vh)
+      )
+      rotate(calc((var(--index) * 20 - 180) * 1deg));
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes home-stay {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+@keyframes home-fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 /* Main content */
 .main {
   flex: 1;
@@ -100,7 +177,13 @@
 
 .media-overlay-hover {
   position: absolute;
-  background-image: conic-gradient(black 10%, turquoise 30%, green 70%, #6a11cb 100%);
+
+  background-image: conic-gradient(
+    black 50%,
+    turquoise 85%,
+    green 96%,
+    black 97%
+  );
   border-radius: 15px;
   opacity: 0;
   inset: -50%;
@@ -203,13 +286,13 @@
 }
 
 .add-comment input:focus {
-  border-color: #007BFF;
+  border-color: #007bff;
 }
 
 .add-comment button {
   padding: 8px 12px;
   border: none;
-  background-color: #007BFF;
+  background-color: #007bff;
   color: white;
   border-radius: 4px;
   cursor: pointer;
@@ -238,7 +321,7 @@
 
 .comment strong {
   font-weight: bold;
-  color: #007BFF;
+  color: #007bff;
 }
 
 .comment p {
@@ -788,7 +871,7 @@
   left: 0;
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0);
   padding: 12px;
   z-index: 1000;
   width: 350px;
@@ -861,14 +944,14 @@
 }
 
 .reaction-users {
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .reaction-user {
   display: flex;
   align-items: center;
   padding: 8px 12px;
-  font-size: 13px;
+  font-size: 14px;
   color: #1a1a1a;
   transition: background-color 0.2s ease;
 }
@@ -896,15 +979,22 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: none;
-  margin-top: -30px;
+  border-radius: 50%;
   padding: 4px;
-  margin-left: -35px;
-  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  margin-left: -40px;
+  background: linear-gradient(
+    45deg,
+    #f09433,
+    #e6683c,
+    #dc2743,
+    #cc2366,
+    #bc1888
+  );
   background-size: 400%;
   border-radius: 50%;
   animation: gradient 15s ease infinite;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-top: -28px;
 }
 
 .story-avatars:hover {
@@ -979,9 +1069,80 @@
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.blink-text {
+  font-size: 2em;
+}
+.blink-text-animation span {
+  animation: blink 0.8s both infinite;
+}
+@keyframes blink {
+  0% {
+    opacity: 0;
+  }
+
+  5% {
+    opacity: 0.4;
+  }
+
+  10% {
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 0.55;
+  }
+
+  20% {
+    opacity: 0.55;
+  }
+
+  25% {
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 0.7;
+  }
+
+  40% {
+    opacity: 0.7;
+  }
+
+  45% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0.85;
+  }
+
+  65% {
+    opacity: 0.85;
+  }
+
+  70% {
+    opacity: 0;
+  }
+
+  75% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 /* Responsive design */
@@ -1030,7 +1191,7 @@
   padding: 30px;
   border-radius: 10px;
   color: #00f0ff;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: "Segoe UI", sans-serif;
   text-shadow: 0 0 10px #00f0ff;
 }
 
