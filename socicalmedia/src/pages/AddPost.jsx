@@ -7,25 +7,42 @@ import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 
 const AddPost = () => {
-  // State để quản lý dữ liệu form (nội dung, ảnh, video, quyền riêng tư)
   const [form, setForm] = useState({
     content: '',
     images: [],
     video: null,
-    visibility: 'public', // Mặc định là công khai
+    visibility: 'public',
   });
-
-  // State để lưu thông tin người dùng hiện tại
   const [user, setUser] = useState(null);
-  // Hook để điều hướng giữa các trang
   const navigate = useNavigate();
-
-  // State để lưu trữ các URL xem trước của ảnh đã chọn
   const [imagePreviews, setImagePreviews] = useState([]);
-  // State để lưu trữ URL xem trước của video đã chọn
   const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
+  const [removingImageIndex, setRemovingImageIndex] = useState(null);
+  const [isRemovingVideo, setIsRemovingVideo] = useState(false);
 
-  // useEffect để tải thông tin người dùng từ localStorage khi component mount
+  const handleRemoveImage = (indexToRemove) => {
+    setImagePreviews(prev => prev.filter((_, index) => index !== indexToRemove));
+    setRemovingImageIndex(null);
+  };
+
+  const startRemoveImageAnimation = (indexToRemove) => {
+    setRemovingImageIndex(indexToRemove);
+    setTimeout(() => {
+      handleRemoveImage(indexToRemove);
+    }, 500); // Thời gian animation (0.5s)
+  };
+
+  const handleRemoveVideo = () => {
+    setVideoPreviewUrl(null);
+    setIsRemovingVideo(false);
+  };
+
+  const startRemoveVideoAnimation = () => {
+    setIsRemovingVideo(true);
+    setTimeout(() => {
+      handleRemoveVideo();
+    }, 500); // Thời gian animation (0.5s)
+  };
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
@@ -33,7 +50,6 @@ const AddPost = () => {
     }
   }, []);
 
-  // useEffect để tạo và giải phóng URL xem trước cho ảnh và video
   useEffect(() => {
     // Tạo URL xem trước cho ảnh khi form.images thay đổi
     if (form.images && form.images.length > 0) {
@@ -190,19 +206,39 @@ const AddPost = () => {
             {imagePreviews.length > 0 && (
               <div className="add-post-image-preview-list">
                 {imagePreviews.map((previewUrl, index) => (
-                  <img
-                    key={index}
-                    src={previewUrl}
-                    alt={`Xem trước ${index}`}
-                    className="add-post-image-preview-item"
-                  />
+                  <div key={index} className="add-post-preview-item-wrapper">
+                    <img
+                      src={previewUrl}
+                      alt={`Xem trước ${index}`}
+                      className={`add-post-image-preview-item ${removingImageIndex === index ? 'removing' : ''
+                        }`}
+                    />
+                    <button
+                      className="remove-preview-button"
+                      onClick={() => startRemoveImageAnimation(index)}
+                      disabled={removingImageIndex !== null} // Vô hiệu hóa nút khi đang xóa
+                    >
+                      X
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
             {/* Video xem trước */}
             {videoPreviewUrl && (
               <div className="add-post-video-preview-wrapper">
-                <video src={videoPreviewUrl} controls className="add-post-video-preview" />
+                <video
+                  src={videoPreviewUrl}
+                  controls
+                  className={`add-post-video-preview ${isRemovingVideo ? 'removing' : ''}`}
+                />
+                <button
+                  className="remove-preview-button"
+                  onClick={startRemoveVideoAnimation}
+                  disabled={isRemovingVideo} // Vô hiệu hóa nút khi đang xóa
+                >
+                  X
+                </button>
               </div>
             )}
           </div>

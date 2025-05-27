@@ -142,16 +142,128 @@
 
 .add-post-image-preview-item {
   flex-shrink: 0; /* NGĂN ẢNH CO LẠI */
-  width: 150px; /* ĐẶT CHIỀU RỘNG CỐ ĐỊNH CHO MỖI ẢNH */
-  height: auto; /* Chiều cao tự động theo tỷ lệ khung hình */
-  max-height: 200px; /* Giới hạn chiều cao tối đa của mỗi ảnh */
-  object-fit: cover; /* Lấp đầy khung ảnh, có thể bị cắt */
+  width: 150px; 
+  height: auto; 
+  max-height: 220px; 
+  object-fit: cover; 
   border-radius: 8px;
   border: 1px solid #ddd;
 }
+.add-post-image-preview-list {
+  display: flex;
+  gap: 10px; 
+  overflow-x: auto; 
+  margin-bottom: 10px;
+}
+/* AddPost.css */
+
+/* ... CSS hiện tại của bạn ... */
+
+.add-post-preview-item-wrapper {
+  position: relative;
+}
+
+.add-post-image-preview-item {
+  flex-shrink: 0;
+  width: 150px;
+  height: auto;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; /* Thêm transition */
+}
+
+.add-post-image-preview-item.removing {
+  animation: shrinkAndFadeOut 0.3s ease-in-out forwards; /* Animation mới */
+}
+
+.add-post-video-preview-wrapper {
+  position: relative;
+  max-width: 300px;
+  margin-bottom: 10px;
+}
+
+.add-post-video-preview {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; /* Thêm transition */
+}
+
+.add-post-video-preview.removing {
+  animation: shrinkAndFadeOut 0.3s ease-in-out forwards; /* Animation mới */
+}
+
+.remove-preview-button {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  z-index: 10;
+}
+
+.remove-preview-button:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+@keyframes shrinkAndFadeOut { /* Định nghĩa animation mới */
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  10% {
+    transform: translateY(3px);
+    opacity: 1;
+  }
+  20% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+    30% {
+    transform: translateY(3px);
+    opacity: 1;
+  }
+  40% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }  50% {
+    transform: translateY(3px);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }  70% {
+    transform: translateY(3px);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+    90% {
+    transform: translateY(3px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-3px);
+    opacity: 0;
+  }
+}
 /* --- Kết thúc thay đổi cho hiển thị ngang --- */
-
-
 .add-post-video-preview-wrapper {
   width: 100%;
   border: 1px solid #ddd;
@@ -172,13 +284,10 @@
     padding: 15px;
     max-width: 95%;
   }
-
   .add-post-container {
     flex-direction: column;
     gap: 15px;
   }
-
-  /* Trên màn hình nhỏ, ảnh sẽ tự động xếp dọc do width: 100% */
   .add-post-image-preview-item {
     width: 100%;
   }

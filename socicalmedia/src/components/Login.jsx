@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../style/Login.css';
-import { initBlinkText, initRippleEffect} from "../script";
+import { initBlinkText, initRippleEffect } from "../script";
 const Login = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
@@ -185,8 +185,17 @@ const Login = () => {
     <div className="login" ref={fireworkContainerRef}>
       <div className="login-form-container">
         <form onSubmit={isOtpRequired ? handleOtpSubmit : handleSubmit} style={{ width: '100%', maxWidth: '400px' }}>
-          <div class="pow-container">
-            <span class="pow-letter">SocicalApp</span>
+          <div className="pow-container">
+            <span className="pow-letter" style={{ animationDelay: '0.1s' }}>S</span>
+            <span className="pow-letter" style={{ animationDelay: '0.2s' }}>o</span>
+            <span className="pow-letter" style={{ animationDelay: '0.3s' }}>c</span>
+            <span className="pow-letter" style={{ animationDelay: '0.4s' }}>i</span>
+            <span className="pow-letter" style={{ animationDelay: '0.5s' }}>c</span>
+            <span className="pow-letter" style={{ animationDelay: '0.6s' }}>a</span>
+            <span className="pow-letter" style={{ animationDelay: '0.7s' }}>l</span>
+            <span className="pow-letter" style={{ animationDelay: '0.8s' }}>A</span>
+            <span className="pow-letter" style={{ animationDelay: '0.9s' }}>p</span>
+            <span className="pow-letter" style={{ animationDelay: '1.0s' }}>p</span>
           </div>
           <h2 className="login-title blink-text">Đăng nhập</h2>
 
