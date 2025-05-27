@@ -131,7 +131,7 @@
   animation: fadeInUp 0.6s ease forwards;
 }
 
-.story-input {
+.storys-input {
   width: 100%;
   margin-bottom: 15px;
   padding: 10px;
@@ -144,13 +144,13 @@
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.story-input:focus {
+.storys-input:focus {
   border-color: #007bff;
   box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
-  animation: inputGlowModern 1.5s ease-in-out infinite;
+  animation: glowFlash 0.3s ease;
 }
 
-.story-input::placeholder {
+.storys-input::placeholder {
   color: #999;
   font-style: italic;
 }
@@ -233,6 +233,11 @@
   background: #f0f8ff;
 }
 
+.submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .submit-button::before {
   content: "";
   position: absolute;
@@ -306,6 +311,101 @@
   animation: sparkleFade 0.6s ease forwards;
   pointer-events: none;
   z-index: 2000;
+}
+
+.media-preview {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+.preview-media {
+  max-width: 100px;
+  max-height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+  transition: transform 0.8s ease, opacity 0.8s ease;
+}
+
+.preview-media.gathering {
+  animation: gather 0.8s ease forwards;
+}
+
+.merge-effect {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 15px auto;
+}
+
+.merge-fragment {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  background: inherit;
+  opacity: 0.8;
+  z-index: 1;
+}
+
+.merge-fragment.fragment1 {
+  top: 0;
+  left: 0;
+  animation: mergeFragments 1s ease forwards;
+  background-size: 200%;
+}
+
+.merge-fragment.fragment2 {
+  top: 0;
+  right: 0;
+  animation: mergeFragments 1s ease forwards;
+  animation-delay: 0.1s;
+  background-size: 200%;
+}
+
+.merge-fragment.fragment3 {
+  bottom: 0;
+  left: 0;
+  animation: mergeFragments 1s ease forwards;
+  animation-delay: 0.2s;
+  background-size: 200%;
+}
+
+.merge-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  opacity: 0;
+  animation: fadeIn 1s ease forwards;
+  animation-delay: 0.3s;
+}
+
+@keyframes gather {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(50px, -50px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes mergeFragments {
+  0% {
+    transform: translate(50px, -50px) scale(0.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 @keyframes fadeInUp {
@@ -432,24 +532,6 @@
   right: 10px;
 }
 
-.current-media-preview {
-  margin: 10px 0;
-  text-align: center;
-}
-
-.current-media-preview h5 {
-  font-size: 1rem;
-  margin-bottom: 8px;
-  color: #333;
-}
-
-.current-media-preview .story-image {
-  max-width: 200px;
-  max-height: 200px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
 .story-avatarh {
   width: 40px;
   height: 40px;
@@ -473,4 +555,81 @@
 .story-item:hover {
   box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
   transition: box-shadow 0.3s ease;
+}
+
+.story-item.scrollable:hover {
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3), 0 0 20px rgba(0, 123, 255, 0.2);
+  animation: softPulse 2s infinite ease-in-out;
+}
+
+@keyframes softPulse {
+  0% { box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3); }
+  50% { box-shadow: 0 12px 25px rgba(0, 123, 255, 0.5); }
+  100% { box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3); }
+}
+
+.story-title {
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(90deg, #ffffff 0%, #00bcd4 50%, #ffffff 100%);
+  background-size: 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShine 2s infinite linear;
+}
+
+@keyframes textShine {
+  0% { background-position: 200% center; }
+  100% { background-position: 0% center; }
+}
+
+.story-item.scrollable::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 0; height: 0;
+  border-top: 6px solid #007bff;
+  border-left: 6px solid #007bff;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.story-item.scrollable:hover::before {
+  opacity: 1;
+  animation: cornerFlash 1s infinite;
+}
+
+@keyframes cornerFlash {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+.story-item.scrollable {
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+}
+
+.story-item.scrollable::after {
+  content: '';
+  position: absolute;
+  top: -2px; left: -2px;
+  right: -2px; bottom: -2px;
+  z-index: -1;
+  background: linear-gradient(45deg, #ff6ec4, #7873f5, #4ade80, #ff6ec4);
+  background-size: 400%;
+  border-radius: 10px;
+  animation: borderFlow 6s linear infinite;
+}
+
+@keyframes borderFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes glowFlash {
+  0% { box-shadow: 0 0 0 rgba(0,255,255,0); }
+  50% { box-shadow: 0 0 12px rgba(0,255,255,0.5); }
+  100% { box-shadow: 0 0 0 rgba(0,255,255,0); }
 }

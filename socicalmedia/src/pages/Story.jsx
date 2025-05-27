@@ -12,7 +12,7 @@ import {
   initRainbowSmokeEffect,
   initButtonRipple,
   initHeaderPulse,
-  initStoryParallax
+  initStoryParallax,
 } from '../script';
 
 const Story = () => {
@@ -27,6 +27,8 @@ const Story = () => {
   });
   const [showMenu, setShowMenu] = useState(null);
   const [showNavButtons, setShowNavButtons] = useState({ left: false, right: false });
+  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission animation
+  const [showMergeEffect, setShowMergeEffect] = useState(false); // Track merge animation
   const storyListRef = useRef(null);
 
   const user = JSON.parse(localStorage.getItem("user"));
@@ -165,31 +167,38 @@ const Story = () => {
       setError("Vui lòng đăng nhập để thêm story");
       return;
     }
-    const formDataObj = new FormData();
-    formDataObj.append("user_id", userIDCMT);
-    formDataObj.append("content", formData.content);
-    formDataObj.append("visibility", formData.visibility);
-    if (formData.image) formDataObj.append("image", formData.image);
-    if (formData.video) formDataObj.append("video", formData.video);
+    setIsSubmitting(true); // Trigger gathering animation
+    setTimeout(async () => {
+      const formDataObj = new FormData();
+      formDataObj.append("user_id", userIDCMT);
+      formDataObj.append("content", formData.content);
+      formDataObj.append("visibility", formData.visibility);
+      if (formData.image) formDataObj.append("image", formData.image);
+      if (formData.video) formDataObj.append("video", formData.video);
 
-    try {
-      const res = await axios.post("http://localhost:8000/api/stories", formDataObj);
-      const updatedStories = [res.data.story, ...stories];
-      setStories(updatedStories);
-      setFormData({
-        content: "",
-        visibility: "public",
-        image: null,
-        video: null,
-      });
-      setError(null);
-      setTimeout(() => {
-        navigate("/home");
-      }, 100);
-    } catch (err) {
-      console.error("Lỗi khi thêm story:", err);
-      setError("Không thể thêm story");
-    }
+      try {
+        const res = await axios.post("http://localhost:8000/api/stories", formDataObj);
+        setShowMergeEffect(true); // Trigger merge animation
+        setTimeout(() => {
+          const updatedStories = [res.data.story, ...stories];
+          setStories(updatedStories);
+          setFormData({
+            content: "",
+            visibility: "public",
+            image: null,
+            video: null,
+          });
+          setError(null);
+          setIsSubmitting(false);
+          setShowMergeEffect(false);
+          navigate("/home");
+        }, 1000); // Match merge animation duration
+      } catch (err) {
+        console.error("Lỗi khi thêm story:", err);
+        setError("Không thể thêm story");
+        setIsSubmitting(false);
+      }
+    }, 800); // Match gathering animation duration
   };
 
   const handleEditStory = (story) => {
@@ -359,7 +368,35 @@ const Story = () => {
             />
           </label>
         </div>
-        <button type="submit" className="submit-button">
+        <div className="media-preview">
+          {formData.image && (
+            <img
+              src={URL.createObjectURL(formData.image)}
+              alt="Preview"
+              className={`preview-media ${isSubmitting ? 'gathering' : ''}`}
+            />
+          )}
+          {formData.video && (
+            <video
+              src={URL.createObjectURL(formData.video)}
+              className={`preview-media ${isSubmitting ? 'gathering' : ''}`}
+              muted
+            />
+          )}
+        </div>
+        {showMergeEffect && (
+          <div className="merge-effect">
+            <div className="merge-fragment fragment1"></div>
+            <div className="merge-fragment fragment2"></div>
+            <div className="merge-fragment fragment3"></div>
+            <img
+              src={formData.image ? URL.createObjectURL(formData.image) : '/default-image.png'}
+              alt="Merged Story"
+              className="merge-image"
+            />
+          </div>
+        )}
+        <button type="submit" className="submit-button" disabled={isSubmitting}>
           Thêm Story
         </button>
       </form>

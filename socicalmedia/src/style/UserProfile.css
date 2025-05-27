@@ -186,6 +186,7 @@ html {
   object-fit: cover;
   border: 3px solid #e5e7eb;
   transition: transform 0.3s ease;
+  margin-left: -50px;
 }
 
 .avatars.has-story {
@@ -196,6 +197,7 @@ html {
   border-radius: 50%;
   animation: gradient 15s ease infinite;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin-left: 2px;
 }
 
 .avatars.has-story:hover {
@@ -382,6 +384,7 @@ html {
   cursor: pointer;
   margin-top: 20px;
   transition: all 0.3s ease;
+  margin-left: -30px;
 }
 
 .follow-button.following {
@@ -866,10 +869,127 @@ html {
   }
 }
 
-.privacy-toggle {
-  margin-top: 10px;
-  font-weight: bold;
+/* 3D Hover cho avatar */
+.avatar-wrapper {
+  perspective: 1000px;
 }
-.privacy-toggle input {
-  margin-right: 8px;
+.avatars {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.avatars:hover {
+  transform: rotateY(10deg) rotateX(10deg) scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Hiệu ứng nghiêng 3D profile-card khi hover */
+.profile-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.profile-card:hover {
+  transform: rotateY(2deg) rotateX(2deg);
+}
+
+
+/* Hiệu ứng zoom ảnh bài post */
+.media-images {
+  transition: transform 0.4s ease, box-shadow 0.3s ease;
+  border-radius: 8px;
+}
+.media-images:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Mở trang nhẹ bằng zoom + fade */
+.profile-container {
+  animation: fadeZoomIn 0.5s ease;
+}
+@keyframes fadeZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Cảm xúc nổi bật hơn khi hover */
+.reaction-icon {
+  transition: transform 0.2s ease, filter 0.3s ease;
+}
+.reaction-icon:hover {
+  transform: scale(1.3);
+  filter: brightness(1.2);
+}
+
+
+
+
+/* 3. Animation bài viết xuất hiện */
+.posts {
+  animation: postFade 0.6s ease;
+}
+@keyframes postFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 4. Avatar có story glowing */
+.avatars.has-story {
+  box-shadow: 0 0 12px rgba(255, 72, 142, 0.5);
+  animation: glowPulse 2s ease-in-out infinite;
+}
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(255, 72, 142, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(255, 72, 142, 0.8);
+  }
+}
+
+/* 5. Hover swipe nhẹ bài post */
+.posts:hover {
+  transform: translate(4px, -2px);
+}
+
+/* 6. Zoom mở Story Viewer */
+.StoryViewer {
+  animation: storyZoom 0.4s ease;
+}
+@keyframes storyZoom {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.profile-container {
+  animation: fadeZoomIn 0.5s ease;
+}
+
+@keyframes fadeZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

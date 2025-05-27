@@ -1,6 +1,8 @@
 // src/App.js
 
+
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+
 import Home from './pages/Home';
 import Login from './components/Login';
 import Register from './components/Register';
@@ -12,6 +14,7 @@ import Story from "./pages/Story";
 import Search from "./pages/Search";
 import FollowersList from "./pages/FollowersList";
 import UserProfile from "./pages/UserProfile";
+import DinoGame from "./pages/DinoGame"; // Import DinoGame
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
@@ -20,12 +23,9 @@ import EditPost from "./pages/EditPost";
 import ListUser from "./pages/users/ListUser";
 import DetailUser from "./pages/users/DetailUser";
 import CreateUser from "./pages/users/CreateUser";
-
-import FriendRequest from "./pages/friends/Index";
-
 import axios from 'axios';
 import EditStory from "./pages/EditStory";
-
+import FriendRequest from "./pages/friends/Index";
 
 
 // Set base URL and credentials
@@ -33,9 +33,9 @@ axios.defaults.baseURL = 'http://localhost:8000/api';
 axios.defaults.withCredentials = true;
 
 // Fetch CSRF cookie on app load
-axios.get('/sanctum/csrf-cookie')
-    .then(() => console.log('CSRF cookie fetched'))
-    .catch(error => console.error('Error fetching CSRF cookie:', error));
+
+await axios.get('http://localhost:8000/sanctum/csrf-cookie');
+
 
 function AppLayout() {
     const location = useLocation();
@@ -58,6 +58,7 @@ function AppLayout() {
             <Route path="/users/:userId/followers" element={<FollowersList type="followers" />} />
             <Route path="/users/:userId/following" element={<FollowersList type="following" />} />
             <Route path="/users/:userId" element={<UserProfile />} />
+
 
             <Route path="/add-post" element={<AddPost />} />
             <Route path="/edit-post/:id" element={<EditPost />} />

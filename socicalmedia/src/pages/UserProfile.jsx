@@ -1,10 +1,13 @@
+// src/pages/UserProfile.js
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import Sidebar from "../components/Sidebar";
-import Header from "../components/Header";
-import StoryViewer from "../components/StoryViewer"; // Import StoryViewer
-import "../style/UserProfile.css";
+import Sidebar from '../components/Sidebar';
+import Header from '../components/Header';
+import StoryViewer from '../components/StoryViewer';
+
+import '../style/UserProfile.css';
+import { initMagnetEffect } from '../script';
 
 export default function UserProfile() {
   const { userId } = useParams();
@@ -18,7 +21,7 @@ export default function UserProfile() {
   const [followCount, setFollowCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [processing, setProcessing] = useState(false);
-  const [bio, setBio] = useState("Chưa có tiểu sử");
+  const [bio, setBio] = useState('Chưa có tiểu sử');
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [comments, setComments] = useState({});
@@ -29,26 +32,36 @@ export default function UserProfile() {
   const [reactionList, setReactionList] = useState({});
   const [showReactionList, setShowReactionList] = useState(null);
   const [activeMenuPostId, setActiveMenuPostId] = useState(null);
-  const [stories, setStories] = useState([]); // State for stories
-  const [isViewerOpen, setIsViewerOpen] = useState(false); // State for StoryViewer
+  const [stories, setStories] = useState([]);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [showIntro, setShowIntro] = useState(true); // State to control intro animation
+
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
   const reactionListRef = useRef(null);
   const fileInputRef = useRef(null);
+  useEffect(() => {
+    initMagnetEffect();
+  }, []);
 
-  // Lấy ID người dùng hiện tại từ localStorage
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowIntro(false);
+    }, 3500); // Matches animation duration
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     const savedUserId = localStorage.getItem('user_id');
     if (savedUserId) {
       const id = parseInt(savedUserId, 10);
       if (!isNaN(id)) setCurrentUserId(id);
-      else setError("ID người dùng không hợp lệ.");
+      else setError('ID người dùng không hợp lệ.');
     } else {
-      setError("Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.");
+      setError('Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.');
     }
   }, []);
 
-  // Lấy thông tin người dùng
   const fetchUserData = async () => {
     if (!userId) return;
     setLoading(true);
@@ -61,66 +74,68 @@ export default function UserProfile() {
       setUser(data);
       setFollowCount(data.followers_count || 0);
       setFollowingCount(data.following_count || 0);
-      setBio(data.bio || "Chưa có tiểu sử");
+      setBio(data.bio || 'Chưa có tiểu sử');
     } catch (err) {
       setError(err.message);
     }
   };
 
-  // Lấy bài viết của người dùng
   const fetchUserPosts = async () => {
     if (!userId) return;
     try {
-      const res = await axios.get("http://localhost:8000/api/posts", {
+      const res = await axios.get('http://localhost:8000/api/posts', {
         params: { user_id: userId },
       });
-      const userPosts = res.data.filter(post => post.user_id === parseInt(userId, 10));
+      const userPosts = res.data.filter(
+        (post) => post.user_id === parseInt(userId, 10)
+      );
       setPosts(userPosts);
     } catch (err) {
-      console.error("Lỗi khi lấy bài viết:", err);
-      setError("Không thể tải bài viết");
+      console.error('Lỗi khi lấy bài viết:', err);
+      setError('Không thể tải bài viết');
     } finally {
       setLoading(false);
     }
   };
 
-  // Gọi cả hai hàm khi userId thay đổi
   useEffect(() => {
-    fetchUserData();
-    fetchUserPosts();
-  }, [userId]);
+    if (!showIntro) {
+      fetchUserData();
+      fetchUserPosts();
+    }
+  }, [userId, showIntro]);
 
-  // Kiểm tra trạng thái follow
   useEffect(() => {
     if (!user || !currentUserId || user.id === currentUserId) return;
 
-    axios.post('http://localhost:8000/api/follow-status', {
-      follower_id: currentUserId,
-      followed_id: user.id,
-    })
-    .then(res => {
-      setIsFollowing(res.data.isFollowing || false);
-    })
-    .catch(() => setIsFollowing(false));
+    axios
+      .post('http://localhost:8000/api/follow-status', {
+        follower_id: currentUserId,
+        followed_id: user.id,
+      })
+      .then((res) => {
+        setIsFollowing(res.data.isFollowing || false);
+      })
+      .catch(() => setIsFollowing(false));
   }, [user, currentUserId]);
 
-  // Lấy danh sách stories của user
   const fetchUserStories = async () => {
     if (!userId || !currentUserId) return;
     try {
-      const res = await axios.get("http://localhost:8000/api/stories", {
-        params: { user_id: currentUserId }, // Pass currentUserId to check follow status
+
+      const res = await axios.get('http://localhost:8000/api/stories', {
+        params: { user_id: currentUserId },
       });
-      // Filter stories for the specific user
-      const userStories = res.data.filter(story => story.user_id === parseInt(userId, 10));
+      const userStories = res.data.filter(
+        (story) => story.user_id === parseInt(userId, 10)
+      );
       setStories(userStories);
     } catch (err) {
-      console.error("Lỗi khi lấy stories:", err);
-      setError("Không thể tải stories");
+      console.error('Lỗi khi lấy stories:', err);
+      setError('Không thể tải stories');
     }
   };
 
-  // Theo dõi hoặc hủy theo dõi
   const toggleFollow = () => {
     if (processing || !currentUserId) return;
     setProcessing(true);
@@ -129,29 +144,30 @@ export default function UserProfile() {
       ? 'http://localhost:8000/api/unfollow'
       : 'http://localhost:8000/api/follow';
 
-    axios.post(url, {
-      follower_id: currentUserId,
-      followed_id: user.id,
-    })
-    .then(() => {
-      setIsFollowing(!isFollowing);
-      setFollowCount(prev => isFollowing ? prev - 1 : prev + 1);
-    })
-    .catch(err => {
-      alert(err.response?.data?.message || 'Lỗi khi thao tác follow');
-    })
-    .finally(() => setProcessing(false));
+    axios
+      .post(url, {
+        follower_id: currentUserId,
+        followed_id: user.id,
+      })
+      .then(() => {
+        setIsFollowing(!isFollowing);
+        setFollowCount((prev) => (isFollowing ? prev - 1 : prev + 1));
+      })
+      .catch((err) => {
+        alert(err.response?.data?.message || 'Lỗi khi thao tác follow');
+      })
+      .finally(() => setProcessing(false));
   };
 
-  // Chỉnh sửa tiểu sử
   const handleBioEdit = () => setIsEditingBio(true);
 
   const handleBioSave = () => {
     if (!user) return;
     setProcessing(true);
-    axios.put(`http://localhost:8000/api/users/${user.id}/bio`, { bio })
+    axios
+      .put(`http://localhost:8000/api/users/${user.id}/bio`, { bio })
       .then(() => {
-        setUser(prev => ({ ...prev, bio }));
+        setUser((prev) => ({ ...prev, bio }));
         setIsEditingBio(false);
       })
       .catch(() => {
@@ -162,14 +178,23 @@ export default function UserProfile() {
 
   const handleBioChange = (e) => setBio(e.target.value);
 
-  // Xử lý tải ảnh avatar và xem stories
- const handleAvatarClick = () => {
-  if (user?.has_active_stories && (currentUserId === user.id || isFollowing)) {
-    fetchUserStories(); // Chỉ gọi fetchUserStories
-  } else if (currentUserId === user.id) {
-    // Cho phép tải ảnh đại diện
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
+  // Handle avatar click and view stories
+  const handleAvatarClick = () => {
+    if (user?.has_active_stories && (currentUserId === user.id || isFollowing)) {
+      fetchUserStories();
+    } else if (currentUserId === user.id) {
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
+    } else if (user?.has_active_stories && !isFollowing) {
+      alert('Hãy theo dõi người dùng này để xem tin của họ!');
+    }
+  };
+
+  // Open StoryViewer when stories are updated
+  useEffect(() => {
+    if (stories.length > 0) {
+      setIsViewerOpen(true);
     }
   } else if (user?.has_active_stories && !isFollowing) {
     alert("Hãy theo dõi người dùng này để xem tin của họ!");
@@ -203,10 +228,14 @@ useEffect(() => {
 
     setProcessing(true);
     try {
-      const res = await axios.post(`http://localhost:8000/api/users/${user.id}/profile-picture`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      setUser(prev => ({ ...prev, profilepicture: res.data.profilepicture }));
+      const res = await axios.post(
+        `http://localhost:8000/api/users/${user.id}/profile-picture`,
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }
+      );
+      setUser((prev) => ({ ...prev, profilepicture: res.data.profilepicture }));
     } catch (err) {
       setError(err.response?.data?.message || 'Lỗi khi tải ảnh avatar');
     } finally {
@@ -224,16 +253,16 @@ useEffect(() => {
 
     try {
       const res = await fetch(`http://localhost:8000/api/posts/${postId}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: currentUserId, content }),
       });
 
       if (!res.ok) throw new Error('Lỗi khi gửi bình luận');
       await fetchComments(postId);
-      setCommentInputs({ ...commentInputs, [postId]: "" });
+      setCommentInputs({ ...commentInputs, [postId]: '' });
     } catch (error) {
-      setError("Không thể gửi bình luận");
+      setError('Không thể gửi bình luận');
     }
   };
 
@@ -249,7 +278,7 @@ useEffect(() => {
       const res = await axios.get(`http://localhost:8000/api/posts/${postId}/reactions`);
       setReactionList((prev) => ({ ...prev, [postId]: res.data }));
     } catch (err) {
-      setError("Không thể tải danh sách cảm xúc");
+      setError('Không thể tải danh sách cảm xúc');
     }
   };
 
@@ -264,7 +293,7 @@ useEffect(() => {
 
   const handleReactionClick = async (postId, reactionType = null) => {
     if (!currentUserId) {
-      setError("Vui lòng đăng nhập để thực hiện hành động này");
+      setError('Vui lòng đăng nhập để thực hiện hành động này');
       return;
     }
 
@@ -294,7 +323,7 @@ useEffect(() => {
         };
       }
     } else if (reactionType || reactionType === null) {
-      const newReactionType = reactionType || "like";
+      const newReactionType = reactionType || 'like';
       updatedPost = {
         ...updatedPost,
         user_reaction: { user_id: currentUserId, post_id: postId, type: newReactionType },
@@ -315,27 +344,34 @@ useEffect(() => {
           data: { user_id: currentUserId },
         });
       } else if (reactionType || reactionType === null) {
-        const newReactionType = reactionType || "like";
+        const newReactionType = reactionType || 'like';
         await axios.post(`http://localhost:8000/api/posts/${postId}/react`, {
           user_id: currentUserId,
           type: newReactionType,
         });
       }
     } catch (err) {
-      setError("Không thể xử lý reaction");
+      setError('Không thể xử lý reaction');
       setPosts(posts);
     }
   };
 
   const renderReaction = (type) => {
-    const icons = { like: "👍", love: "❤️", haha: "😂", wow: "😲", sad: "😢", angry: "😡" };
-    return icons[type] || "👍";
+    const icons = { like: '👍', love: '❤️', haha: '😂', wow: '😲', sad: '😢', angry: '😡' };
+    return icons[type] || '👍';
   };
 
   const renderButtonLabel = (userReaction) => {
-    if (!userReaction) return "👍 Like";
-    const labels = { like: "👍 Like", love: "❤️ Love", haha: "😂 Haha", wow: "😲 Wow", sad: "😢 Sad", angry: "😡 Angry" };
-    return labels[userReaction.type] || "👍 Like";
+    if (!userReaction) return '👍 Like';
+    const labels = {
+      like: '👍 Like',
+      love: '❤️ Love',
+      haha: '😂 Haha',
+      wow: '😲 Wow',
+      sad: '😢 Sad',
+      angry: '😡 Angry',
+    };
+    return labels[userReaction.type] || '👍 Like';
   };
 
   const getTotalReactions = (summary) => {
@@ -343,7 +379,7 @@ useEffect(() => {
   };
 
   const toggleExpandImages = (postId) => {
-    setExpandedPosts(prev => ({ ...prev, [postId]: !prev[postId] }));
+    setExpandedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
 
   const handleEdit = (post) => {
@@ -373,40 +409,55 @@ useEffect(() => {
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [activeMenuPostId, showReactionList]);
 
-   if (loading)
+  if (loading) {
     return (
-      <>
-       <div className="youtube-loader"></div>
-<div className="spinner"></div>
-      </>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+        <div className="youtube-loader"></div>
+        <div className="spinner"></div>
+      </div>
     );
-  if (error) return <p className="error-text">{error}</p>;
+  }
+
+  if (error) {
+    return <p className="text-center text-red-600 p-6 bg-red-50 rounded-lg">{error}</p>;
+  }
 
   
 
   return (
-    <div className="app-container">
+    <div className="app-container min-h-screen flex flex-col bg-gray-100">
       <Header />
-      <div className="main-content">
+      <div className="main-content flex flex-1 overflow-hidden">
         <Sidebar />
-        <div className="profile-container">
+        <div className="profile-container flex-1 p-6 overflow-y-auto bg-gradient-to-b from-indigo-100 to-gray-100">
           {user && (
             <div className="profile-card">
               <div className="avatar-wrapper">
                 <img
-                  src={user.profilepicture
-                    ? `http://localhost:8000/storage/images/${user.profilepicture}`
-                    : '/default-avatar.png'}
+                  src={
+                    user.profilepicture
+                      ? `http://localhost:8000/storage/images/${user.profilepicture}`
+                      : '/default-avatar.png'
+                  }
                   alt={`${user.username} avatar`}
                   className={`avatars ${user.has_active_stories ? 'has-story' : ''}`}
                   onClick={handleAvatarClick}
-                  style={{ cursor: user.has_active_stories || currentUserId === user.id ? 'pointer' : 'default' }}
-                  onError={e => e.currentTarget.src = '/default-avatar.png'}
-                  aria-label={user.has_active_stories ? `Xem tin của ${user.username}` : `Ảnh đại diện của ${user.username}`}
+                  style={{
+                    cursor:
+                      user.has_active_stories || currentUserId === user.id
+                        ? 'pointer'
+                        : 'default',
+                  }}
+                  onError={(e) => (e.currentTarget.src = '/default-avatar.png')}
+                  aria-label={
+                    user.has_active_stories
+                      ? `Xem tin của ${user.username}`
+                      : `Ảnh đại diện của ${user.username}`
+                  }
                 />
                 {currentUserId === user.id && (
                   <>
@@ -434,17 +485,29 @@ useEffect(() => {
                 <p className="username">@{user.username}</p>
 
                 <div className="stats">
-                  <div><strong>{posts.length}</strong> Bài viết</div>
-                  <div className="clickable" onClick={() => navigate(`/users/${user.id}/followers`)}>
+                  <div>
+                    <strong>{posts.length}</strong> Bài viết
+                  </div>
+                  <div
+                    className="clickable"
+                    onClick={() => navigate(`/users/${user.id}/followers`)}
+                  >
                     <strong>{followCount}</strong> Người theo dõi
                   </div>
-                  <div className="clickable" onClick={() => navigate(`/users/${user.id}/following`)}>
+                  <div
+                    className="clickable"
+                    onClick={() => navigate(`/users/${user.id}/following`)}
+                  >
                     <strong>{followingCount}</strong> Đang theo dõi
                   </div>
                 </div>
 
-                <p><strong className="Email">Email:</strong> {user.email}</p>
-                <p><strong className="SDT">SĐT:</strong> {user.phone || 'Chưa cập nhật'}</p>
+                <p>
+                  <strong className="Email">Email:</strong> {user.email}
+                </p>
+                <p>
+                  <strong className="SDT">SĐT:</strong> {user.phone || 'Chưa cập nhật'}
+                </p>
 
                 <div className="bio-section">
                   <strong className="bio">Tiểu sử:</strong>
@@ -457,13 +520,25 @@ useEffect(() => {
                         className="bio-input"
                         disabled={processing}
                       />
-                      <button onClick={handleBioSave} className="bio-save-button" disabled={processing}>Lưu</button>
+                      <button
+                        onClick={handleBioSave}
+                        className="bio-save-button"
+                        disabled={processing}
+                      >
+                        Lưu
+                      </button>
                     </div>
                   ) : (
                     <div className="bio-display">
                       <p>{bio}</p>
                       {currentUserId === user.id && (
-                        <span className="edit-icon" onClick={handleBioEdit} title="Chỉnh sửa tiểu sử">✏️</span>
+                        <span
+                          className="edit-icon"
+                          onClick={handleBioEdit}
+                          title="Chỉnh sửa tiểu sử"
+                        >
+                          ✏️
+                        </span>
                       )}
                     </div>
                   )}
@@ -497,13 +572,13 @@ useEffect(() => {
                           src={
                             post.user?.profilepicture
                               ? `http://localhost:8000/storage/images/${post.user.profilepicture}`
-                              : "/default-avatar.png"
+                              : '/default-avatar.png'
                           }
                           alt="Avatar"
                           className="avatar"
                         />
                         <div>
-                          <strong>{post.user?.username || "Người dùng"}</strong>
+                          <strong>{post.user?.username || 'Người dùng'}</strong>
                           <br />
                           <small>{new Date(post.created_at).toLocaleString()}</small>
                         </div>
@@ -527,7 +602,7 @@ useEffect(() => {
                                 <button onClick={() => handleEdit(post)}>📝 Sửa</button>
                                 <button
                                   onClick={() => {
-                                    if (window.confirm("Bạn có chắc muốn xóa bài viết này?")) {
+                                    if (window.confirm('Bạn có chắc muốn xóa bài viết này?')) {
                                       setLoading(true);
                                       axios
                                         .delete(`http://localhost:8000/api/posts/${post.id}`, {
@@ -537,7 +612,7 @@ useEffect(() => {
                                           setPosts(posts.filter((p) => p.id !== post.id));
                                         })
                                         .catch(() => {
-                                          setError("Không thể xóa bài viết");
+                                          setError('Không thể xóa bài viết');
                                         })
                                         .finally(() => setLoading(false));
                                     }
@@ -557,25 +632,33 @@ useEffect(() => {
                     <div className="post-media">
                       {Array.isArray(post.imageurl) && (
                         <>
-                          {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 4)).map((img, index) => (
+                          {(expandedPosts[post.id]
+                            ? post.imageurl
+                            : post.imageurl.slice(0, 4)
+                          ).map((img, index) => (
                             <div key={index} className="image-wrapper">
                               <img
                                 src={`http://localhost:8000/storage/images/${img}`}
                                 alt={`Ảnh ${index + 1}`}
-                                className="media-image"
+                                className="media-images"
                               />
-                              {index === 3 && post.imageurl.length > 4 && !expandedPosts[post.id] && (
-                                <div
-                                  className="image-overlay"
-                                  onClick={() => toggleExpandImages(post.id)}
-                                >
-                                  +{post.imageurl.length - 4} ảnh
-                                </div>
-                              )}
+                              {index === 3 &&
+                                post.imageurl.length > 4 &&
+                                !expandedPosts[post.id] && (
+                                  <div
+                                    className="image-overlay"
+                                    onClick={() => toggleExpandImages(post.id)}
+                                  >
+                                    +{post.imageurl.length - 4} ảnh
+                                  </div>
+                                )}
                             </div>
                           ))}
                           {expandedPosts[post.id] && (
-                            <button onClick={() => toggleExpandImages(post.id)} className="collapse-btn">
+                            <button
+                              onClick={() => toggleExpandImages(post.id)}
+                              className="collapse-btn"
+                            >
                               Thu gọn
                             </button>
                           )}
@@ -600,17 +683,18 @@ useEffect(() => {
                           <span
                             className="reaction-icon"
                             onClick={() => handleReactionSummaryClick(post.id)}
-                            style={{ cursor: "pointer" }}
+                            style={{ cursor: 'pointer' }}
                           >
-                            {Object.keys(post.reaction_summary).map((type) =>
-                              post.reaction_summary[type] > 0 ? (
-                                <span key={type}>{renderReaction(type)}</span>
-                              ) : null
+                            {Object.keys(post.reaction_summary).map(
+                              (type) =>
+                                post.reaction_summary[type] > 0 && (
+                                  <span key={type}>{renderReaction(type)}</span>
+                                )
                             )}
                           </span>
                           <span
                             onClick={() => handleReactionSummaryClick(post.id)}
-                            style={{ cursor: "pointer" }}
+                            style={{ cursor: 'pointer' }}
                           >
                             {getTotalReactions(post.reaction_summary)}
                           </span>
@@ -643,12 +727,14 @@ useEffect(() => {
                                         src={
                                           reaction.user?.profilepicture
                                             ? `http://localhost:8000/storage/images/${reaction.user.profilepicture}`
-                                            : "/default-avatar.png"
+                                            : '/default-avatar.png'
                                         }
                                         alt="Avatar"
                                         className="reaction-user-avatar"
                                       />
-                                      <span>{reaction.user?.username || reaction.username}</span>
+                                      <span>
+                                        {reaction.user?.username || reaction.username}
+                                      </span>
                                       : {renderReaction(reaction.type)}
                                     </div>
                                   ))
@@ -667,17 +753,19 @@ useEffect(() => {
                         onMouseLeave={() => setShowReactions(null)}
                       >
                         <button
-                          className={`like-button ${post.user_reaction ? "reacted" : ""}`}
+                          className={`like-button ${post.user_reaction ? 'reacted' : ''}`}
                           onClick={() => handleReactionClick(post.id)}
                         >
                           {renderButtonLabel(post.user_reaction)}
                         </button>
                         {showReactions === post.id && (
                           <div className="reaction-icons">
-                            {["like", "love", "haha", "wow", "sad", "angry"].map((type) => (
+                            {['like', 'love', 'haha', 'wow', 'sad', 'angry'].map((type) => (
                               <button
                                 key={type}
-                                className={`reaction-icon ${post.user_reaction?.type === type ? "selected" : ""}`}
+                                className={`reaction-icon ${
+                                  post.user_reaction?.type === type ? 'selected' : ''
+                                }`}
                                 onClick={() => handleReactionClick(post.id, type)}
                                 title={type.charAt(0).toUpperCase() + type.slice(1)}
                               >
@@ -700,7 +788,7 @@ useEffect(() => {
                       >
                         💬 Bình luận
                       </button>
-                      <button onClick={() => alert("Chức năng chia sẻ chưa được triển khai")}>
+                      <button onClick={() => alert('Chức năng chia sẻ chưa được triển khai')}>
                         🔗 Chia sẻ
                       </button>
                     </div>
@@ -710,9 +798,12 @@ useEffect(() => {
                         <input
                           type="text"
                           placeholder="Viết bình luận..."
-                          value={commentInputs[post.id] || ""}
+                          value={commentInputs[post.id] || ''}
                           onChange={(e) =>
-                            setCommentInputs({ ...commentInputs, [post.id]: e.target.value })
+                            setCommentInputs({
+                              ...commentInputs,
+                              [post.id]: e.target.value,
+                            })
                           }
                         />
                         <button onClick={() => handleCommentSubmit(post.id)}>Gửi</button>
@@ -723,7 +814,8 @@ useEffect(() => {
                       <div className="comments">
                         {comments[post.id].map((comment) => (
                           <div key={comment.id} className="comment">
-                            <strong>{comment.user?.username || "Người dùng"}:</strong> {comment.content}
+                            <strong>{comment.user?.username || 'Người dùng'}:</strong>{' '}
+                            {comment.content}
                           </div>
                         ))}
                       </div>
@@ -744,9 +836,9 @@ useEffect(() => {
               onNextUser={() => setIsViewerOpen(false)} // No next user in profile context
               onPrevUser={() => setIsViewerOpen(false)} // No previous user in profile context
               onDeleteStory={(id) => {
-                setStories(stories.filter(story => story.id !== id));
+                setStories(stories.filter((story) => story.id !== id));
                 if (stories.length === 1) {
-                  setUser(prev => ({ ...prev, has_active_stories: false }));
+                  setUser((prev) => ({ ...prev, has_active_stories: false }));
                 }
               }}
               currentUserId={currentUserId}

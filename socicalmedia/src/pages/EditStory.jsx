@@ -6,7 +6,6 @@ import Header from "../components/Header";
 import "../style/EditStory.css";
 
 import {
-  initBlinkText,
   initGradientTextHover,
   sparkleMouseEffect,
   initRainbowSmokeEffect,
@@ -54,7 +53,6 @@ const EditStory = () => {
   }, [userIDCMT, story.id, navigate]);
 
   useEffect(() => {
-    initBlinkText();
     initGradientTextHover();
     const removeSparkleListener = sparkleMouseEffect();
     const removeSmokeListener = initRainbowSmokeEffect();
@@ -157,11 +155,18 @@ const EditStory = () => {
     navigate("/home");
   };
 
+  const titleText = "Sửa Story";
   return (
     <div className="edit-story-container">
       <Header />
       <Sidebar />
-      <h4 className="edit-story-header blink-text">Sửa Story</h4>
+      <h4 className="edit-story-header netflix-text">
+        {titleText.split("").map((char, index) => (
+          <span key={index} style={{ "--i": index }}>
+            {char}
+          </span>
+        ))}
+      </h4>
       {error && <p className="error">{error}</p>}
       <form onSubmit={handleUpdateStory} className="edit-story-form">
         <label htmlFor="content" className="visually-hidden">
