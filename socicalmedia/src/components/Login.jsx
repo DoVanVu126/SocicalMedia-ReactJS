@@ -222,13 +222,13 @@ const Login = () => {
                 ref={passwordInputRef}
               />
               <div class="box-login">
-                <div class="canvas-login">
-                  <button type="submit" className={`btn-login-big submit-btn0-login ${isSubmitting ? 'loading' : ''}`}></button>
-                  <button type="submit" className={`btn-login-big submit-btn1-login ${isSubmitting ? 'loading' : ''}`}>Đăng nhập</button>
-                  <button type="submit" className={`btn-login-big submit-btn2-login ${isSubmitting ? 'loading' : ''}`}>Đăng nhập</button>
-                  <button type="submit" className={`btn-login-big submit-btn3-login ${isSubmitting ? 'loading' : ''}`}></button>
-                  <button type="submit" className={`btn-login-small submit-btn4-login ${isSubmitting ? 'loading' : ''}`}></button>
-                  <button type="submit" className={`btn-login-small submit-btn5-login ${isSubmitting ? 'loading' : ''}`}></button>
+                <div class="canvas-login-vu">
+                  <button type="submit" className={`btn-login-big submit-btn0-login `}></button>
+                  <button type="submit" className={`btn-login-big submit-btn1-login `}>Đăng nhập</button>
+                  <button type="submit" className={`btn-login-big submit-btn2-login `}>Đăng nhập</button>
+                  <button type="submit" className={`btn-login-big submit-btn3-login `}></button>
+                  <button type="submit" className={`btn-login-small submit-btn4-login `}></button>
+                  <button type="submit" className={`btn-login-small submit-btn5-login `}></button>
                 </div>
               </div>
             </>

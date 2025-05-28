@@ -1,6 +1,4 @@
 // src/App.js
-
-
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import Home from './pages/Home';

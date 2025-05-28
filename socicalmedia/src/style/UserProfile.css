@@ -568,7 +568,7 @@ body {
   color: #2563eb;
 }
 
-.options-menu {
+.options-menu-profile {
   position: absolute;
   right: 0;
   top: 24px;
@@ -579,7 +579,7 @@ body {
   z-index: 10;
 }
 
-.options-menu button {
+.options-menu-profile button {
   display: block;
   width: 100%;
   padding: 10px 16px;
@@ -592,7 +592,7 @@ body {
   transition: background 0.2s ease;
 }
 
-.options-menu button:hover {
+.options-menu-profile button:hover {
   background: #f1f5f9;
 }
 

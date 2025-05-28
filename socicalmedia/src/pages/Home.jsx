@@ -19,15 +19,6 @@ export default function Home() {
 
     return () => clearTimeout(timer);
   }, []);
-
-
-  //BÌNH LUẬN
-  const [notifications, setNotifications] = useState([]);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);
-  const [notificationStatusMessage, setNotificationStatusMessage] = useState("");
-
   const [editingIndex, setEditingIndex] = useState(null);
   const [editContent, setEditContent] = useState("");
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
@@ -55,6 +46,39 @@ export default function Home() {
   const buttonRef = useRef(null);
   const reactionListRef = useRef(null);
   const storyListRef = useRef(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPosts, setTotalPosts] = useState(0);
+  const postsPerPage = 10;
+
+  const fetchPosts = async (page) => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`/posts?page=${page}&limit=${postsPerPage}`);
+      setPosts(res.data.posts);
+      setTotalPosts(res.data.totalPosts);
+      setCurrentPage(page);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+
+  };
+
+  const totalPages = Math.ceil(totalPosts / postsPerPage);
+
+  // Hàm điều hướng phân trang
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
   const [showNavButtons, setShowNavButtons] = useState({
     left: false,
     right: false,
@@ -120,24 +144,14 @@ export default function Home() {
       setError("Vui lòng đăng nhập để xem bài viết.");
       return;
     }
-    const start = Date.now();
-    setLoading(true);
-    axios
-      .get("http://localhost:8000/api/posts", { params: { user_id: userIDCMT } })
-      .then((res) => {
-        const elapsed = Date.now() - start;
-        const remainingTime = Math.max(3000 - elapsed, 0);
-        setTimeout(() => {
-          setPosts(res.data);
-          setLoading(false);
-        }, remainingTime);
-      })
-      .catch((err) => {
-        console.error("Error fetching posts:", err);
-        setError("Không thể tải bài viết.");
-        setLoading(false);
-      });
-  }, [userIDCMT]);
+
+    fetchPosts(currentPage); // Gọi API phân trang đã đúng
+  }, [userIDCMT, currentPage]);
+
+  useEffect(() => {
+    console.log("Total posts:", totalPosts);
+    console.log("Total pages:", totalPages);
+  }, [totalPosts]);
 
   useEffect(() => {
     const updateNavButtons = () => {
@@ -233,7 +247,6 @@ export default function Home() {
     setOpenMenuIndex(null);
     setSelectedCommentId(commentId);
   };
-
   const handleSaveEdit = async () => {
     if (
       editingIndex === null ||
@@ -242,30 +255,33 @@ export default function Home() {
     ) {
       return;
     }
+
     try {
       const response = await axios.put(
         `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${selectedCommentId}`,
-        { content: editContent, user_id: userIDCMT }
+        {
+          content: editContent,
+          user_id: userIDCMT,
+        }
       );
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error editing comment:", errorData);
-        setError("Unable to edit comment.");
-        return;
-      }
-      const updatedComment = await response.json();
-      setComments(prevComments => {
+
+      // Cập nhật comment sau khi sửa
+      const updatedComment = response.data;
+
+      setComments((prevComments) => {
         const updatedComments = { ...prevComments };
         if (updatedComments[selectedCommentPostId]) {
           const commentIndex = updatedComments[selectedCommentPostId].findIndex(
             (cmt) => cmt.id === selectedCommentId
           );
           if (commentIndex !== -1) {
-            updatedComments[selectedCommentPostId][commentIndex] = response.data;
+            updatedComments[selectedCommentPostId][commentIndex] = updatedComment;
           }
         }
         return updatedComments;
       });
+
+      // Reset các state
       setEditingIndex(null);
       setEditContent("");
       setSelectedCommentId(null);
@@ -314,14 +330,28 @@ export default function Home() {
   const toggleExpandImages = (postId) => {
     setExpandedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
-  const handleEdit = (post) => {
-    navigate(`/edit-post/${post.id}`, {
-      state: {
-        content: post.content,
-        imageUrl: post.imageurl,
-        videoUrl: post.videourl,
-      },
-    });
+  const handleEdit = async (post) => {
+    try {
+      // Gửi request GET để kiểm tra bài viết có tồn tại không
+      const response = await axios.get(`http://localhost:8000/api/posts/${post.id}`);
+      const latestPost = response.data;
+      if (!latestPost) {
+        alert("Bài viết không còn tồn tại hoặc đã bị xóa. Hãy load lại trang!");
+        return;
+      }
+      // Nếu không thay đổi, điều hướng sang trang chỉnh sửa
+      navigate(`/edit-post/${post.id}`, {
+        state: {
+          content: latestPost.content,
+          imageUrl: latestPost.imageurl,
+          videoUrl: latestPost.videourl,
+        },
+      });
+
+    } catch (error) {
+      console.error("Không thể sửa bài viết:", error);
+      alert("Bài viết không còn tồn tại hoặc đã bị xóa. Hãy load lại trang!");
+    }
   };
 
   const handleEditStory = (story) => {
@@ -811,11 +841,16 @@ export default function Home() {
                         src={
                           post.user?.profilepicture
                             ? `http://localhost:8000/storage/images/${post.user.profilepicture}`
-                            : "/default-avatar.png"
+                            : "/images/image-default.jpg"
                         }
                         alt="Avatar"
                         className="avatar"
+                        onError={(e) => {
+                          e.target.onerror = null; // tránh lỗi vòng lặp
+                          e.target.src = "/images/image-default.jpg"; // fallback ảnh mặc định
+                        }}
                       />
+
                       <div>
                         <strong>{post.user?.username || "Người dùng"}</strong>
                         <br />
@@ -832,7 +867,6 @@ export default function Home() {
                       >
                         ⋯
                       </button>
-
                       {activeMenuPostId === post.id && post.user?.id === user?.id && (
                         <div className="options-menu" ref={menuRef}>
                           <button onClick={() => handleEdit(post)}>Sửa</button>
@@ -844,17 +878,13 @@ export default function Home() {
 
                           <button
                             onClick={() => {
-
                               if (!window.confirm("Bạn có chắc muốn xóa bài viết này không?")) {
                                 return;
                               }
                               const postElement = document.getElementById(`post-${post.id}`);
 
                               if (postElement) {
-                                // Thêm class kích hoạt animation chém
                                 postElement.classList.add("sliced");
-
-                                // Sau khi animation kết thúc, gọi API xóa
                                 postElement.addEventListener(
                                   "animationend",
                                   () => {
@@ -870,7 +900,7 @@ export default function Home() {
                                       })
                                       .catch((err) => {
                                         console.error("Lỗi khi xóa bài viết:", err);
-                                        setError("Không thể xóa bài viết");
+                                        setError("Không thể xóa bài viết, hãy load lại trang !");
                                       })
                                       .finally(() => setLoading(false));
                                   },
@@ -884,41 +914,36 @@ export default function Home() {
                           </button>
                         </div>
                       )}
-
                     </div>
                   </div>
-
                   <p className="post-content">{post.content}</p>
-
                   <div key={post.id} className="post-media">
-
                     {Array.isArray(post.imageurl) && (
                       <>
-                        {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 4)).map((img, index) => (
+                        {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 6)).map((img, index) => (
                           <div key={index} className="image-wrapper">
-                            {/* Overlay đen nhạt khi hover */}
                             <div className="media-overlay-black"></div>
                             <div className="media-overlay-hover"></div>
-                            {/* Ảnh */}
-
                             <img
                               src={`http://localhost:8000/storage/images/${img}`}
                               alt={`Ảnh ${index + 1}`}
                               className="media-image"
+                              onError={(e) => {
+                                e.target.onerror = null; // tránh lỗi vòng lặp
+                                e.target.src = '/images/image-default.jpg'; // đường dẫn ảnh mặc định trong public folder
+                              }}
                             />
-                            {/* Overlay +x ảnh */}
 
-                            {index === 3 && post.imageurl.length > 4 && !expandedPosts[post.id] && (
+                            {index === 5 && post.imageurl.length > 6 && !expandedPosts[post.id] && (
                               <div
                                 className="image-overlay"
                                 onClick={() => toggleExpandImages(post.id)}
                               >
-                                +{post.imageurl.length - 4} ảnh
+                                +{post.imageurl.length - 6} ảnh
                               </div>
                             )}
                           </div>
                         ))}
-
                         {expandedPosts[post.id] && (
                           <button
                             onClick={() => toggleExpandImages(post.id)}
@@ -942,7 +967,6 @@ export default function Home() {
                       </div>
                     )}
                   </div>
-
                   <div className="actions">
                     {getTotalReactions(post.reaction_summary) > 0 && (
                       <div className="reaction-summary">
@@ -1013,7 +1037,6 @@ export default function Home() {
                         )}
                       </div>
                     )}
-
                     <div
                       className="reaction-container"
                       onMouseEnter={() => setShowReactions(post.id)}
@@ -1041,7 +1064,6 @@ export default function Home() {
                         </div>
                       )}
                     </div>
-
                     <button
                       onClick={() => {
                         if (selectedCommentPostId === post.id) {
@@ -1060,7 +1082,7 @@ export default function Home() {
                   </div>
                   {selectedCommentPostId === post.id && (
                     <>
-                      <div className="add-comment">
+                      <div className="cm-add-comment">
                         <input
                           type="text"
                           placeholder="Viết bình luận..."
@@ -1072,40 +1094,41 @@ export default function Home() {
                             })
                           }
                         />
-                        <button onClick={() => handleCommentSubmit(post.id)}>
-                          Gửi
-                        </button>
+                        <button onClick={() => handleCommentSubmit(post.id)}>Gửi</button>
                       </div>
 
-                      <div className="comments">
+                      <div className="cm-comments">
                         {comments[post.id]?.map((comment, index) => (
-                          <div key={index} className="comment">
+                          <div key={index} className="cm-comment">
+                            <div className="cm-comment-content">
+                              <strong>{comment.user?.username || "Người dùng"}:</strong>{" "}
+                              {editingIndex === index ? (
+                                <>
+                                  <input
+                                    type="text"
+                                    value={editContent}
+                                    onChange={(e) => setEditContent(e.target.value)}
+                                  />
+                                  <button onClick={handleSaveEdit}>Lưu</button>
+                                  <button onClick={() => setEditingIndex(null)}>Hủy</button>
+                                </>
+                              ) : (
+                                comment.content
+                              )}
+                            </div>
 
-                            <strong>{comment.user?.username || "Người dùng"}:</strong>{" "}
-
-                            {editingIndex === index ? (
-                              <>
-                                <input
-                                  type="text"
-                                  value={editContent}
-                                  onChange={(e) => setEditContent(e.target.value)}
-                                />
-                                <button onClick={handleSaveEdit}>Lưu</button>
-                                <button onClick={() => setEditingIndex(null)}>Hủy</button>
-                              </>
-                            ) : (
-                              comment.content
-                            )}
-
-
-                            <div className="comment-actions">
+                            <div className="cm-comment-actions">
                               {comment.user?.id === userIDCMT && (
                                 <>
-                                  <button className="btn-more" onClick={() => toggleMenu(index)}>...</button>
-                                  <div className="comment-menu" style={{ display: openMenuIndex === index ? "block" : "none" }}>
-                                    <button className="edit-btn" onClick={() => handleEditClick(index, comment.content, comment.id)}>Sửa</button>
-                                    <button className="delete-btn" onClick={() => handleDelete(comment.id)}>Xóa</button>
-
+                                  <button className="cm-btn-more" onClick={() => toggleMenu(index)}>
+                                    ...
+                                  </button>
+                                  <div
+                                    className="cm-comment-menu"
+                                    style={{ display: openMenuIndex === index ? "block" : "none" }}
+                                  >
+                                    <button onClick={() => handleEditClick(index, comment.content, comment.id)}>Sửa</button>
+                                    <button onClick={() => handleDelete(comment.id)}>Xóa</button>
                                   </div>
                                 </>
                               )}
@@ -1117,6 +1140,23 @@ export default function Home() {
                   )}
                 </div>
               ))}
+            <div className="pagination">
+              <button
+                disabled={currentPage === 1 || loading}
+                onClick={() => fetchPosts(currentPage - 1)}
+              >
+                Trang trước
+              </button>
+              <span>
+                Trang {currentPage} / {totalPages}
+              </span>
+              <button
+                disabled={currentPage === totalPages || loading}
+                onClick={() => fetchPosts(currentPage + 1)}
+              >
+                Trang sau
+              </button>
+            </div>
           </>
         )}
       </div>

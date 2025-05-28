@@ -104,7 +104,7 @@
   transform-style: preserve-3d;
   transform: rotateY(30deg) ;
 }
-.canvas-login {
+.canvas-login-vu {
   position: relative;
   margin-bottom: 100px;
   margin-left: 100px;
@@ -112,8 +112,8 @@
   transform-style: preserve-3d;
   transform: rotateX(-20deg);
 }
-.canvas-login:hover {
-  transform: rotateX(-110deg) translateZ(30px);
+.canvas-login-vu:hover {
+  transform: rotateX(-110deg) translateZ(60px);
   margin-left: 120px;
 }
 .btn-login-big {
@@ -130,7 +130,7 @@
   border-radius: 0;
   transition: transform 0.3s ease, background-color 0.3s ease;
 }
-.canvas-login.loading {
+.canvas-login-vu.loading {
   animation: rotate-login 1s linear infinite;
 }
 .submit-btn0-login {
@@ -180,12 +180,12 @@
   color: #000000;
 }
 @keyframes rotate-login {
-  from {
-    transform:rotateX(0deg) translateZ(30px);
+  0% {
+    opacity: 1;
+  }100% {
+    opacity: 0.5;
   }
-  to {
-    transform:rotateX(360deg) translateZ(30px);
-  }
+
 }
 .btn-login-big,
 .btn-login-small {

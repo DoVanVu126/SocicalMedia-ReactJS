@@ -20,10 +20,48 @@ const AddPost = () => {
   const [videoPreviewUrl, setVideoPreviewUrl] = useState(null);
   const [removingImageIndex, setRemovingImageIndex] = useState(null);
   const [isRemovingVideo, setIsRemovingVideo] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!form.content.trim() && form.images.length === 0 && !form.video) {
+      newErrors.content = 'Vui lòng nhập nội dung hoặc chọn ảnh/video.';
+    }
+    if (form.content && form.content.length > 500) {
+      newErrors.content = 'Nội dung không được vượt quá 500 ký tự.';
+    }
+    if (form.images.length > 10) {
+      newErrors.images = 'Chỉ được chọn tối đa 10 ảnh.';
+    }
+
+    if (form.video && form.video.size > 20 * 1024 * 1024) { // 20MB
+      newErrors.video = 'Video vượt quá dung lượng tối đa cho phép (20MB).';
+    }
+    if (form.visibility !== 'public' && form.visibility !== 'private') {
+      newErrors.visibility = 'Danh mục không tồn tại.';
+    }
+    return newErrors;
+  };
 
   const handleRemoveImage = (indexToRemove) => {
+    const newImages = form.images.filter((_, index) => index !== indexToRemove);
+
+    setForm(prevForm => {
+      const newImages = prevForm.images.filter((_, index) => index !== indexToRemove);
+      return { ...prevForm, images: newImages };
+    });
     setImagePreviews(prev => prev.filter((_, index) => index !== indexToRemove));
     setRemovingImageIndex(null);
+
+    // Kiểm tra lại lỗi nếu số ảnh sau khi xóa <= 10
+    setErrors(prevErrors => {
+      const newErrors = { ...prevErrors };
+      if (newErrors.images && newImages.length <= 10) {
+        delete newErrors.images;
+      }
+      return newErrors;
+    });
   };
 
   const startRemoveImageAnimation = (indexToRemove) => {
@@ -87,12 +125,54 @@ const AddPost = () => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+
     if (files) { // Nếu là input file (ảnh hoặc video)
       if (name === 'images') {
-        setForm((prevForm) => ({ ...prevForm, images: Array.from(files) }));
-      } else if (name === 'video') {
-        setForm((prevForm) => ({ ...prevForm, [name]: files[0] }));
+        const selectedImages = Array.from(files);
+
+        // Kiểm tra định dạng file ảnh hợp lệ
+        const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        const invalidImages = selectedImages.filter(file => !validImageTypes.includes(file.type));
+        if (invalidImages.length > 0) {
+          setErrors((prev) => ({ ...prev, images: 'Chỉ được chọn file ảnh (jpg, jpeg, png, gif).' }));
+          return; // Không cập nhật form khi có file không hợp lệ
+        }
+
+        setForm((prevForm) => ({ ...prevForm, images: selectedImages }));
+
+        // Kiểm tra lỗi ảnh ngay khi chọn
+        if (selectedImages.length > 10) {
+          setErrors((prev) => ({ ...prev, images: 'Chỉ được chọn tối đa 10 ảnh.' }));
+        } else {
+          setErrors((prev) => {
+            const { images, ...rest } = prev;
+            return rest;
+          });
+        }
       }
+      else if (name === 'video') {
+        const selectedVideo = files[0];
+
+        // Kiểm tra định dạng file video hợp lệ
+        const validVideoTypes = ['video/mp4', 'video/mov', 'video/avi', 'video/mpeg', 'video/quicktime'];
+        if (selectedVideo && !validVideoTypes.includes(selectedVideo.type)) {
+          setErrors((prev) => ({ ...prev, video: 'Chỉ được chọn file video hợp lệ (mp4, mov, avi, mpeg, quicktime).' }));
+          return; // Không cập nhật form khi file video không hợp lệ
+        }
+
+        setForm((prevForm) => ({ ...prevForm, video: selectedVideo }));
+
+        // Kiểm tra lỗi video ngay khi chọn
+        if (selectedVideo && selectedVideo.size > 20 * 1024 * 1024) {
+          setErrors((prev) => ({ ...prev, video: 'Video vượt quá dung lượng tối đa cho phép (20MB).' }));
+        } else {
+          setErrors((prev) => {
+            const { video, ...rest } = prev;
+            return rest;
+          });
+        }
+      }
+
     } else { // Nếu là input text hoặc select
       setForm((prevForm) => ({ ...prevForm, [name]: value }));
     }
@@ -100,37 +180,45 @@ const AddPost = () => {
 
   // Xử lý gửi form
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Ngăn chặn hành vi gửi form mặc định
+    e.preventDefault();
+
+    if (isSubmitting) {
+      alert('Vui lòng đợi cho đến khi đăng bài trước hoàn thành');
+      return;
+    }
+
     if (!user) {
       alert('Vui lòng đăng nhập');
       return;
     }
 
-    const data = new FormData(); // Tạo đối tượng FormData để gửi file và dữ liệu
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({});
+    setIsSubmitting(true); // Bắt đầu gửi
+
+    const data = new FormData();
     data.append('user_id', user.id);
     data.append('content', form.content);
     data.append('visibility', form.visibility);
-
-    // Thêm từng ảnh vào FormData
-    form.images.forEach((image) => {
-      data.append(`images[]`, image); // Laravel expects an array
-
-    });
-    // Thêm video nếu có
-    if (form.video) {
-      data.append('video', form.video);
-    }
+    form.images.forEach((image) => data.append(`images[]`, image));
+    if (form.video) data.append('video', form.video);
 
     try {
-      // Gửi yêu cầu POST đến API
       await axios.post('http://localhost:8000/api/posts', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }, // Đặt header cho FormData
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('Đăng bài thành công');
-      navigate('/home'); // Điều hướng về trang chủ sau khi đăng bài
+      navigate('/home');
     } catch (err) {
       console.error(err.response?.data || err.message);
       alert('Có lỗi xảy ra khi thêm bài viết');
+    } finally {
+      setIsSubmitting(false); // Kết thúc gửi
     }
   };
 
@@ -183,10 +271,10 @@ const AddPost = () => {
               name="content"
               placeholder="Nội dung bài viết"
               value={form.content}
-
               onChange={handleChange}
               className="add-post-textarea"
             />
+            {errors.content && <p className="form-error">{errors.content}</p>}
             {/* Selector quyền riêng tư */}
             <div className="add-post-visibility-selector">
               <label htmlFor="visibility">Quyền riêng tư:</label>
@@ -198,7 +286,10 @@ const AddPost = () => {
               >
                 <option value="public">Công khai</option>
                 <option value="private">Riêng tư</option>
+                <option value="11111">1111</option>
+                <option value="44444">4444</option>
               </select>
+              {errors.visibility && <p className="form-error">{errors.visibility}</p>}
             </div>
 
             {/* Input chọn ảnh và video */}
@@ -215,9 +306,9 @@ const AddPost = () => {
                 onChange={handleChange}
                 className="add-post-file-input"
               />
-
+              {errors.images && <p className="form-error">{errors.images}</p>}
               <label htmlFor="video" className="add-post-file-label">
-                {form.video ? form.video.name : 'Chọn video'}
+                {form.video ? form.video.name : 'Chọn 1 video'}
               </label>
               <input
                 type="file"
@@ -227,8 +318,15 @@ const AddPost = () => {
                 onChange={handleChange}
                 className="add-post-file-input"
               />
+              {errors.video && <p className="form-error">{errors.video}</p>}
             </div>
-            <button type="submit" className="add-post-submit-button">Đăng bài</button>
+            <button
+              type="submit"
+              className="add-post-submit-button"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Đang gửi...' : 'Đăng bài'}
+            </button>
           </form>
         </div>
 

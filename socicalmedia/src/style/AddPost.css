@@ -379,3 +379,8 @@ body {
   100% { filter: url(#water-effect); transform: scale(1); }
 }
 
+.form-error {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}

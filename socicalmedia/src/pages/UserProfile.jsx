@@ -606,7 +606,7 @@ export default function UserProfile() {
                               ⋯
                             </button>
                             {activeMenuPostId === post.id && (
-                              <div className="options-menu" ref={menuRef}>
+                              <div className="options-menu-profile" ref={menuRef}>
                                 <button onClick={() => handleEdit(post)}>📝 Sửa</button>
                                 <button
                                   onClick={() => {
