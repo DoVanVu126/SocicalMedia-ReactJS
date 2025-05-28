@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function Sidebar() {
   const [user, setUser] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
-
+  const [showGameList, setShowGameList] = useState(false);
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) {
@@ -124,11 +125,11 @@ function Sidebar() {
           </a>
         </li>
 
-        <li className="nav-item item-game">
-          <a className="nav-link collapsed link-game" href="/game">
+        <li className="nav-item">
+          <Link className="nav-link collapsed" to="/minigame">
             <i className="bi bi-joystick icon-game"></i>
-            <span className="text-game">Mini Game</span>
-          </a>
+            <span>Mini Game</span>
+          </Link>
         </li>
 
         <li className="nav-item">

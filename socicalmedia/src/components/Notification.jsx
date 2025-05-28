@@ -230,7 +230,6 @@ const NotificationComponent = () => {
             </div>
           </div>
           {statusMessage && <div className="status-message">{statusMessage}</div>}
-          {loading && <div className="loading-spinner">⏳ Đang tải...</div>}
           <ul className="notifications-list">
             {notifications.length > 0 ? (
               notifications.map(notification => (

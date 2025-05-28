@@ -1,0 +1,119 @@
+.minigame-container {
+  padding: 100px;
+  text-align: center;
+
+  background: linear-gradient(
+    -45deg,
+    #8ec5fc,
+    #e0c3fc,
+    #f9f586,
+    #8ec5fc,
+    #e0c3fc,
+    #f9f586
+  );
+  background-size: 600% 600%; /* tăng kích thước nền để chuyển động mượt hơn */
+
+  animation: gradientBG 10s ease infinite;
+
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 50% 100%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  75% {
+    background-position: 50% 0%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+
+.game-icons {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.game-icon {
+  width: 120px;
+  user-select: none;
+  transition: transform 0.2s ease;
+}
+
+.game-icon:hover {
+  transform: scale(1.1);
+}
+
+/* Hiệu ứng nhấp nhô cho robot */
+@keyframes floatUpDown {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.robot-helper {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 100px;
+  text-align: center;
+  z-index: 1000;
+
+  /* Áp dụng animation nhấp nhô cho toàn bộ khung */
+  animation: floatUpDown 3s ease-in-out infinite;
+}
+
+/* Ảnh robot có thể được giữ tỉ lệ và có thể thêm hiệu ứng bóng nhẹ */
+.robot-helper img {
+  width: 130px;
+  height: 130px;
+  user-select: none;
+  pointer-events: none; /* để tránh ảnh chắn click */
+  filter: drop-shadow(0 4px 3px rgba(0,0,0,0.2));
+}
+
+.robot-message {
+  position: absolute;
+  bottom: 100%;
+  right: 30%;          /* giảm khoảng cách bên phải để khung rộng ra */
+  margin-right: 8px;   /* giảm margin để căn sát hơn */
+  margin-bottom: 12px; /* tăng margin dưới để cách robot */
+  max-width: 1000px;    /* tăng chiều rộng tối đa */
+  background-color: #fff;
+  border: 2px solid #4caf50;
+  border-radius: 12px;
+  padding: 16px 20px;  /* tăng padding cho khung rộng và thoáng */
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  font-size: 1.1rem;   /* tăng cỡ chữ */
+  color: #333;
+  user-select: none;
+  white-space: normal;
+  
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 1;
+}
+
+
+/* Mũi tên nhỏ phía dưới bubble */
+.robot-message::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 10px;
+  border-width: 8px;
+  border-style: solid;
+  border-color: #4caf50 transparent transparent transparent;
+}

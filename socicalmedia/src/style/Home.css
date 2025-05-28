@@ -138,7 +138,7 @@
 
 .post-content {
   font-size: 1rem;
-  margin-top: -40px;
+  margin-top: -10px;
   margin-left: 5px;
   color: #333;
 }
@@ -154,7 +154,7 @@
 .image-wrapper,
 .video-wrapper {
   position: relative;
-  width: 40%;
+  width: 30%;
   overflow: hidden;
   border-radius: 8px;
   display: flex;
@@ -177,12 +177,7 @@
 
 .media-overlay-hover {
   position: absolute;
-  background-image: conic-gradient(
-    black 50%,
-    turquoise 85%,
-    green 96%,
-    black 97%
-  );
+  background-image: conic-gradient(black 10%, turquoise 30%, green 70%, #6a11cb 100%);
   border-radius: 15px;
   opacity: 0;
   inset: -50%;
@@ -203,6 +198,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -456,6 +452,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -560,9 +557,11 @@
   0% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
+
   100% {
     opacity: 1;
   }
@@ -617,6 +616,7 @@
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   will-change: scroll-position;
+
 }
 
 .story-list::-webkit-scrollbar {
@@ -841,6 +841,7 @@
 .story-nav-btn:hover {
   background: #ffffff;
   transform: translateY(-50%) scale(1.15);
+
 }
 
 .story-nav-btn:disabled {
@@ -1144,24 +1145,30 @@
     max-width: 100%;
     margin: 0 0.5rem 1.5rem;
   }
+
   .main {
     padding: 0.5rem;
     margin-left: 0;
   }
+
   .reaction-icons {
     top: -45px;
   }
+
   .reaction-icon {
     font-size: 1.25rem;
   }
+
   .reaction-list {
     width: 300px;
     max-height: 450px;
   }
+
   .reaction-user-avatar {
     width: 28px;
     height: 28px;
   }
+
   .add-friend-btn {
     font-size: 11px;
     padding: 2px 6px;
@@ -1228,7 +1235,98 @@
   0% {
     width: 0%;
   }
+
   100% {
     width: 100%;
   }
 }
+
+.post {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.5s ease;
+}
+
+/* 5 đường chém nằm trên bài viết */
+.slice {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, #6a11cb, #2575fc);
+  opacity: 0;
+  left: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+.slice1 {
+  top: 10%;
+  transform: rotate(-15deg);
+}
+.slice2 {
+  top: 30%;
+  transform: rotate(20deg);
+}
+.slice3 {
+  top: 50%;
+  transform: rotate(-10deg);
+}
+.slice4 {
+  top: 70%;
+  transform: rotate(15deg);
+}
+.slice5 {
+  top: 90%;
+  transform: rotate(-20deg);
+}
+.sliced .slice {
+  opacity: 0;
+  animation: sliceFade 2s forwards;
+}
+
+.sliced .slice1 {
+  animation-delay: 0s;
+}
+
+.sliced .slice2 {
+  animation-delay: 0.3s;
+}
+.sliced .slice3 {
+  animation-delay: 0.6s;
+}
+.sliced .slice4 {
+  animation-delay: 0.9s;
+}
+
+.sliced .slice5 {
+  animation-delay: 1.2s;
+}
+@keyframes sliceFade {
+  0% {
+    opacity: 0;
+  }
+  99% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.sliced {
+  animation: postFadeOut 2s forwards;
+  animation-delay: 0.5s;
+}
+@keyframes postFadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+}
+

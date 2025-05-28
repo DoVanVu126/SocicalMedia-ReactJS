@@ -895,7 +895,6 @@ body {
   }
 }
 
-/* 3D Hover for Avatar */
 .avatar-wrapper {
   perspective: 1000px;
 }
@@ -972,6 +971,22 @@ body {
     transform: scale(0.85);
   }
   100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+.profile-container {
+  animation: fadeZoomIn 0.5s ease;
+}
+
+@keyframes fadeZoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
     opacity: 1;
     transform: scale(1);
   }
