@@ -895,7 +895,6 @@ body {
   }
 }
 
-/* 3D Hover for Avatar */
 .avatar-wrapper {
   perspective: 1000px;
 }

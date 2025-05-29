@@ -40,7 +40,7 @@ const StoryIntro = ({ onComplete }) => {
 const Story = () => {
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     content: "",
     visibility: "public",
@@ -53,17 +53,22 @@ const Story = () => {
   const [showMergeEffect, setShowMergeEffect] = useState(false);
   const [animateImage, setAnimateImage] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
+  const [successMessage, setSuccessMessage] = useState("");
   const storyListRef = useRef(null);
+  const lastSubmitTimeRef = useRef(0);
 
   const user = JSON.parse(localStorage.getItem("user"));
   const userIDCMT = user?.id;
   const navigate = useNavigate();
 
+  // Define valid visibility options
+  const validVisibilities = ["public", "private"];
+
   // Hide intro after 1.8 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowIntro(false);
-    }, 1800); // 800ms for animation + 1000ms display
+    }, 1800);
     return () => clearTimeout(timer);
   }, []);
 
@@ -87,15 +92,15 @@ const Story = () => {
 
   useEffect(() => {
     triggerSparkleEffect();
-
     return () => {
       document.querySelectorAll('.sparkle-star').forEach((sparkle) => sparkle.remove());
     };
   }, []);
 
+  // Fetch stories
   useEffect(() => {
     if (!userIDCMT) {
-      setError("Vui lòng đăng nhập để xem story");
+      setErrors({ general: "Vui lòng đăng nhập để xem story" });
       return;
     }
     setLoading(true);
@@ -107,11 +112,12 @@ const Story = () => {
       })
       .catch((err) => {
         console.error("Lỗi khi tải story:", err);
-        setError("Không thể tải story");
+        setErrors({ general: "Không thể tải story" });
         setLoading(false);
       });
   }, [userIDCMT]);
 
+  // Update navigation buttons
   useEffect(() => {
     const updateNavButtons = () => {
       if (storyListRef.current) {
@@ -134,6 +140,7 @@ const Story = () => {
     };
   }, [stories]);
 
+  // Handle story list dragging
   useEffect(() => {
     const storyList = storyListRef.current;
     if (!storyList) return;
@@ -180,6 +187,7 @@ const Story = () => {
     };
   }, []);
 
+  // Initialize effects
   useEffect(() => {
     const removeBubbleListener = initBubbleEffect();
     const removeSparkleListener = sparkleMouseEffect();
@@ -209,15 +217,28 @@ const Story = () => {
       ...formData,
       [name]: value,
     });
+    setErrors({ ...errors, [name]: null });
   };
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
     if (files[0]) {
+      const file = files[0];
+      const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      const allowedVideoTypes = ['video/mp4', 'video/avi', 'video/x-matroska'];
+      if (name === 'image' && !allowedImageTypes.includes(file.type)) {
+        setErrors({ ...errors, image: 'File phải là ảnh (jpeg, png, jpg)' });
+        return;
+      }
+      if (name === 'video' && !allowedVideoTypes.includes(file.type)) {
+        setErrors({ ...errors, video: 'File phải là video (mp4, avi, mkv)' });
+        return;
+      }
       setFormData({
         ...formData,
-        [name]: files[0],
+        [name]: file,
       });
+      setErrors({ ...errors, [name]: null });
       if (name === "image") {
         setAnimateImage(true);
         setTimeout(() => setAnimateImage(false), 1000);
@@ -225,50 +246,102 @@ const Story = () => {
     }
   };
 
+  const clearFile = (type) => {
+    setFormData((prev) => ({
+      ...prev,
+      [type]: null,
+    }));
+    setErrors((prev) => ({ ...prev, [type]: null }));
+  };
+
   const handleAddStory = async (e) => {
     e.preventDefault();
     if (!userIDCMT) {
-      setError("Vui lòng đăng nhập để thêm story");
+      setErrors({ general: "Vui lòng đăng nhập để thêm story" });
       return;
     }
-    setIsSubmitting(true);
-    setTimeout(async () => {
-      const formDataObj = new FormData();
-      formDataObj.append("user_id", userIDCMT);
-      formDataObj.append("content", formData.content);
-      formDataObj.append("visibility", formData.visibility);
-      if (formData.image) formDataObj.append("image", formData.image);
-      if (formData.video) formDataObj.append("video", formData.video);
 
-      try {
-        const res = await axios.post("http://localhost:8000/api/stories", formDataObj);
-        setShowMergeEffect(true);
-        triggerSparkleEffect();
-        setTimeout(() => {
-          const updatedStories = [res.data.story, ...stories];
-          setStories(updatedStories);
-          setFormData({
-            content: "",
-            visibility: "public",
-            image: null,
-            video: null,
-          });
-          setError(null);
-          setIsSubmitting(false);
-          setShowMergeEffect(false);
-          navigate("/home");
-        }, 1000);
-      } catch (err) {
-        console.error("Lỗi khi thêm story:", err);
-        setError("Không thể thêm story");
+    // Prevent rapid submissions
+    const now = Date.now();
+    if (now - lastSubmitTimeRef.current < 10000) {
+      setErrors({ general: "Vui lòng đợi 10 giây trước khi gửi lại" });
+      return;
+    }
+
+    // Validate content
+    const trimmedContent = formData.content.trim();
+    if (!trimmedContent) {
+      setErrors({ content: "Nội dung không được để trống hoặc chỉ chứa khoảng trắng" });
+      return;
+    }
+    if (/[\u2000-\u200B\u3000]/.test(trimmedContent)) {
+      setErrors({ content: "Nội dung không được chứa ký tự khoảng trắng 2-byte" });
+      return;
+    }
+    if (/<[^>]+>/.test(trimmedContent)) {
+      setErrors({ content: "Nội dung không được chứa mã HTML" });
+      return;
+    }
+    if (trimmedContent.length > 1000) {
+      setErrors({ content: "Nội dung quá dài, tối đa 1000 ký tự" });
+      return;
+    }
+
+    // Validate visibility
+    if (!validVisibilities.includes(formData.visibility)) {
+      setErrors({ visibility: "Danh mục không hợp lệ" });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrors({});
+
+    const formDataObj = new FormData();
+    formDataObj.append("user_id", userIDCMT);
+    formDataObj.append("content", trimmedContent);
+    formDataObj.append("visibility", formData.visibility);
+    if (formData.image) formDataObj.append("image", formData.image);
+    if (formData.video) formDataObj.append("video", formData.video);
+
+    try {
+      const res = await axios.post("http://localhost:8000/api/stories", formDataObj, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      lastSubmitTimeRef.current = now;
+      setShowMergeEffect(true);
+      triggerSparkleEffect();
+      setTimeout(() => {
+        const updatedStories = [res.data.story, ...stories];
+        setStories(updatedStories);
+        setFormData({
+          content: "",
+          visibility: "public",
+          image: null,
+          video: null,
+        });
+        setErrors({});
         setIsSubmitting(false);
+        setShowMergeEffect(false);
+        setSuccessMessage("Story đã được thêm thành công!");
+        setTimeout(() => setSuccessMessage(""), 3000);
+        navigate("/home");
+      }, 1000);
+    } catch (err) {
+      console.error("Lỗi khi thêm story:", err);
+      if (err.response?.status === 422) {
+        setErrors(err.response.data.errors || { general: err.response.data.error });
+      } else if (err.response?.status === 429) {
+        setErrors({ general: err.response.data.error });
+      } else {
+        setErrors({ general: "Không thể thêm story" });
       }
-    }, 800);
+      setIsSubmitting(false);
+    }
   };
 
   const handleEditStory = (story) => {
     if (!userIDCMT) {
-      setError("Vui lòng đăng nhập để sửa story");
+      setErrors({ general: "Vui lòng đăng nhập để sửa story" });
       return;
     }
     navigate(`/edit-story/${story.id}`, {
@@ -282,36 +355,45 @@ const Story = () => {
     });
   };
 
-  const handleDeleteStory = (id) => {
+  const handleDeleteStory = async (id) => {
     if (!userIDCMT) {
-      setError("Vui lòng đăng nhập để xóa story");
+      setErrors({ general: "Vui lòng đăng nhập để xóa story" });
       return;
     }
-    axios
-      .delete(`http://localhost:8000/api/stories/${id}`, {
+    if (!window.confirm("Bạn có chắc muốn xóa story này?")) return;
+
+    try {
+      await axios.delete(`http://localhost:8000/api/stories/${id}`, {
         data: { user_id: userIDCMT },
-      })
-      .then(() => {
-        setStories(stories.filter((story) => story.id !== id));
-        setError(null);
-      })
-      .catch((err) => {
-        console.error("Lỗi khi xóa story:", err);
-        setError("Không thể xóa story");
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
+      setStories(stories.filter((story) => story.id !== id));
+      setSuccessMessage("Story đã được xóa thành công!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      console.error("Lỗi khi xóa story:", err);
+      setErrors({ general: "Không thể xóa story" });
+    }
   };
 
   const handleToggleMenu = (id) => {
     setShowMenu(showMenu === id ? null : id);
   };
 
-  if (loading)
+  const getImageUrl = (imageurl) => {
+    if (!imageurl) return null;
+    if (imageurl.startsWith("http")) return imageurl;
+    return `http://localhost:8000/storage/story_images/${imageurl}`;
+  };
+
+  if (loading) {
     return (
       <>
         <div className="youtube-loader"></div>
         <div className="spinner"></div>
       </>
     );
+  }
 
   if (showIntro) {
     return <StoryIntro onComplete={() => setShowIntro(false)} />;
@@ -322,7 +404,8 @@ const Story = () => {
       <Header />
       <Sidebar />
       <div className="scrollable-story-wrapper">
-        {error && <p className="error">{error}</p>}
+        {errors.general && <p className="error">{errors.general}</p>}
+        {successMessage && <p className="success-message">{successMessage}</p>}
         {showNavButtons.left && (
           <button className="story-scroll-btn prev" onClick={() => scrollStories("left")}>
             ❮
@@ -370,20 +453,21 @@ const Story = () => {
                   </button>
                 </div>
               )}
-              <div className="story-image-wrapper">
+              <div className="story-image-wrapper" style={{ background: story.imageurl || story.videourl ? 'none' : 'linear-gradient(135deg, #1e3c72, #2a5298)' }}>
                 {story.videourl?.match(/\.(mp4|webm)$/i) ? (
                   <video
                     src={`http://localhost:8000/storage/story_videos/${story.videourl}`}
                     className="story-image"
                     muted
                   />
-                ) : (
+                ) : story.imageurl ? (
                   <img
-                    src={`http://localhost:8000/storage/story_images/${story.imageurl}`}
+                    src={getImageUrl(story.imageurl)}
                     alt="Story"
                     className="story-image"
+                    onError={(e) => { e.target.src = '/default-image.png'; }}
                   />
-                )}
+                ) : null}
               </div>
               <div className="story-content">
                 <p className="text">{story.content}</p>
@@ -394,15 +478,18 @@ const Story = () => {
       </div>
 
       <form onSubmit={handleAddStory} className="add-story-form">
-        <textarea
-          id="content"
-          name="content"
-          value={formData.content}
-          onChange={handleInputChange}
-          placeholder="Nội dung"
-          className="storys-input"
-          aria-required="true"
-        />
+        <div className="form-group">
+          <textarea
+            id="content"
+            name="content"
+            value={formData.content}
+            onChange={handleInputChange}
+            placeholder="Nội dung"
+            className="storys-input"
+            aria-required="true"
+          />
+          {errors.content && <p className="error">{errors.content}</p>}
+        </div>
         <div className="visibility-container">
           <select
             name="visibility"
@@ -413,43 +500,73 @@ const Story = () => {
             <option value="public">Công khai</option>
             <option value="private">Riêng tư</option>
           </select>
+          {errors.visibility && <p className="error">{errors.visibility}</p>}
         </div>
         <div className="file-inputs">
-          <label className="file-label">
-            {formData.image ? formData.image.name : "Chọn ảnh"}
-            <input
-              type="file"
-              name="image"
-              onChange={handleFileChange}
-              accept="image/*"
-              className="file-input"
-            />
-          </label>
-          <label className="file-label">
-            {formData.video ? formData.video.name : "Chọn video"}
-            <input
-              type="file"
-              name="video"
-              onChange={handleFileChange}
-              accept="video/*"
-              className="file-input"
-            />
-          </label>
+          <div className="file-input-group">
+            <label className="file-label">
+              {formData.image ? formData.image.name : "Chọn ảnh"}
+              <input
+                type="file"
+                name="image"
+                onChange={handleFileChange}
+                accept="image/jpeg,image/png,image/jpg"
+                className="file-input"
+              />
+            </label>
+            {formData.image && (
+              <button
+                type="button"
+                className="clear-file-btn"
+                onClick={() => clearFile("image")}
+              >
+                ✕
+              </button>
+            )}
+            {errors.image && <p className="error">{errors.image}</p>}
+          </div>
+          <div className="file-input-group">
+            <label className="file-label">
+              {formData.video ? formData.video.name : "Chọn video"}
+              <input
+                type="file"
+                name="video"
+                onChange={handleFileChange}
+                accept="video/mp4,video/avi,video/x-matroska"
+                className="file-input"
+              />
+            </label>
+            {formData.video && (
+              <button
+                type="button"
+                className="clear-file-btn"
+                onClick={() => clearFile("video")}
+              >
+                ✕
+              </button>
+            )}
+            {errors.video && <p className="error">{errors.video}</p>}
+          </div>
         </div>
         <div className="media-preview">
           {formData.image && (
-            <img
-              src={URL.createObjectURL(formData.image)}
-              alt="Preview"
-              className={`preview-media ${isSubmitting ? 'gathering' : ''} ${animateImage ? 'fall-in' : ''}`}
-            />
+            <div className="preview-container">
+              <img
+                src={URL.createObjectURL(formData.image)}
+                alt="Preview"
+                className={`preview-media ${isSubmitting ? 'gathering' : ''} ${animateImage ? 'fall-in' : ''}`}
+              />
+            </div>
           )}
           {formData.video && (
-            <video
-              src={URL.createObjectURL(formData.video)}
-              className={`preview-media ${isSubmitting ? 'gathering' : ''}`}
-              muted
-            />
+            <div className="preview-container">
+              <video
+                src={URL.createObjectURL(formData.video)}
+                className={`preview-media ${isSubmitting ? 'gathering' : ''}`}
+                muted
+                controls
+              />
+            </div>
           )}
         </div>
         {showMergeEffect && (
@@ -457,15 +574,27 @@ const Story = () => {
             <div className="merge-fragment fragment1"></div>
             <div className="merge-fragment fragment2"></div>
             <div className="merge-fragment fragment3"></div>
-            <img
-              src={formData.image ? URL.createObjectURL(formData.image) : '/default-image.png'}
-              alt="Merged Story"
-              className="merge-image"
-            />
+            {formData.image ? (
+              <img
+                src={URL.createObjectURL(formData.image)}
+                alt="Merged Story"
+                className="merge-image"
+              />
+            ) : formData.video ? (
+              <video
+                src={URL.createObjectURL(formData.video)}
+                className="merge-image"
+                muted
+              />
+            ) : (
+              <div className="merge-text" style={{ background: 'linear-gradient(135deg, #1e3c72, #2a5298)' }}>
+                <p>{formData.content}</p>
+              </div>
+            )}
           </div>
         )}
         <button type="submit" className="submit-button" disabled={isSubmitting}>
-          Thêm Story
+          {isSubmitting ? 'Đang xử lý...' : 'Thêm Story'}
         </button>
       </form>
     </div>

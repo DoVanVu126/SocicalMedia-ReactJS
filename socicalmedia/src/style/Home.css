@@ -151,7 +151,6 @@
 
 .media-overlay-hover {
   position: absolute;
-
   background-image: conic-gradient(black 50%,
       turquoise 70%,
       green 85%,
@@ -1334,4 +1333,3 @@
     opacity: 0;
     transform: scale(1.1);
   }
-}
