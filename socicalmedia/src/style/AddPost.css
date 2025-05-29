@@ -1,22 +1,97 @@
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body {
+  background: #f9fafb;
+  min-height: 100vh;
+  color: #1e293b;
+}
+
+/* Add Post Intro Animation */
+.add-post-intro-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #10b981, #34d399); /* Different gradient from UserProfile */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: addPostFadeOut 0.3s ease 1.5s forwards; /* Start fade-out after 1.5s */
+}
+
+.add-post-intro-text {
+  display: flex;
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.add-post-intro-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: scale(0.5);
+  animation: addPostFadeInScale 0.8s ease forwards; /* 0.8s animation */
+}
+
+@keyframes addPostFadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes addPostFadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Ensure main content is hidden during intro */
 .add-post-container {
-  margin-left: 100px; /* Bạn có thể giữ lại hoặc bỏ dòng này tùy thuộc vào layout tổng thể */
+  margin: 100px auto 0 350px;
   padding: 20px;
   max-width: 800px;
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
-  min-height: 80vh;
-  transform: translate(300px, 80px); /* Thêm dòng này */
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  align-items: center;
 }
 
-/* Các style khác giữ nguyên */
-.user-info {
+.add-post-main-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.add-post-user-info {
   display: flex;
   align-items: center;
-  margin-bottom: 25px;
 }
 
-.user-avatar {
+.add-post-user-avatar {
   width: 55px;
   height: 55px;
   border-radius: 50%;
@@ -25,40 +100,40 @@
   border: 2px solid #007bff;
 }
 
-.user-name {
+.add-post-user-name {
   font-size: 1.25rem;
   font-weight: 600;
   color: #333;
 }
 
-form {
+.add-post-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 15px;
 }
 
-textarea {
+.add-post-textarea {
   padding: 12px;
   font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 8px;
   resize: vertical;
   outline: none;
-  min-height: 120px;
+  min-height: 100px;
   transition: border 0.2s;
 }
 
-input[type="file"] {
+.add-post-file-input {
   display: none;
 }
 
-.file-inputs {
+.add-post-file-inputs {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.file-label {
+.add-post-file-label {
   padding: 12px;
   font-size: 1rem;
   color: #007bff;
@@ -66,15 +141,16 @@ input[type="file"] {
   border: 1px solid #ccc;
   border-radius: 8px;
   cursor: pointer;
+  text-align: center;
   transition: background-color 0.2s, color 0.2s;
 }
 
-.file-label:hover {
+.add-post-file-label:hover {
   background-color: #007bff;
   color: #fff;
 }
 
-button {
+.add-post-submit-button {
   padding: 12px;
   font-size: 1rem;
   background-color: #007bff;
@@ -85,25 +161,226 @@ button {
   transition: background-color 0.3s;
 }
 
-button:hover {
+.add-post-submit-button:hover {
   background-color: #0056b3;
 }
 
-@media screen and (max-width: 768px) {
-  .add-post-container {
-    margin-left: 0;
-    padding: 20px;
-    transform: translate(0, 200px); /* Điều chỉnh cho màn hình nhỏ hơn nếu cần */
-  }
-}
-
-
-.visibility-selector {
+.add-post-visibility-selector {
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
-.visibility-selector label {
+.add-post-visibility-selector label {
   margin-right: 8px;
   font-weight: bold;
+}
+
+
+.add-post-visibility-selector select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 0.95rem;
+}
+
+.add-post-preview-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.add-post-preview-section h2 {
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+  color: #333;
+  text-align: center;
+}
+
+/* --- Thay đổi cho hiển thị ngang --- */
+.add-post-image-preview-list {
+  display: flex;
+  flex-direction: row; /* Sắp xếp các ảnh theo hàng ngang */
+  flex-wrap: nowrap; /* NGĂN KHÔNG CHO ẢNH XUỐNG DÒNG */
+  gap: 10px; /* Khoảng cách giữa các ảnh */
+  overflow-x: auto; /* THÊM THANH CUỘN NGANG */
+  padding-bottom: 10px; /* Thêm padding để thanh cuộn không che mất ảnh */
+}
+
+.add-post-image-preview-item {
+  flex-shrink: 0; /* NGĂN ẢNH CO LẠI */
+  width: 150px; 
+  height: auto; 
+  max-height: 220px; 
+  object-fit: cover; 
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+.add-post-image-preview-list {
+  display: flex;
+  gap: 10px; 
+  overflow-x: auto; 
+  margin-bottom: 10px;
+}
+/* AddPost.css */
+
+/* ... CSS hiện tại của bạn ... */
+
+.add-post-preview-item-wrapper {
+  position: relative;
+}
+
+.add-post-image-preview-item {
+  flex-shrink: 0;
+  width: 150px;
+  height: auto;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; /* Thêm transition */
+}
+
+.add-post-image-preview-item.removing {
+  animation: shrinkAndFadeOut 0.3s ease-in-out forwards; /* Animation mới */
+}
+
+.add-post-video-preview-wrapper {
+  position: relative;
+  max-width: 300px;
+  margin-bottom: 10px;
+}
+
+.add-post-video-preview {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; /* Thêm transition */
+}
+
+.add-post-video-preview.removing {
+  animation: shrinkAndFadeOut 0.3s ease-in-out forwards; /* Animation mới */
+}
+
+.remove-preview-button {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  z-index: 10;
+}
+
+.remove-preview-button:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+@keyframes shrinkAndFadeOut { /* Định nghĩa animation mới */
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  10% {
+    transform: translateY(3px);
+    opacity: 1;
+  }
+  20% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+    30% {
+    transform: translateY(3px);
+    opacity: 1;
+  }
+  40% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }  50% {
+    transform: translateY(3px);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }  70% {
+    transform: translateY(3px);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+    90% {
+    transform: translateY(3px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-3px);
+    opacity: 0;
+  }
+}
+/* --- Kết thúc thay đổi cho hiển thị ngang --- */
+.add-post-video-preview-wrapper {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.add-post-video-preview {
+  display: block;
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+}
+
+@media screen and (max-width: 768px) {
+  .add-post-container {
+    margin: 20px auto;
+    padding: 15px;
+    max-width: 95%;
+  }
+  .add-post-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+  .add-post-image-preview-item {
+    width: 100%;
+  }
+}
+.add-post-water-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 30% 30%, #d0f0ff, #a0c4ff);
+  z-index: -1;
+  filter: url(#water-effect);
+  animation: waveMotion 8s infinite ease-in-out;
+}
+
+@keyframes waveMotion {
+  0% { filter: url(#water-effect); transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { filter: url(#water-effect); transform: scale(1); }
+}
+
+.form-error {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 4px;
 }

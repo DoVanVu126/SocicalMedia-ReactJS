@@ -27,6 +27,66 @@
   font-weight: bold;
   margin-bottom: 20px;
 }
+.pow-container {
+  display: inline-block;
+  margin-bottom: 100px;
+  border-radius: 5px;
+  font-size: 2rem;
+}
+
+.pow-letter {
+  display: inline-block;
+  font-size: 2em;
+  font-weight: bold;
+  color: #6a11cb;
+  margin-right: 5px;
+  text-shadow: 1px 1px white, 2px 2px orange, 3px 3px red;
+  animation: flyInAndAssemble 0.5s ease-out forwards; /* Animation chung */
+}
+
+/* Стиль vị trí bắt đầu và hướng bay riêng cho từng chữ cái */
+.pow-container > span:nth-child(1) { /* S */
+  transform: translateX(-80px) translateY(-20px) rotate(-20deg) scale(0.6);
+}
+.pow-container > span:nth-child(2) { /* o */
+  transform: translateX(60px) translateY(-10px) rotate(15deg) scale(0.7);
+}
+.pow-container > span:nth-child(3) { /* c */
+  transform: translateX(-40px) translateY(30px) rotate(10deg) scale(0.8);
+}
+.pow-container > span:nth-child(4) { /* i */
+  transform: translateX(20px) translateY(40px) rotate(-5deg) scale(0.9);
+}
+.pow-container > span:nth-child(5) { /* c */
+  transform: translateX(-70px) translateY(10px) rotate(25deg) scale(0.75);
+}
+.pow-container > span:nth-child(6) { /* a */
+  transform: translateX(50px) translateY(-30px) rotate(-10deg) scale(0.85);
+}
+.pow-container > span:nth-child(7) { /* l */
+  transform: translateX(-20px) translateY(-40px) rotate(5deg) scale(0.95);
+}
+.pow-container > span:nth-child(8) { /* A */
+  transform: translateX(80px) translateY(20px) rotate(-20deg) scale(0.65);
+}
+.pow-container > span:nth-child(9) { /* p */
+  transform: translateX(-60px) translateY(-5px) rotate(18deg) scale(0.7);
+}
+.pow-container > span:nth-child(10) { /* p */
+  transform: translateX(40px) translateY(35px) rotate(-12deg) scale(0.8);
+}
+
+@keyframes flyInAndAssemble {
+  0% {
+    opacity: 0;
+    /* Không cần transform ở đây nữa, đã định nghĩa ở trên cho từng chữ */
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) translateY(0) rotate(0deg) scale(1); /* Về vị trí và trạng thái cuối */
+  }
+}
+
 
 .input-field {
   width: 100%;
@@ -39,12 +99,12 @@
 }
 
 
-.box {
+.box-login {
   perspective: 800px;
   transform-style: preserve-3d;
   transform: rotateY(30deg) ;
 }
-.canvas {
+.canvas-login-vu {
   position: relative;
   margin-bottom: 100px;
   margin-left: 100px;
@@ -52,11 +112,11 @@
   transform-style: preserve-3d;
   transform: rotateX(-20deg);
 }
-.canvas:hover {
-  transform: rotateX(-110deg) translateZ(30px);
+.canvas-login-vu:hover {
+  transform: rotateX(-110deg) translateZ(60px);
   margin-left: 120px;
 }
-.btn-login {
+.btn-login-big {
   position: absolute;
   width: 200px;
   height: 50px;
@@ -68,37 +128,69 @@
   align-items: center;
   transform: translateZ(25px);
   border-radius: 0;
+  transition: transform 0.3s ease, background-color 0.3s ease;
 }
-.submit-btn0 {
-  background-color: #ffffff;
-  color: white;
-  border: 1px solid rgb(0, 0, 0);
+.canvas-login-vu.loading {
+  animation: rotate-login 1s linear infinite;
+}
+.submit-btn0-login {
+  background-color: #6a11cb;
   transform: rotateX(90deg) translateZ(-25px);
 }
-.submit-btn1 {
+.submit-btn1-login {
   background-color: #6a11cb;
-  color: white;
-  border: 1px solid white;
+  color: rgb(255, 255, 255);
   transform: translateZ(25px);
 }
-.submit-btn2 {
-  background-color: white;
-  color: black;
-  border: 1px solid black;
+.submit-btn2-login {
+  background-color: #6a11cb;
+  color: rgb(255, 255, 255);
   transform: rotateX(90deg) translateZ(25px);
 }
-.submit-btn3 {
-  background-color: #ffffff;
-  color: black;
-  border: 1px solid black;
+.submit-btn3-login {
+  background-color: #6a11cb;
   transform: translateZ(-25px) ;
 }
-.submit-btn1:hover {
+.btn-login-small {
+  position: absolute;
+  width: 50px;
+  height: 50px;
   background-color: #6a11cb;
+  border: 1px solid rgb(255, 255, 255);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translateZ(25px);
+  border-radius: 0;
 }
-.submit-btn2:hover {
-  background-color: white;
-  color: #6a11cb;
+.submit-btn4-login {
+  background-color: #6a11cb;
+  transform: translateX(-25px) rotateY(90deg);
+}
+.submit-btn5-login {
+  background-color: #6a11cb;
+  transform: translateX(175px) rotateY(90deg);
+}
+.submit-btn1-login:hover {
+  background-color: #6a11cb;
+  color: #000000;
+}
+.submit-btn2-login:hover {
+  background-color: #6a11cb;
+  color: #000000;
+}
+@keyframes rotate-login {
+  0% {
+    opacity: 1;
+  }100% {
+    opacity: 0.5;
+  }
+
+}
+.btn-login-big,
+.btn-login-small {
+  background: linear-gradient(to right, #6a11cb, #2575fc);
+  box-shadow: 0 4px 10px rgba(191, 129, 224, 0.8);
 }
 
 .signup-link {
@@ -202,7 +294,6 @@
   color: #6a11cb;
   /* Màu chữ gốc */
   margin-right: 5px;
-  /* Khoảng cách giữa các chữ */
   text-shadow: 1px 1px white, 2px 2px orange, 3px 3px red;
   /* Hiệu ứng bóng đổ nhiều lớp */
 }
@@ -341,4 +432,39 @@
     height: 10px;
     opacity: 0;
   }
+}
+
+.tiny-firework {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: yellow; /* Màu mặc định */
+  opacity: 1;
+  animation: twinkle 1s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes twinkle {
+  0% {
+    transform: translate(-2px, -2px) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(5px, -20px) scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Các biến thể màu sắc (tùy chọn) */
+.tiny-firework-red {
+  background-color: red;
+}
+
+.tiny-firework-blue {
+  background-color: blue;
+}
+
+.tiny-firework-green {
+  background-color: green;
 }

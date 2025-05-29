@@ -1,0 +1,330 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+/* Intro Animation */
+.dino-intro-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #4caf50, #81c784); /* Green gradient for dino theme */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: dinoFadeOut 0.3s ease 1.5s forwards;
+}
+
+.dino-icon {
+  font-size: 48px;
+  color: #ffffff;
+  animation: dinoIconScale 0.5s ease-in-out;
+  margin-bottom: 20px;
+}
+
+.dino-intro-text {
+  display: flex;
+  font-family: 'Poppins', sans-serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.dino-intro-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: scale(0.5);
+  animation: dinoFadeInScale 0.8s ease forwards;
+}
+
+@keyframes dinoIconScale {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.5); }
+  100% { transform: scale(1.2); }
+}
+
+@keyframes dinoFadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes dinoFadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Ensure main content is hidden during intro */
+.dino-main {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1));
+  overflow: hidden;
+  opacity: 0;
+  animation: dinoFadeIn 0.3s ease 1.8s forwards;
+}
+
+@keyframes dinoFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Existing styles (unchanged) */
+.dino-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 300px;
+}
+
+.dino-card {
+  max-width: 850px;
+  width: 100%;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transform: perspective(1000px) rotateX(5deg);
+  animation: cardFadeIn 1s ease-out;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden;
+}
+
+.dino-card:hover {
+  transform: perspective(1000px) rotateX(0deg);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+}
+
+.card-title {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 2rem;
+  color: #333;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  animation: titleFadeIn 1.5s ease-out;
+}
+
+.dino-canvas {
+  max-width: 100%;
+  height: auto;
+  border: 2px solid #555;
+  border-radius: 8px;
+  background: #f0f2f5;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 123, 255, 0.3);
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+  animation: canvasPulse 2s infinite alternate;
+}
+
+.dino-canvas.start {
+  animation: canvasStart 0.5s ease-out;
+}
+
+.dino-btn {
+  position: relative;
+  padding: 12px 24px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  background: linear-gradient(45deg, #007bff, #00b7eb);
+  border: none;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dino-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(0, 123, 255, 0.5);
+}
+
+.dino-btn:active {
+  transform: scale(0.95);
+}
+
+.dino-btn::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  width: 100px;
+  height: 100px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.dino-btn:active::after {
+  animation: ripple 0.6s linear;
+  opacity: 1;
+}
+
+.game-over-container {
+  animation: gameOverFadeIn 0.8s ease-out;
+}
+
+.game-over-text {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #d32f2f;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  animation: gameOverText 1s ease-out;
+}
+
+.score-text {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: #606770;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+  animation: scoreFadeIn 1s ease-out;
+}
+
+/* Animations */
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(50px) perspective(1000px) rotateX(10deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) perspective(1000px) rotateX(5deg);
+  }
+}
+
+@keyframes titleFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes canvasPulse {
+  from {
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 123, 255, 0.3);
+  }
+  to {
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2), 0 0 30px rgba(0, 123, 255, 0.5);
+  }
+}
+
+@keyframes canvasStart {
+  from {
+    transform: scale(0.95);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes gameOverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gameOverText {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scoreFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes ripple {
+  to {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dino-container {
+    margin-left: 0;
+  }
+
+  .dino-card {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+  }
+
+  .dino-btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+  }
+
+  .game-over-text {
+    font-size: 1.2rem;
+  }
+
+  .score-text {
+    font-size: 1rem;
+  }
+
+  .dino-intro-text {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dino-intro-text {
+    font-size: 18px;
+  }
+
+  .dino-icon {
+    font-size: 36px;
+  }
+}

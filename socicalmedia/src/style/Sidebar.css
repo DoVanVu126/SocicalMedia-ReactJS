@@ -1,87 +1,193 @@
-/* Sidebar cố định */
-.sidebar {
-  width: 220px; /* Điều chỉnh chiều rộng để phù hợp hơn */
-  background-color: #ffffff;
-  padding: 1rem;
-  flex-shrink: 0;
-  position: fixed;
-  inset: 0;
-  overflow-y: auto;
-  border-right: 1px solid #000000; /* Màu sắc đường viền nhẹ hơn */
-  display: flex;
-  flex-direction: column;
+/* ... Các style sidebar cơ bản ... */
+
+/* Style cho icon home */
+.icon-home {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  position: relative;
+  margin-right: 10px;
 }
 
-/* Tiêu đề Sidebar */
-.sidebar h2 {
-  margin-bottom: 1.5rem;
-  color: red; /* Giữ màu đỏ cho tiêu đề */
-  font-size: 1.5rem;
-  font-weight: bold;
+.home-cell {
+  position: absolute;
+  width: 40%;
+  height: 40%;
+  border-radius: 20%;
+  opacity: 0;
+  transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* Các link trong Sidebar */
-.sidebar a {
-  display: block;
-  padding: 15px; /* Giảm padding để tạo cảm giác vừa phải */
-  text-decoration: none;
-  color: #333;
-  font-size: 18px; /* Điều chỉnh font size để vừa mắt hơn */
-  transition: all 0.3s ease; /* Thêm hiệu ứng chuyển đổi khi hover */
+.home-cell.cell-1 {
+  top: 0;
+  left: 0;
 }
 
-/* Hover effect cho các link */
-.sidebar a:hover {
-  color: #007bff; /* Màu sắc khi hover */
-  background-color: #e0e0e0; /* Thêm màu nền khi hover */
-  border-radius: 5px; /* Làm tròn các góc của link khi hover */
+.home-cell.cell-2 {
+  top: 0;
+  right: 0;
 }
 
-/* Đẩy phần "User" và "Cài đặt" xuống dưới cùng */
-.sidebar .bottom-links {
-  margin-top: auto;
+.home-cell.cell-3 {
+  bottom: 0;
+  left: 0;
 }
 
-/* Cải thiện kiểu hiển thị cho avatar và tên người dùng */
-.user-info {
+.home-cell.cell-4 {
+  bottom: 0;
+  right: 0;
+}
+
+.item-home:hover .home-cell {
+  opacity: 1;
+}
+
+.item-home:hover .home-cell.cell-1 {
+  background-color: red;
+  animation: appearColor1 0.6s ease forwards;
+}
+
+.item-home:hover .home-cell.cell-2 {
+  background-color: green;
+  animation: appearColor2 0.6s ease 0.2s forwards;
+}
+
+.item-home:hover .home-cell.cell-3 {
+  background-color: blue;
+  animation: appearColor3 0.6s ease 0.4s forwards;
+}
+
+.item-home:hover .home-cell.cell-4 {
+  background-color: orange;
+  animation: appearColor4 0.6s ease 0.6s forwards;
+}
+
+/* Style cho các icon khác (sử dụng class đặc trưng) */
+.icon-search {
+  margin-right: 10px;
+  /* Thêm style riêng cho icon tìm kiếm nếu cần */
+}
+
+.item-search:hover .icon-search {
+  color: #007bff; /* Ví dụ: đổi màu icon khi hover */
+}
+
+.icon-add-post {
+  margin-right: 10px;
+  /* Thêm style riêng cho icon thêm bài viết nếu cần */
+}
+
+.item-add-post:hover .icon-add-post {
+  color: #007bff;
+}
+
+.icon-story {
+  margin-right: 10px;
+  /* Thêm style riêng cho icon story nếu cần */
+}
+
+.item-story:hover .icon-story {
+  color: #007bff;
+}
+
+.icon-heart {
+  margin-right: 10px;
+  /* Thêm style riêng cho icon yêu thích nếu cần */
+}
+
+.item-heart:hover .icon-heart {
+  color: #007bff;
+}
+
+.icon-notifications {
+  margin-right: 10px;
+  /* Thêm style riêng cho icon thông báo nếu cần */
+}
+
+.item-notifications:hover .icon-notifications {
+  color: #007bff;
+  animation: shake 0.5s ease-in-out infinite alternate;
+}
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px) rotate(-5deg); }
+  50% { transform: translateX(5px) rotate(5deg); }
+  75% { transform: translateX(-5px) rotate(-5deg); }
+  100% { transform: translateX(0); }
+}
+
+.icon-manage-accounts {
+  margin-right: 10px;
+  /* Thêm style riêng cho icon quản lý tài khoản nếu cần */
+}
+
+.item-manage-accounts:hover .icon-manage-accounts {
+  color: #007bff;
+}
+
+.icon-chevron-down-accounts {
+  margin-left: auto; /* Đẩy xuống bên phải */
+}
+
+.icon-user-list, .icon-user-create {
+  margin-right: 10px;
+  font-size: 0.8em; /* Làm nhỏ hơn một chút */
+}
+
+.item-settings:hover .icon-settings {
+  color: #007bff;
+}
+
+.icon-profile {
+  margin-right: 10px;
+}
+
+.item-profile:hover .icon-profile {
+  color: #007bff;
+}
+
+.icon-logout {
+  margin-right: 10px;
+}
+
+.item-logout:hover .icon-logout {
+  color: #007bff;
+}
+
+/* ... Các style sidebar cơ bản (nav-item, nav-link, hover chung) ... */
+.sidebar .nav-item {
+  margin-bottom: 5px;
+}
+
+.sidebar .nav-item .nav-link {
   display: flex;
   align-items: center;
-  margin-top: 1.5rem;
-  margin-bottom: 2rem;
-  cursor: pointer; /* Thêm hiệu ứng con trỏ khi hover vào phần người dùng */
-  transition: background-color 0.3s ease;
-}
-
-/* Thêm hiệu ứng khi hover vào người dùng */
-.user-info:hover {
-  background-color: #e0e0e0;
-  border-radius: 5px;
-}
-
-/* Avatar người dùng */
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 0.75rem;
-}
-
-/* Tên người dùng */
-.user-name {
-  font-size: 1.1rem;
-  font-weight: bold;
-}
-
-/* Các liên kết cuối cùng */
-.bottom-links a {
-  font-size: 16px; /* Giảm kích thước chữ */
+  padding: 15px;
+  text-decoration: none;
   color: #333;
-  padding: 10px;
+  font-size: 18px;
+  transition: color 0.3s ease;
 }
 
-.bottom-links a:hover {
-  color: #007bff; /* Màu sắc hover cho liên kết cài đặt */
+.sidebar .nav-item:hover {
   background-color: #e0e0e0;
   border-radius: 5px;
+  transition: background-color 0.3s ease, border-radius 0.3s ease;
+}
+
+.sidebar .nav-item:hover .nav-link {
+  color: #007bff;
+}
+
+
+.sub-game-list li a {
+  color: #444;
+  padding: 6px 0;
+  display: block;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.sub-game-list li a:hover {
+  color: #0d6efd;
 }

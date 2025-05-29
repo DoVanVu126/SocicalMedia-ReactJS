@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../style/StoryViewer.css";
 
 const StoryViewer = ({
@@ -13,25 +13,55 @@ const StoryViewer = ({
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [direction, setDirection] = useState(null);
   const [progress, setProgress] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false); // New state for delete animation
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const animationFrameRef = useRef(null);
   const currentStory = stories[currentIndex];
 
+  const restartAnimation = (duration) => {
+    cancelAnimationFrame(animationFrameRef.current);
+    setProgress(0);
+    const startTime = performance.now();
+
+    const updateProgress = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const newProgress = Math.min((elapsed / duration) * 100, 100);
+      setProgress(newProgress);
+
+      if (newProgress < 100) {
+        animationFrameRef.current = requestAnimationFrame(updateProgress);
+      } else {
+        goToNext();
+      }
+    };
+
+    animationFrameRef.current = requestAnimationFrame(updateProgress);
+  };
+
   useEffect(() => {
+    if (!currentStory || stories.length === 0) {
+      onClose();
+      return;
+    }
+
     let duration = 5000;
-    let startTime = Date.now();
 
     if (currentStory?.videourl) {
       const video = videoRef.current;
       if (video) {
+        video.currentTime = 0;
         video.play().catch((error) => {
           console.error("Video play error:", error);
           goToNext();
         });
         video.onloadedmetadata = () => {
           duration = video.duration * 1000;
-          startProgress(duration, startTime);
+          restartAnimation(duration);
+        };
+        video.ontimeupdate = () => {
+          const videoProgress = (video.currentTime / video.duration) * 100;
+          setProgress(videoProgress);
         };
         video.onerror = () => {
           console.error("Video load error:", currentStory.videourl);
@@ -39,28 +69,15 @@ const StoryViewer = ({
         };
       }
     } else {
-      startProgress(duration, startTime);
-    }
-
-    function startProgress(duration, start) {
-      const updateProgress = () => {
-        const elapsed = Date.now() - start;
-        const newProgress = Math.min((elapsed / duration) * 100, 100);
-        setProgress(newProgress);
-
-        if (newProgress < 100) {
-          animationFrameRef.current = requestAnimationFrame(updateProgress);
-        } else {
-          goToNext();
-        }
-      };
-      animationFrameRef.current = requestAnimationFrame(updateProgress);
+      restartAnimation(duration);
     }
 
     return () => {
       cancelAnimationFrame(animationFrameRef.current);
       if (videoRef.current) {
         videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+        videoRef.current.ontimeupdate = null;
       }
     };
   }, [currentIndex, currentStory]);
@@ -71,7 +88,10 @@ const StoryViewer = ({
       setCurrentIndex(currentIndex + 1);
       setProgress(0);
     } else if (onNextUser) {
-      onNextUser(); // Chuyển sang user tiếp theo khi hết story
+      setDirection(null);
+      setCurrentIndex(0);
+      setProgress(0);
+      onNextUser();
     } else {
       onClose();
     }
@@ -83,17 +103,18 @@ const StoryViewer = ({
       setCurrentIndex(currentIndex - 1);
       setProgress(0);
     } else if (onPrevUser) {
-      onPrevUser(); // Chuyển sang user trước đó khi ở story đầu tiên
+      setDirection(null);
+      setCurrentIndex(0);
+      setProgress(0);
+      onPrevUser();
+    } else {
+      onClose();
     }
   };
 
   const handleProgressStyle = (index) => {
-    if (index < currentIndex) {
-      return { width: "100%" };
-    }
-    if (index === currentIndex) {
-      return { width: `${progress}%` };
-    }
+    if (index < currentIndex) return { width: "100%" };
+    if (index === currentIndex) return { width: `${progress}%` };
     return { width: "0%" };
   };
 
@@ -112,16 +133,28 @@ const StoryViewer = ({
 
   const handleDelete = () => {
     if (onDeleteStory && currentStory) {
-      onDeleteStory(currentStory.id);
-      if (stories.length === 1) {
-        onClose(); // Đóng nếu chỉ còn 1 story
-      } else {
-        goToNext(); // Chuyển sang story tiếp theo
-      }
+      setIsDeleting(true); // Trigger shatter animation
+      setTimeout(() => {
+        onDeleteStory(currentStory.id);
+        if (stories.length === 1) {
+          onClose();
+        } else if (currentIndex === stories.length - 1) {
+          setDirection("left");
+          setCurrentIndex(currentIndex - 1);
+          setProgress(0);
+        } else {
+          setDirection("right");
+          setProgress(0);
+        }
+        setIsDeleting(false); // Reset after animation
+      }, 800); // Match animation duration (0.8s)
     }
   };
 
-  if (!currentStory) return null;
+  if (!currentStory || stories.length === 0) {
+    onClose();
+    return null;
+  }
 
   return (
     <div className="story-viewer-overlay" onClick={onClose}>
@@ -130,20 +163,15 @@ const StoryViewer = ({
           {stories.map((_, index) => (
             <div
               key={index}
-              className={`progress-segment ${
-                index < currentIndex
-                  ? "completed"
-                  : index === currentIndex
-                  ? "active"
-                  : ""
-              }`}
-              style={handleProgressStyle(index)}
-            ></div>
+              className={`progress-segment ${index < currentIndex ? "completed" : index === currentIndex ? "active" : ""}`}
+            >
+              <div className="progress-fill" style={handleProgressStyle(index)}></div>
+            </div>
           ))}
         </div>
 
         <div
-          className={`story-content-display ${direction ? `slide-${direction}` : ""}`}
+          className={`story-content-display ${direction ? `slide-${direction}` : ""} ${isDeleting ? "shatter" : ""}`}
           onClick={handleContainerClick}
         >
           <div className="story-user-info">
@@ -157,13 +185,10 @@ const StoryViewer = ({
               className="story-avatar"
               onError={(e) => {
                 e.target.src = "/default-avatar.png";
-                console.error("Avatar load error:", currentStory.user?.profilepicture);
               }}
             />
             <div className="story-user-details">
-              <span className="story-username">
-                {currentStory.user?.username || "Người dùng"}
-              </span>
+              <span className="story-username">{currentStory.user?.username || "Người dùng"}</span>
               <span className="story-time">
                 {new Date(currentStory.created_at).toLocaleString("vi-VN", {
                   timeStyle: "short",
@@ -172,6 +197,7 @@ const StoryViewer = ({
               </span>
             </div>
           </div>
+
           {currentStory.videourl?.match(/\.(mp4|webm)$/i) ? (
             <video
               ref={videoRef}
@@ -180,10 +206,7 @@ const StoryViewer = ({
               autoPlay
               muted
               playsInline
-              onError={(e) => {
-                console.error("Video load error:", currentStory.videourl);
-                goToNext();
-              }}
+              onError={() => goToNext()}
             />
           ) : (
             <img
@@ -192,22 +215,21 @@ const StoryViewer = ({
               alt="Story"
               onError={(e) => {
                 e.target.src = "/default-image.png";
-                console.error("Image load error:", currentStory.imageurl);
               }}
             />
           )}
           <div className="story-text">{currentStory.content}</div>
+
           {currentStory.user?.id === currentUserId && (
             <div className="story-menu-wrapper">
               <button
-                className="story-menu-btn"
+                className="close-btn"
                 onClick={(e) => {
                   e.stopPropagation();
-                  // Logic hiển thị menu có thể mở rộng, hiện tại chỉ gọi delete
                   handleDelete();
                 }}
               >
-                ⋮
+                🗑️
               </button>
             </div>
           )}

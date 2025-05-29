@@ -1,8 +1,128 @@
-/* Search.css - giảm khoảng trống và cân đối giao diện */
+/* Reset and Base Styles
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+} */
+
+/* Search Intro Animation */
+.search-intro-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #141414, #1c2526); /* Netflix-style dark background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: searchFadeOut 0.4s ease 1.8s forwards;
+  will-change: opacity;
+}
+
+.search-intro-text {
+  display: flex;
+  font-size: 60px;
+  font-weight: 900;
+  color: #e50914; /* Netflix red */
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  perspective: 1000px;
+}
+
+.search-intro-letter.search-s {
+  display: inline-block;
+  opacity: 0;
+  transform: scale(0.2) rotateY(90deg);
+  animation: netflixSGrow 1.2s ease forwards;
+  text-shadow: 
+    0 0 20px rgba(229, 9, 20, 0.8),
+    0 0 40px rgba(229, 9, 20, 0.6),
+    0 0 60px rgba(229, 9, 20, 0.4);
+  will-change: transform, opacity, text-shadow;
+}
+
+.search-intro-letter.search-rest {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(40px);
+  animation: searchLetterFade 0.6s ease forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes netflixSGrow {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotateY(90deg);
+    text-shadow: 
+      0 0 20px rgba(229, 9, 20, 0),
+      0 0 40px rgba(229, 9, 20, 0),
+      0 0 60px rgba(229, 9, 20, 0);
+  }
+  40% {
+    opacity: 0.6;
+    transform: scale(1.4) rotateY(-10deg);
+    text-shadow: 
+      0 0 30px rgba(229, 9, 20, 0.9),
+      0 0 50px rgba(229, 9, 20, 0.7),
+      0 0 70px rgba(229, 9, 20, 0.5);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.1) rotateY(5deg);
+    text-shadow: 
+      0 0 25px rgba(229, 9, 20, 0.8),
+      0 0 45px rgba(229, 9, 20, 0.6),
+      0 0 65px rgba(229, 9, 20, 0.4);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateY(0deg);
+    text-shadow: 
+      0 0 20px rgba(229, 9, 20, 0.8),
+      0 0 40px rgba(229, 9, 20, 0.6),
+      0 0 60px rgba(229, 9, 20, 0.4);
+  }
+}
+
+@keyframes searchLetterFade {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes searchFadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Ensure main content is hidden during intro */
+.container {
+  opacity: 0;
+  animation: searchFadeIn 0.4s ease 2.2s forwards;
+  will-change: opacity;
+}
+
+@keyframes searchFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Search Container */
 .search-container {
-  max-width: 1000px; /* Tăng max-width để tận dụng không gian ngang */
-  margin: 80px 20px; /* Giảm margin-top và margin ngang để giảm khoảng trống */
-  padding: 25px 100px; /* Giảm padding để không gian gọn hơn */
+  max-width: 1000px;
+  margin: 80px 20px;
+  padding: 25px 100px;
   border-radius: 18px;
   background: linear-gradient(135deg, #e6f0ff, #ffffff);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
@@ -12,18 +132,28 @@
 }
 
 .search-container h2 {
-  font-size: 26px; /* Giảm cỡ chữ để tiết kiệm không gian */
-  margin-bottom: 15px; /* Giảm margin-bottom */
-  color: #1a1a1a;
+  font-size: 26px;
+  margin-bottom: 15px;
+  color: #e50914;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.netflix-text span {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(20px) scale(0.7);
+  animation: netflixFade 0.5s ease-in-out forwards;
+  animation-delay: calc(var(--i) * 0.1s);
+  text-shadow: 0 0 10px rgba(229, 9, 20, 0.7), 0 0 20px rgba(229, 9, 20, 0.5);
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
 .search-input {
   width: 100%;
-  max-width: 850px; /* Tăng chiều rộng input để lấp đầy không gian */
+  max-width: 850px;
   margin: 0 auto;
-  padding: 12px 18px; /* Giảm padding để input gọn hơn */
-  font-size: 16px; /* Giảm cỡ chữ để cân đối */
+  padding: 12px 18px;
+  font-size: 16px;
   border-radius: 10px;
   border: 1px solid #ccc;
   background-color: #f7f9fc;
@@ -37,49 +167,54 @@
   outline: none;
   border-color: #3399ff;
   box-shadow: 0 0 10px rgba(51, 153, 255, 0.5);
-  transform: scale(1.01); /* Giảm hiệu ứng phóng to */
+  transform: scale(1.01);
   background-color: #ffffff;
 }
 
 .search-results {
   list-style: none;
-  margin: 20px 0 0; /* Giảm margin-top để giảm khoảng trống */
+  margin: 20px 0 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Giảm gap để các item gần nhau hơn */
+  gap: 12px;
 }
 
 .search-item {
   background: linear-gradient(145deg, #f4f7fa, #ffffff);
-  padding: 12px 18px; /* Giảm padding để item không quá lớn */
+  padding: 12px 18px;
   border-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 12px; /* Giảm khoảng cách giữa avatar và thông tin */
+  gap: 12px;
   transition: transform 0.35s ease, box-shadow 0.35s ease;
   transform-style: preserve-3d;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
   cursor: pointer;
+  opacity: 0;
+  animation: slideIn 0.4s ease forwards;
+  border: 1px solid transparent;
 }
 
 .search-item:hover {
   transform: translateY(-4px) rotateX(4deg) rotateY(4deg);
   box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(51, 153, 255, 0.2);
 }
 
 .search-avatar {
-  width: 50px; /* Giảm kích thước avatar để tiết kiệm không gian */
+  width: 50px;
   height: 50px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #3399ff; /* Giảm độ dày viền */
+  border: 2px solid #3399ff;
   transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
 .search-item:hover .search-avatar {
-  transform: scale(1.1) rotateZ(5deg); /* Giảm hiệu ứng phóng to */
-  box-shadow: 0 0 12px 3px rgba(51, 153, 255, 0.5); /* Giảm hiệu ứng phát sáng */
+  transform: scale(1.1) rotateZ(5deg);
+  box-shadow: 0 0 12px 2px rgba(51, 153, 255, 0.5),
+              0 0 20px rgba(51, 153, 255, 0.25);
 }
 
 .search-info {
@@ -87,14 +222,75 @@
 }
 
 .search-name {
-  font-size: 16px; /* Giảm cỡ chữ để tiết kiệm không gian */
+  font-size: 16px;
   font-weight: 600;
   color: #222;
 }
 
 .search-username {
-  font-size: 12px; /* Giảm cỡ chữ để cân đối */
+  font-size: 12px;
   color: #666;
+}
+
+.history-container {
+  margin-top: 10px;
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.history-item {
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.history-item:hover {
+  background: #e3f0ff;
+  transform: translateX(4px);
+}
+
+.clear-history-btn {
+  background: transparent;
+  border: none;
+  color: #dc2626;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: 600;
+  transition: transform 0.2s ease, color 0.3s ease;
+  padding: 0;
+  align-self: center;
+}
+
+.clear-history-btn:hover {
+  color: #b91c1c;
+  transform: scale(1.1);
+}
+
+/* Animations */
+@keyframes netflixFade {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) translateX(calc(var(--i) * 10px - 50px)) scale(0.7);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) translateX(0) scale(1.2);
+  }
 }
 
 @keyframes fadeInUp {
@@ -108,90 +304,61 @@
   }
 }
 
-/* css hiệu ứng blinktext */
-.blink-text {
-  font-size: 2em;
-}
-.blink-text-animation span {
-  animation: blink 0.8s both;
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-@keyframes blink {
-  0% {
-    opacity: 0;
-  }
-
-  5% {
-    opacity: 0.4;
-  }
-
-  10% {
-    opacity: 0;
-  }
-
-  15% {
-    opacity: 0.55;
-  }
-
-  20% {
-    opacity: 0.55;
-  }
-
-  25% {
-    opacity: 0;
-  }
-
-  30% {
-    opacity: 0.7;
-  }
-
-  40% {
-    opacity: 0.7;
-  }
-
-  45% {
-    opacity: 0;
-  }
-
-  50% {
-    opacity: 0.85;
-  }
-
-  65% {
-    opacity: 0.85;
-  }
-
-  70% {
-    opacity: 0;
-  }
-
-  75% {
+@keyframes sparkleFade {
+  from {
     opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
   }
-
   to {
-    opacity: 1;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2);
   }
 }
 
+@keyframes shake {
+  0% { transform: translateX(0px); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0px); }
+}
 
-/* Responsive design */
-@media (max-width: 992px) {
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive mobile */
+@media (max-width: 620px) {
   .search-container {
-    max-width: calc(100% - 40px); /* Đảm bảo không gian ngang được tận dụng */
-    margin: 60px 20px; /* Giảm margin-top trên mobile */
-    padding: 20px 25px;
+    margin: 40px 12px;
+    padding: 18px 30px;
+  }
+
+  .search-container h2 {
+    font-size: 20px;
   }
 
   .search-input {
-    max-width: 100%; /* Input chiếm toàn bộ chiều rộng trên mobile */
-    padding: 10px 15px;
+    max-width: 100%;
+    padding: 10px 12px;
     font-size: 14px;
   }
 
   .search-item {
-    padding: 10px 15px;
-    gap: 10px;
+    padding: 10px 12px;
+    gap: 8px;
   }
 
   .search-avatar {
@@ -205,5 +372,29 @@
 
   .search-username {
     font-size: 11px;
+  }
+
+  .search-intro-text {
+    font-size: 40px;
+    letter-spacing: 2px;
+  }
+
+  .search-intro-letter.search-s {
+    text-shadow: 
+      0 0 15px rgba(229, 9, 20, 0.8),
+      0 0 30px rgba(229, 9, 20, 0.6); /* Reduced shadow for mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .search-intro-text {
+    font-size: 28px;
+    letter-spacing: 1.5px;
+  }
+
+  .search-intro-letter.search-s {
+    text-shadow: 
+      0 0 10px rgba(229, 9, 20, 0.8),
+      0 0 20px rgba(229, 9, 20, 0.6); /* Further reduced for smaller screens */
   }
 }

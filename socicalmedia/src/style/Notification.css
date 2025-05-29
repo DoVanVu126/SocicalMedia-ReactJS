@@ -1,48 +1,408 @@
-/* notifications.css */
-.notifications-container {
-  padding: 20px;
-  max-width: 600px;
-  margin: 0 auto;
-  font-family: Arial, sans-serif;
-}
-
-.notifications-list {
-  list-style-type: none;
+/* Reset and Base Styles */
+* {
+  margin: 0;
   padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
-.notification-item {
-  border-bottom: 1px solid #ddd;
-  padding: 10px 0;
+body {
+  background: #f9fafb;
+  min-height: 100vh;
+  color: #1e293b;
 }
 
-.notification-item.read {
-  background-color: #f9f9f9;
+/* Notification Intro Animation */
+.notification-intro-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #ff4d4f, #ff7875);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: notificationFadeOut 0.3s ease 1.5s forwards;
 }
 
-.notification-item.unread {
-  font-weight: bold;
+.notification-bell {
+  font-size: 48px;
+  color: #ffffff;
+  animation: notificationBellShake 0.5s ease-in-out;
+  margin-bottom: 20px;
 }
 
-.mark-all-read-btn, .toggle-settings-btn, .mark-as-read-btn, .delete-btn {
-  margin-top: 10px;
-  padding: 8px 12px;
-  background-color: #007bff;
-  color: white;
+.notification-intro-text {
+  display: flex;
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.notification-intro-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: scale(0.5);
+  animation: notificationFadeInScale 0.8s ease forwards;
+}
+
+@keyframes notificationBellShake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(15deg); }
+  75% { transform: rotate(-15deg); }
+}
+
+@keyframes notificationFadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes notificationFadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Ensure main content is hidden during intro */
+.notifications-wrapper {
+  opacity: 0;
+  animation: notificationFadeIn 0.3s ease 1.8s forwards;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  background: #f4f7fa;
+  padding: 20px;
+  margin-top: 50px;
+  margin-left: 300px;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes notificationFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Fancy Text Styles for Header (Simplified to Plain Text) */
+.fancy-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.fancy-text {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+.unread-badge {
+  background: #ff4d4f;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 12px;
+  animation: pulse 2s infinite;
+}
+
+/* Remaining styles (unchanged) */
+.notifications-container {
+  max-width: 600px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  margin-top: 20px;
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(5px);
+}
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.action-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
 }
 
-.mark-all-read-btn:disabled, .toggle-settings-btn:disabled {
-  background-color: #ccc;
+.mark-all-btn {
+  background: #1890ff;
+  color: #fff;
+}
+
+.mark-all-btn:hover {
+  background: #40a9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-btn {
+  background: #52c41a;
+  color: #fff;
+}
+
+.toggle-btn:hover {
+  background: #73d13d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.action-btn:disabled {
+  background: #d9d9d9;
   cursor: not-allowed;
 }
 
 .status-message {
-  margin: 10px 0;
-  padding: 10px;
-  background-color: #e0f7fa;
-  color: #00796b;
-  border-radius: 4px;
+  background: #e6f7ff;
+  color: #096dd9;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  animation: fadeIn 0.5s ease-in;
+}
+
+.loading-spinner {
+  text-align: center;
+  color: #666;
+  font-size: 16px;
+  margin: 20px 0;
+  animation: spin 1s linear infinite;
+}
+
+.notifications-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+  animation: fadeIn 0.5s ease-out forwards;
+  animation-delay: calc(var(--index) * 0.1s);
+}
+
+.notification-item:hover {
+  background: #fafafa;
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.notification-item.unread {
+  background: #e6f7ff;
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.notification-icon {
+  font-size: 24px;
+  transition: transform 0.3s;
+}
+
+.notification-item.unread .notification-icon {
+  animation: shake 0.5s ease-in-out infinite;
+}
+
+.notification-item:hover .notification-icon {
+  transform: scale(1.2);
+}
+
+.notification-text p {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.notification-time {
+  font-size: 12px;
+  color: #888;
+}
+
+.notification-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.mark-read-btn {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.mark-read-btn:hover {
+  background: #d9d9d9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.delete-btn {
+  background: #ff4d4f;
+  color: #fff;
+}
+
+.delete-btn:hover {
+  background: #ff7875;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.no-notifications {
+  text-align: center;
+  color: #666;
+  font-size: 16px;
+  margin: 20px 0;
+  animation: fadeIn 0.5s ease-in;
+}
+
+/* Keyframe Animations (Removed unused ones for fancy-text) */
+@keyframes notificationBellShake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(15deg); }
+  75% { transform: rotate(-15deg); }
+}
+
+@keyframes notificationFadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes notificationFadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes notificationFadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+  20%, 40%, 60%, 80% { transform: translateX(2px); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .notifications-wrapper {
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  .notifications-container {
+    padding: 15px;
+  }
+
+  .fancy-text {
+    font-size: 2rem;
+  }
+
+  .action-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .notification-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .notification-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .notification-intro-text {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .notification-intro-text {
+    font-size: 18px;
+  }
+
+  .notification-bell {
+    font-size: 36px;
+  }
 }

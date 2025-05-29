@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../style/Login.css';
-
+import { initBlinkText, initRippleEffect } from "../script";
 const Login = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [form, setForm] = useState({ email: '', password: '' });
   const [otpForm, setOtpForm] = useState({ otp_code: '' });
@@ -13,8 +14,84 @@ const Login = () => {
   const navigate = useNavigate();
   const [fireworks, setFireworks] = useState([]);
   const fireworkContainerRef = useRef(null);
+  const emailInputRef = useRef(null); // Tạo ref cho email input
+  const passwordInputRef = useRef(null); // Tạo ref cho password input
 
-  // Tạo pháo bông ngẫu nhiên trong khu vực ảnh
+  function createFloatingChar(inputElement, char) {
+    const rect = inputElement.getBoundingClientRect();
+    const selectionStart = inputElement.selectionStart;
+    const tempSpan = document.createElement('span');
+    tempSpan.style.visibility = 'hidden';
+    tempSpan.style.position = 'absolute';
+    tempSpan.style.left = rect.left + 'px';
+    tempSpan.style.top = rect.top + 'px';
+    tempSpan.textContent = inputElement.value.substring(0, selectionStart);
+    document.body.appendChild(tempSpan);
+    const charRect = tempSpan.getBoundingClientRect();
+    document.body.removeChild(tempSpan);
+
+    const baseX = rect.left + (charRect.width * 0.8);
+    const baseY = rect.top + (rect.height / 2);
+
+    const numberOfSparks = 5; // Số lượng "tia" pháo bông
+    for (let i = 0; i < numberOfSparks; i++) {
+      const spark = document.createElement('div');
+      spark.classList.add('tiny-firework');
+      // Thêm class màu ngẫu nhiên (tùy chọn)
+      const colors = ['red', 'blue', 'green', 'yellow', 'orange', 'purple'];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      spark.classList.add(`tiny-firework-${randomColor}`);
+
+      const angle = Math.random() * 2 * Math.PI;
+      const distance = Math.random() * 10; // Khoảng cách "bay"
+
+      const x = baseX + Math.cos(angle) * distance;
+      const y = baseY + Math.sin(angle) * distance;
+
+      spark.style.left = `${x}px`;
+      spark.style.top = `${y}px`;
+      spark.style.animationDelay = `${Math.random() * 0.2}s`; // Tạo độ trễ ngẫu nhiên
+
+      document.body.appendChild(spark);
+
+      // Loại bỏ tia pháo bông sau khi animation kết thúc
+      spark.addEventListener('animationend', () => {
+        spark.remove();
+      });
+    }
+  }
+
+  useEffect(() => {
+    const emailInput = emailInputRef.current;
+    const passwordInput = passwordInputRef.current;
+
+    const handleInput = (event) => {
+      const lastChar = event.data;
+      if (lastChar && event.target === emailInput) {
+        createFloatingChar(emailInput, lastChar);
+      }
+      if (lastChar && event.target === passwordInput) {
+        createFloatingChar(passwordInput, lastChar);
+      }
+    };
+
+    if (emailInput) {
+      emailInput.addEventListener('input', handleInput);
+    }
+    if (passwordInput) {
+      passwordInput.addEventListener('input', handleInput);
+    }
+
+    return () => {
+      if (emailInput) {
+        emailInput.removeEventListener('input', handleInput);
+      }
+      if (passwordInput) {
+        passwordInput.removeEventListener('input', handleInput);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const interval = setInterval(() => {
       const container = fireworkContainerRef.current;
@@ -47,7 +124,10 @@ const Login = () => {
 
     return () => clearInterval(interval);
   }, []);
-
+  useEffect(() => {
+    initBlinkText();
+    initRippleEffect(); // Initialize ripple effect
+  }, []);
   // Xử lý thay đổi input
   const handleChange = (e) => {
     if (e.target.name === 'otp_code') {
@@ -60,6 +140,8 @@ const Login = () => {
   // BƯỚC 1: Gửi email + password
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true); // Bắt đầu loading
+
     try {
       const res = await axios.post('http://localhost:8000/api/login', form);
 
@@ -74,6 +156,8 @@ const Login = () => {
     } catch (err) {
       console.error('Login error:', err.response?.data || err.message);
       setMessage(err.response?.data?.message || 'Đăng nhập thất bại');
+    } finally {
+      setIsSubmitting(false); // Kết thúc loading
     }
   };
 
@@ -101,37 +185,50 @@ const Login = () => {
     <div className="login" ref={fireworkContainerRef}>
       <div className="login-form-container">
         <form onSubmit={isOtpRequired ? handleOtpSubmit : handleSubmit} style={{ width: '100%', maxWidth: '400px' }}>
-          <div class="pow-container">
-            <span class="pow-letter">SocicalApp</span>
+          <div className="pow-container">
+            <span className="pow-letter" style={{ animationDelay: '0.1s' }}>S</span>
+            <span className="pow-letter" style={{ animationDelay: '0.2s' }}>o</span>
+            <span className="pow-letter" style={{ animationDelay: '0.3s' }}>c</span>
+            <span className="pow-letter" style={{ animationDelay: '0.4s' }}>i</span>
+            <span className="pow-letter" style={{ animationDelay: '0.5s' }}>c</span>
+            <span className="pow-letter" style={{ animationDelay: '0.6s' }}>a</span>
+            <span className="pow-letter" style={{ animationDelay: '0.7s' }}>l</span>
+            <span className="pow-letter" style={{ animationDelay: '0.8s' }}>A</span>
+            <span className="pow-letter" style={{ animationDelay: '0.9s' }}>p</span>
+            <span className="pow-letter" style={{ animationDelay: '1.0s' }}>p</span>
           </div>
-          <h2 className="login-title">Đăng nhập</h2>
+          <h2 className="login-title blink-text">Đăng nhập</h2>
 
           {!isOtpRequired ? (
             <>
               <input
                 type="email"
                 name="email"
-                className="input-field"
+                className="input-field email-input"
                 placeholder="Email"
                 value={form.email}
                 onChange={handleChange}
                 required
+                ref={emailInputRef} // Gán ref cho email input
               />
               <input
                 type="password"
                 name="password"
-                className="input-field"
+                className="input-field password-input"
                 placeholder="Mật khẩu"
                 value={form.password}
                 onChange={handleChange}
                 required
+                ref={passwordInputRef}
               />
-              <div class="box">
-                <div class="canvas">
-                  <button type="submit" className="btn-login submit-btn0"></button>
-                  <button type="submit" className="btn-login submit-btn1">Đăng nhập</button>
-                  <button type="submit" className="btn-login submit-btn2">Đăng nhập</button>
-                  <button type="submit" className="btn-login submit-btn3"></button>
+              <div class="box-login">
+                <div class="canvas-login-vu">
+                  <button type="submit" className={`btn-login-big submit-btn0-login `}></button>
+                  <button type="submit" className={`btn-login-big submit-btn1-login `}>Đăng nhập</button>
+                  <button type="submit" className={`btn-login-big submit-btn2-login `}>Đăng nhập</button>
+                  <button type="submit" className={`btn-login-big submit-btn3-login `}></button>
+                  <button type="submit" className={`btn-login-small submit-btn4-login `}></button>
+                  <button type="submit" className={`btn-login-small submit-btn5-login `}></button>
                 </div>
               </div>
             </>
@@ -193,7 +290,6 @@ const Login = () => {
           }}
         />
       ))}
-
     </div>
   );
 };
