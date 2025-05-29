@@ -80,17 +80,12 @@ export default function UserProfile() {
     }
   };
 
-  // Fetch user posts
-  const fetchUserPosts = async () => {
+const fetchUserPosts = async () => {
     if (!userId) return;
     try {
-      const res = await axios.get('http://localhost:8000/api/posts', {
-        params: { user_id: userId },
-      });
-      const userPosts = res.data.filter(
-        (post) => post.user_id === parseInt(userId, 10)
-      );
-      setPosts(userPosts);
+      const res = await axios.get(`http://localhost:8000/api/users/${userId}/posts`);
+      // Backend (getUserPosts) đã lọc bài viết theo userId, nên bạn không cần filter lại ở frontend
+      setPosts(res.data);
     } catch (err) {
       console.error('Lỗi khi lấy bài viết:', err);
       setError('Không thể tải bài viết');
