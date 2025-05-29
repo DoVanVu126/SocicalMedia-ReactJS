@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import "../style/Home.css";
@@ -11,6 +11,14 @@ import { initBlinkText, sparkleMouseEffect, initRippleEffect } from "../script";
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
+  // Loader 3 giây chỉ khi lần đầu load trang
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
   const [editingIndex, setEditingIndex] = useState(null);
   const [editContent, setEditContent] = useState("");
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
@@ -20,8 +28,7 @@ export default function Home() {
   const [comments, setComments] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
   const [selectedCommentPostId, setSelectedCommentPostId] = useState(null);
-  const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [error, setError] = useState(null);
   const [showReactions, setShowReactions] = useState(null);
   const [stories, setStories] = useState([]);
   const [showMenu, setShowMenu] = useState(null);
@@ -33,19 +40,15 @@ export default function Home() {
   const [deletingStoryId, setDeletingStoryId] = useState(null);
   const [showTrash, setShowTrash] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPosts, setTotalPosts] = useState(0);
-  const postsPerPage = 10;
-  const [showNavButtons, setShowNavButtons] = useState(false); // Ví dụ giá trị khởi tạo
   const user = JSON.parse(localStorage.getItem("user"));
   const userIDCMT = user?.id;
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
   const reactionListRef = useRef(null);
   const storyListRef = useRef(null);
-
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPosts, setTotalPosts] = useState(0);
+  const postsPerPage = 10;
 
   const fetchPosts = async (page) => {
     setLoading(true);
@@ -59,57 +62,60 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
+
   };
 
   const totalPages = Math.ceil(totalPosts / postsPerPage);
 
+  // Hàm điều hướng phân trang
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+  const [showNavButtons, setShowNavButtons] = useState({
+    left: false,
+    right: false,
+  });
+
+  const navigate = useNavigate();
+
+  // Split intro text into letters for animation
   const introText = "SocialMediaApp".split("").map((letter, index) => ({
     letter,
     delay: index * 0.05,
   }));
 
-  const fetchReactionList = async (postId) => {
-    try {
-      const res = await axios.get(`http://localhost:8000/api/posts/${postId}/reactions`);
-      setReactionList((prev) => ({ ...prev, [postId]: res.data }));
-    } catch (err) {
-      console.error("Lỗi khi tải danh sách cảm xúc:", err.message);
-      setError("Không thể tải danh sách cảm xúc.");
-      setTimeout(() => setError(""), 3000);
-    }
-  };
-
   useEffect(() => {
-    if (location.state?.postId && location.state?.openComments) {
-      const postId = parseInt(location.state.postId);
-      if (postId) {
-        fetchComments(postId);
-        setSelectedCommentPostId(postId);
-        const postElement = document.getElementById(`post-${postId}`);
-        if (postElement) {
-          postElement.scrollIntoView({ behavior: "smooth" });
-        }
-      }
-    }
-  }, [location]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2000);
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
     return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    const introTimer = setTimeout(() => setShowIntro(false), 3000);
-    return () => clearTimeout(introTimer);
   }, []);
 
   useEffect(() => {
     initBlinkText();
     initRippleEffect();
+  }, []);
+
+  useEffect(() => {
     const removeSparkleListener = sparkleMouseEffect();
     return () => {
       if (typeof removeSparkleListener === "function") removeSparkleListener();
     };
+  }, []);
+
+  useEffect(() => {
+    const introTimer = setTimeout(() => {
+      setShowIntro(false);
+    }, 1500);
+    return () => clearTimeout(introTimer);
   }, []);
 
   useEffect(() => {
@@ -120,16 +126,15 @@ export default function Home() {
       .get("http://localhost:8000/api/stories", { params })
       .then((res) => {
         const elapsed = Date.now() - start;
-        const remainingTime = Math.max(2000 - elapsed, 0);
+        const remainingTime = Math.max(3000 - elapsed, 0);
         setTimeout(() => {
           setStories(res.data);
           setLoading(false);
         }, remainingTime);
       })
       .catch((err) => {
-        console.error("Lỗi khi tải stories:", err.message);
-        setError("Không thể tải story.");
-        setTimeout(() => setError(""), 3000);
+        console.error("Error fetching stories:", err);
+        setError("Không thể tải tin.");
         setLoading(false);
       });
   }, [userIDCMT]);
@@ -137,32 +142,16 @@ export default function Home() {
   useEffect(() => {
     if (!userIDCMT) {
       setError("Vui lòng đăng nhập để xem bài viết.");
-      setTimeout(() => setError(""), 3000);
       return;
     }
-    fetchPosts(currentPage);
+
+    fetchPosts(currentPage); // Gọi API phân trang đã đúng
   }, [userIDCMT, currentPage]);
 
   useEffect(() => {
     console.log("Total posts:", totalPosts);
     console.log("Total pages:", totalPages);
   }, [totalPosts]);
-
-  useEffect(() => {
-    const handleFocus = () => {
-      if (!userIDCMT) return;
-      axios
-        .get("http://localhost:8000/api/stories", { params: { user_id: userIDCMT } })
-        .then((res) => setStories(res.data))
-        .catch((err) => console.error("Lỗi khi làm mới stories:", err));
-      axios
-        .get("http://localhost:8000/api/posts", { params: { user_id: userIDCMT } })
-        .then((res) => setPosts(res.data))
-        .catch((err) => console.error("Lỗi khi làm mới posts:", err));
-    };
-    window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
-  }, [userIDCMT]);
 
   useEffect(() => {
     const updateNavButtons = () => {
@@ -212,6 +201,7 @@ export default function Home() {
       e.preventDefault();
       const x = (e.pageX || e.touches[0].pageX) - storyList.offsetLeft;
       const walk = (x - startX) * 1.5;
+
       animationFrameId = requestAnimationFrame(() => {
         storyList.scrollLeft = scrollLeft - walk;
       });
@@ -239,8 +229,10 @@ export default function Home() {
 
   const scrollStories = (direction) => {
     if (storyListRef.current) {
-      const storyItemWidth = storyListRef.current.querySelector(".story-item")?.offsetWidth || 120;
-      const scrollAmount = direction === "left" ? -storyItemWidth * 3 : storyItemWidth * 3;
+      const storyItemWidth =
+        storyListRef.current.querySelector(".story-item")?.offsetWidth || 120;
+      const scrollAmount =
+        direction === "left" ? -storyItemWidth * 3 : storyItemWidth * 3;
       storyListRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
   };
@@ -255,15 +247,27 @@ export default function Home() {
     setOpenMenuIndex(null);
     setSelectedCommentId(commentId);
   };
-
   const handleSaveEdit = async () => {
-    if (editingIndex === null || selectedCommentPostId === null || selectedCommentId === null) return;
+    if (
+      editingIndex === null ||
+      selectedCommentPostId === null ||
+      selectedCommentId === null
+    ) {
+      return;
+    }
+
     try {
       const response = await axios.put(
         `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${selectedCommentId}`,
-        { content: editContent, user_id: userIDCMT }
+        {
+          content: editContent,
+          user_id: userIDCMT,
+        }
       );
+
+      // Cập nhật comment sau khi sửa
       const updatedComment = response.data;
+
       setComments((prevComments) => {
         const updatedComments = { ...prevComments };
         if (updatedComments[selectedCommentPostId]) {
@@ -276,55 +280,74 @@ export default function Home() {
         }
         return updatedComments;
       });
+
+      // Reset các state
       setEditingIndex(null);
       setEditContent("");
       setSelectedCommentId(null);
-    } catch (err) {
-      console.error("Lỗi khi sửa bình luận:", err.message);
+    } catch (error) {
+      console.error("Error editing comment:", error);
       setError("Không thể sửa bình luận.");
-      setTimeout(() => setError(""), 3000);
     }
   };
 
   const handleDelete = async (commentId) => {
-    if (!window.confirm("Bạn có chắc muốn xóa bình luận này?")) return;
+    if (!window.confirm("Bạn có chắc muốn xóa bình luận này?")) {
+      return;
+    }
     try {
-      await axios.delete(
+      const response = await fetch(
         `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${commentId}`,
-        { data: { user_id: userIDCMT } }
-      );
-      setComments((prev) => {
-        const updated = { ...prev };
-        if (updated[selectedCommentPostId]) {
-          updated[selectedCommentPostId] = updated[selectedCommentPostId].filter(
-            (comment) => comment.id !== commentId
-          );
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: userIDCMT }),
         }
-        return updated;
+      );
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error deleting comment:", errorData);
+        setError("Unable to delete comment.");
+        return;
+      }
+      setComments(prevComments => {
+
+        const updatedComments = { ...prevComments };
+        if (updatedComments[selectedCommentPostId]) {
+          updatedComments[selectedCommentPostId] = updatedComments[
+            selectedCommentPostId
+          ].filter((comment) => comment.id !== commentId);
+        }
+        return updatedComments;
       });
       setOpenMenuIndex(null);
-    } catch (err) {
-      console.error("Lỗi khi xóa bình luận:", err.message);
+    } catch (error) {
+      console.error("Error deleting comment:", error);
       setError("Không thể xóa bình luận.");
-      setTimeout(() => setError(""), 3000);
     }
   };
 
   const toggleExpandImages = (postId) => {
     setExpandedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
-
   const handleEdit = async (post) => {
     try {
+      // Gửi request GET để kiểm tra bài viết có tồn tại không
       const response = await axios.get(`http://localhost:8000/api/posts/${post.id}`);
       const latestPost = response.data;
       if (!latestPost) {
         alert("Bài viết không còn tồn tại hoặc đã bị xóa. Hãy load lại trang!");
         return;
       }
+      // Nếu không thay đổi, điều hướng sang trang chỉnh sửa
       navigate(`/edit-post/${post.id}`, {
-        state: { content: latestPost.content, imageUrl: latestPost.imageurl, videoUrl: latestPost.videourl },
+        state: {
+          content: latestPost.content,
+          imageUrl: latestPost.imageurl,
+          videoUrl: latestPost.videourl,
+        },
       });
+
     } catch (error) {
       console.error("Không thể sửa bài viết:", error);
       alert("Bài viết không còn tồn tại hoặc đã bị xóa. Hãy load lại trang!");
@@ -333,8 +356,7 @@ export default function Home() {
 
   const handleEditStory = (story) => {
     if (!userIDCMT) {
-      setError("Vui lòng đăng nhập để sửa story.");
-      setTimeout(() => setError(""), 3000);
+      setError("Vui lòng đăng nhập để sửa tin.");
       return;
     }
     navigate(`/edit-story/${story.id}`, {
@@ -348,84 +370,33 @@ export default function Home() {
     });
   };
 
-  const handleDeleteStory = async (id) => {
+  const handleDeleteStory = (id) => {
     if (!userIDCMT) {
-      setError("Vui lòng đăng nhập để xóa story.");
-      setTimeout(() => setError(""), 3000);
+      setError("Vui lòng đăng nhập để xóa tin.");
       return;
     }
-    if (!window.confirm("Bạn có chắc muốn xóa story này?")) return;
+    if (!window.confirm("Bạn có chắc muốn xóa tin này?")) {
+      return;
+    }
     setDeletingStoryId(id);
     setShowTrash(true);
-    try {
-      const response = await axios.delete(`http://localhost:8000/api/stories/${id}`, {
-        data: { user_id: userIDCMT },
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      setStories(stories.filter((story) => story.id !== id));
-      setSuccessMessage(response.data.message || "Story đã được xóa thành công");
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
-      console.error("Lỗi khi xóa story:", err.response?.data || err.message);
-      const errorMessage =
-        err.response?.status === 404
-          ? "Story không tồn tại hoặc đã bị xóa"
-          : err.response?.status === 403
-            ? "Bạn không có quyền xóa story này"
-            : err.response?.status === 401
-              ? "Vui lòng đăng nhập lại"
-              : "Không thể xóa story. Vui lòng thử lại.";
-      setError(errorMessage);
-      setTimeout(() => setError(""), 3000);
-    } finally {
-      setTimeout(() => {
-        setShowTrash(false);
-        setDeletingStoryId(null);
-      }, 1000);
-    }
-  };
-
-  const handleDeletePost = (postId) => {
-    if (!userIDCMT) {
-      setError("Vui lòng đăng nhập để xóa bài viết.");
-      setTimeout(() => setError(""), 3000);
-      return;
-    }
-    if (!window.confirm("Bạn có chắc muốn xóa bài viết này?")) return;
-    const postElement = document.getElementById(`post-${postId}`);
-    if (postElement) {
-      postElement.classList.add("sliced");
-      postElement.addEventListener(
-        "animationend",
-        async () => {
-          setLoading(true);
-          try {
-            await axios.delete(`http://localhost:8000/api/posts/${postId}`, {
-              data: { user_id: userIDCMT },
-              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-            });
-            setPosts((prev) => prev.filter((p) => p.id !== postId));
-            setSuccessMessage("Bài viết đã được xóa thành công");
-            setTimeout(() => setSuccessMessage(""), 3000);
-          } catch (err) {
-            console.error("Lỗi khi xóa bài viết:", err.response?.data || err.message);
-            const errorMessage =
-              err.response?.status === 404
-                ? "Bài viết không tồn tại hoặc đã bị xóa"
-                : err.response?.status === 403
-                  ? "Bạn không có quyền xóa bài viết này"
-                  : err.response?.status === 401
-                    ? "Vui lòng đăng nhập lại"
-                    : "Không thể xóa bài viết. Vui lòng thử lại.";
-            setError(errorMessage);
-            setTimeout(() => setError(""), 3000);
-          } finally {
-            setLoading(false);
-          }
-        },
-        { once: true }
-      );
-    }
+    setTimeout(() => {
+      axios
+        .delete(`http://localhost:8000/api/stories/${id}`, {
+          data: { user_id: userIDCMT },
+        })
+        .then(() => {
+          setStories(stories.filter((story) => story.id !== id));
+          setShowTrash(false);
+          setDeletingStoryId(null);
+        })
+        .catch((err) => {
+          console.error("Error deleting story:", err);
+          setError("Không thể xóa tin.");
+          setShowTrash(false);
+          setDeletingStoryId(null);
+        });
+    }, 1000);
   };
 
   const handleToggleMenu = (storyId) => {
@@ -437,9 +408,14 @@ export default function Home() {
     const now = new Date();
     const diffInSeconds = Math.floor((now - date) / 1000);
     if (diffInSeconds < 60) return `${diffInSeconds} giây trước`;
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
-    return date.toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
+    if (diffInSeconds < 3600)
+      return `${Math.floor(diffInSeconds / 60)} phút trước`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+    return date.toLocaleString("vi-VN", {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
   };
 
   const handleCommentSubmit = async (postId) => {
@@ -450,11 +426,20 @@ export default function Home() {
     const content = commentInputs[postId];
     if (!content) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/posts/${postId}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: userIDCMT, content }),
-      });
+      const res = await fetch(
+        `http://localhost:8000/api/posts/${postId}/comments`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: userIDCMT,
+            content,
+          }),
+        }
+      );
+
       if (!res.ok) {
         const errorText = await res.text();
         throw new Error(`Server error: ${res.status} - ${errorText}`);
@@ -471,10 +456,19 @@ export default function Home() {
     try {
       const res = await axios.get(`http://localhost:8000/api/posts/${postId}/comments`);
       setComments((prev) => ({ ...prev, [postId]: res.data }));
-    } catch (err) {
-      console.error("Lỗi khi tải bình luận:", err.message);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
       setError("Không thể tải bình luận.");
-      setTimeout(() => setError(""), 3000);
+    }
+  };
+
+  const fetchReactionList = async (postId) => {
+    try {
+      const res = await axios.get(`http://localhost:8000/api/posts/${postId}/reactions`);
+      setReactionList((prev) => ({ ...prev, [postId]: res.data }));
+    } catch (err) {
+      console.error("Error fetching reaction list:", err);
+      setError("Không thể tải danh sách cảm xúc.");
     }
   };
 
@@ -490,7 +484,7 @@ export default function Home() {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        activeMenuPostId &&
+        activeMenuPostId !== null &&
         menuRef.current &&
         !menuRef.current.contains(event.target) &&
         buttonRef.current &&
@@ -499,7 +493,7 @@ export default function Home() {
         setActiveMenuPostId(null);
       }
       if (
-        showReactionList &&
+        showReactionList !== null &&
         reactionListRef.current &&
         !reactionListRef.current.contains(event.target)
       ) {
@@ -507,11 +501,20 @@ export default function Home() {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, [activeMenuPostId, showReactionList]);
 
   const renderReaction = (type) => {
-    const icons = { like: "👍", love: "❤️", haha: "😂", wow: "😲", sad: "😢", angry: "😡" };
+    const icons = {
+      like: "👍",
+      love: "❤️",
+      haha: "😂",
+      wow: "😲",
+      sad: "😢",
+      angry: "😡",
+    };
     return icons[type] || "👍";
   };
 
@@ -530,8 +533,7 @@ export default function Home() {
 
   const handleReactionClick = async (postId, reactionType = null) => {
     if (!userIDCMT) {
-      setError("Vui lòng đăng nhập để thả cảm xúc.");
-      setTimeout(() => setError(""), 3000);
+      setError("Vui lòng đăng nhập để thực hiện hành động này.");
       return;
     }
     const post = posts.find((p) => p.id === postId);
@@ -553,13 +555,16 @@ export default function Home() {
         setPosts(newPosts);
         await axios.delete(`http://localhost:8000/api/posts/${postId}/react`, {
           data: { user_id: userIDCMT },
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
       } else {
         const newReactionType = reactionType || "like";
         updatedPost = {
           ...updatedPost,
-          user_reaction: { user_id: userIDCMT, post_id: postId, type: newReactionType },
+          user_reaction: {
+            user_id: userIDCMT,
+            post_id: postId,
+            type: newReactionType,
+          },
           reaction_summary: {
             ...updatedPost.reaction_summary,
             [userReaction?.type]: userReaction
@@ -570,17 +575,15 @@ export default function Home() {
         };
         newPosts = newPosts.map((p) => (p.id === postId ? updatedPost : p));
         setPosts(newPosts);
-        await axios.post(
-          `http://localhost:8000/api/posts/${postId}/react`,
-          { user_id: userIDCMT, type: newReactionType },
-          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-        );
+        await axios.post(`http://localhost:8000/api/posts/${postId}/react`, {
+          user_id: userIDCMT,
+          type: newReactionType,
+        });
       }
       setShowReactions(null);
     } catch (err) {
-      console.error("Lỗi khi xử lý cảm xúc:", err.message);
+      console.error("Error processing reaction:", err);
       setError("Không thể xử lý cảm xúc.");
-      setTimeout(() => setError(""), 3000);
       setPosts([...posts]);
     }
   };
@@ -588,11 +591,9 @@ export default function Home() {
   const getTotalReactions = (summary) => {
     return Object.values(summary || {}).reduce((sum, count) => sum + count, 0);
   };
-
   const handleOpenViewer = (userId) => {
     if (!userIDCMT) {
-      setError("Vui lòng đăng nhập để xem story.");
-      setTimeout(() => setError(""), 3000);
+      setError("Vui lòng đăng nhập để xem tin.");
       navigate("/login");
       return;
     }
@@ -613,6 +614,8 @@ export default function Home() {
     });
     return Object.values(userStories);
   };
+
+  const filteredStories = getLatestStories();
 
   const getUserStories = (userId) => {
     return stories
@@ -643,9 +646,6 @@ export default function Home() {
       setSelectedUserId(null);
     }
   };
-
-  const filteredStories = getLatestStories();
-
   return (
     <div className="container">
       {showIntro && (
@@ -655,7 +655,10 @@ export default function Home() {
               <span
                 key={index}
                 className="home-intro-letter"
-                style={{ animationDelay: `${delay}s`, "--index": index }}
+                style={{
+                  animationDelay: `${delay}s`,
+                  "--index": index,
+                }}
               >
                 {letter}
               </span>
@@ -669,8 +672,6 @@ export default function Home() {
         <div className="story-containers">
           <h3 className="story-header blink-text">Bảng tin</h3>
           {loading && <p className="loading">⏳ Đang tải...</p>}
-          {successMessage && <p className="success-message">{successMessage}</p>}
-          {error && <p className="error-message">{error}</p>}
           {!loading && !userIDCMT && (
             <p className="no-stories">Vui lòng đăng nhập để xem tin.</p>
           )}
@@ -688,12 +689,15 @@ export default function Home() {
                 className="story-nav-btn story-nav-next"
                 onClick={() => scrollStories("right")}
               >
-                ❯
+                ›
               </button>
             )}
             <div className="story-list" ref={storyListRef}>
               {userIDCMT && (
-                <div className="story-item create-story" onClick={() => navigate("/story")}>
+                <div
+                  className="story-item create-story"
+                  onClick={() => navigate("/story")}
+                >
                   <div className="story-user-info">
                     <img
                       src={
@@ -713,7 +717,7 @@ export default function Home() {
               {filteredStories.map((story) => (
                 <div
                   key={story.user.id}
-                  className={`story-item ${deletingStoryId === story.id ? "deleting" : ""}`}
+                  className={`story-item ${deletingStoryId === story.id ? 'deleting' : ''}`}
                   onClick={() => handleOpenViewer(story.user.id)}
                 >
                   <div className="story-user-info">
@@ -727,8 +731,12 @@ export default function Home() {
                       className="story-avatars"
                     />
                     <div className="story-user-details">
-                      <span className="story-username">{story.user?.username || "Người dùng"}</span>
-                      <span className="story-time">{formatTime(story.created_at)}</span>
+                      <span className="story-username">
+                        {story.user?.username || "Người dùng"}
+                      </span>
+                      <span className="story-time">
+                        {formatTime(story.created_at)}
+                      </span>
                     </div>
                   </div>
                   {userIDCMT && story.user?.id === userIDCMT && (
@@ -760,24 +768,17 @@ export default function Home() {
                       )}
                     </>
                   )}
-                  <div className="story-image-wrapper" style={{ background: !story.imageurl && !story.videourl ? 'linear-gradient(135deg, #1e3c72, #2a5298)' : 'none' }}>
+                  <div className="story-image-wrapper">
                     {story.videourl?.match(/\.(mp4|webm)$/i) ? (
                       <video
                         src={`http://localhost:8000/storage/story_videos/${story.videourl}`}
                         className="story-image"
                         muted
                       />
-                    ) : story.imageurl ? (
+                    ) : (
                       <img
                         src={`http://localhost:8000/storage/story_images/${story.imageurl}`}
                         alt="Story"
-                        className="story-image"
-                        onError={(e) => { e.target.src = '/default-story.jpg'; }}
-                      />
-                    ) : (
-                      <img
-                        src="/default-story.jpg"
-                        alt="Default Story"
                         className="story-image"
                       />
                     )}
@@ -809,6 +810,7 @@ export default function Home() {
             />
           )}
         </div>
+
         {loading ? (
           <div className="neon-loader-home">
             <div className="circle-loader-home"></div>
@@ -820,253 +822,304 @@ export default function Home() {
         ) : (
           <>
             {error && <p className="error">{error}</p>}
-            {Array.isArray(posts) && posts.length > 0 ? (
-              <>
-                {posts.map((post) => (
-                  <div className="post" id={`post-${post.id}`} key={post.id}>
-                    <div className="slice slice1"></div>
-                    <div className="slice slice2"></div>
-                    <div className="slice slice3"></div>
-                    <div className="slice slice4"></div>
-                    <div className="slice slice5"></div>
-                    <div className="post-header">
-                      <div
-                        className="user-info"
-                        onClick={() => navigate(`/users/${post.user?.id}`)}
-                        style={{ cursor: "pointer" }}
-                      >
-                        <img
-                          src={
-                            post.user?.profilepicture
-                              ? `http://localhost:8000/storage/images/${post.user.profilepicture}`
-                              : "/images/image-default.jpg"
-                          }
-                          alt="Avatar"
-                          className="avatar"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "/images/image-default.jpg";
-                          }}
-                        />
-                        <div>
-                          <strong>{post.user?.username || "Người dùng"}</strong>
-                          <br />
-                          <small>{new Date(post.created_at).toLocaleString()}</small>
-                        </div>
-                      </div>
-                      <div className="post-options">
-                        <button
-                          ref={buttonRef}
-                          className="options-btn"
-                          onClick={() =>
-                            setActiveMenuPostId(activeMenuPostId === post.id ? null : post.id)
-                          }
-                        >
-                          ⋯
-                        </button>
-                        {activeMenuPostId === post.id && post.user?.id === user?.id && (
-                          <div className="options-menu" ref={menuRef}>
-                            <button onClick={() => handleEdit(post)}>Sửa</button>
-                            <button onClick={() => handleDeletePost(post.id)}>Xóa</button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <p className="post-content">{post.content}</p>
-                    <div className="post-media">
-                      {Array.isArray(post.imageurl) && (
-                        <>
-                          {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 6)).map(
-                            (img, index) => (
-                              <div key={index} className="image-wrapper">
-                                <div className="media-overlay-black"></div>
-                                <div className="media-overlay-hover"></div>
-                                <img
-                                  src={`http://localhost:8000/storage/images/${img}`}
-                                  alt={`Ảnh ${index + 1}`}
-                                  className="media-image"
-                                  onError={(e) => {
-                                    e.target.onerror = null;
-                                    e.target.src = "/images/image-default.jpg";
-                                  }}
-                                />
-                                {index === 5 && post.imageurl.length > 6 && !expandedPosts[post.id] && (
-                                  <div
-                                    className="image-overlay"
-                                    onClick={() => toggleExpandImages(post.id)}
-                                  >
-                                    +{post.imageurl.length - 6} ảnh
-                                  </div>
-                                )}
-                              </div>
-                            )
-                          )}
-                          {expandedPosts[post.id] && (
-                            <button
-                              onClick={() => toggleExpandImages(post.id)}
-                              className="collapse-btn"
-                            >
-                              Thu gọn
-                            </button>
-                          )}
-                        </>
-                      )}
-                      {post.videourl && (
-                        <div className="video-wrapper">
-                          <div className="media-overlay-hover"></div>
-                          <video controls className="media-video">
-                            <source
-                              src={`http://localhost:8000/storage/videos/${post.videourl}`}
-                              type="video/mp4"
-                            />
-                            Trình duyệt không hỗ trợ video.
-                          </video>
-                        </div>
-                      )}
-                    </div>
-                    <div className="actions">
-                      {getTotalReactions(post.reaction_summary) > 0 && (
-                        <div className="reaction-summary">
-                          <span
-                            className="reaction-icon"
-                            onClick={() => handleReactionSummaryClick(post.id)}
-                            style={{ cursor: "pointer" }}
-                          >
-                            {Object.keys(post.reaction_summary).map(
-                              (type) =>
-                                post.reaction_summary[type] > 0 && (
-                                  <span key={type}>{renderReaction(type)}</span>
-                                )
-                            )}
-                          </span>
-                          <span
-                            onClick={() => handleReactionSummaryClick(post.id)}
-                            style={{ cursor: "pointer" }}
-                          >
-                            {getTotalReactions(post.reaction_summary)}
-                          </span>
-                          {showReactionList === post.id && (
-                            <div className="reaction-list" ref={reactionListRef}>
-                              <div className="reaction-list-header">
-                                <span>{getTotalReactions(post.reaction_summary)} lượt thả cảm xúc</span>
-                                <button
-                                  className="close-button"
-                                  onClick={() => setShowReactionList(null)}
-                                >
-                                  ×
-                                </button>
-                              </div>
-                              <div className="reaction-counts">
-                                {Object.keys(post.reaction_summary).map(
-                                  (type) =>
-                                    post.reaction_summary[type] > 0 && (
-                                      <span key={type} className="reaction-count">
-                                        {renderReaction(type)} {post.reaction_summary[type]}
-                                      </span>
-                                    )
-                                )}
-                              </div>
-                              <div className="reaction-users">
-                                {reactionList[post.id]?.length > 0 ? (
-                                  reactionList[post.id].map((reaction, index) => (
-                                    <div key={index} className="reaction-user">
-                                      <img
-                                        src={
-                                          reaction.user?.profilepicture
-                                            ? `http://localhost:8000/storage/images/${reaction.user.profilepicture}`
-                                            : "/default-avatar.png"
-                                        }
-                                        alt="Avatar"
-                                        className="reaction-user-avatar"
-                                      />
-                                      <span>{reaction.user?.username || reaction.username}</span>:{" "}
-                                      {renderReaction(reaction.type)}
-                                    </div>
-                                  ))
-                                ) : (
-                                  <p>Không có cảm xúc nào</p>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      <div
-                        className="reaction-container"
-                        onMouseEnter={() => setShowReactions(post.id)}
-                        onMouseLeave={() => setShowReactions(null)}
-                      >
-                        <button
-                          className={`like-button ${post.user_reaction ? "reacted" : ""}`}
-                          onClick={() => handleReactionClick(post.id)}
-                        >
-                          {renderButtonLabel(post.user_reaction)}
-                        </button>
-                        {showReactions === post.id && (
-                          <div className="reaction-icons">
-                            {["like", "love", "haha", "wow", "sad", "angry"].map((type) => (
-                              <button
-                                key={type}
-                                className={`reaction-button ${post.user_reaction?.type === type ? "selected" : ""}`}
-                                onClick={() => handleReactionClick(post.id, type)}
-                                title={type.charAt(0).toUpperCase() + type.slice(1)}
-                              >
-                                {renderReaction(type)}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => {
-                          if (selectedCommentPostId === post.id) {
-                            setSelectedCommentPostId(null);
-                          } else {
-                            fetchComments(post.id);
-                            setSelectedCommentPostId(post.id);
-                          }
+            {Array.isArray(posts) &&
+              posts.length > 0 &&
+              posts.map((post) => (
+                <div className="post" id={`post-${post.id}`} key={post.id}>
+                  <div className="slice slice1"></div>
+                  <div className="slice slice2"></div>
+                  <div className="slice slice3"></div>
+                  <div className="slice slice4"></div>
+                  <div className="slice slice5"></div>
+                  <div className="post-header">
+                    <div
+                      className="user-info"
+                      onClick={() => navigate(`/users/${post.user?.id}`)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <img
+                        src={
+                          post.user?.profilepicture
+                            ? `http://localhost:8000/storage/images/${post.user.profilepicture}`
+                            : "/images/image-default.jpg"
+                        }
+                        alt="Avatar"
+                        className="avatar"
+                        onError={(e) => {
+                          e.target.onerror = null; // tránh lỗi vòng lặp
+                          e.target.src = "/images/image-default.jpg"; // fallback ảnh mặc định
                         }}
-                      >
-                        💬 Bình luận
-                      </button>
-                      <button onClick={() => alert("Chức năng chia sẻ chưa được triển khai")}>
-                        🔗 Chia sẻ
-                      </button>
+                      />
+
+                      <div>
+                        <strong>{post.user?.username || "Người dùng"}</strong>
+                        <br />
+                        <small>{new Date(post.created_at).toLocaleString()}</small>
+                      </div>
                     </div>
-                    {selectedCommentPostId === post.id && (
-                      <>
-                        <div className="cm-add-comment">
-                          <input
-                            type="text"
-                            placeholder="Viết bình luận..."
-                            value={commentInputs[post.id] || ""}
-                            onChange={(e) =>
-                              setCommentInputs({ ...commentInputs, [post.id]: e.target.value })
-                            }
-                          />
-                          <button onClick={() => handleCommentSubmit(post.id)}>Gửi</button>
+                    <div className="post-options">
+                      <button
+                        ref={buttonRef}
+                        className="options-btn"
+                        onClick={() =>
+                          setActiveMenuPostId(activeMenuPostId === post.id ? null : post.id)
+                        }
+                      >
+                        ⋯
+                      </button>
+                      {activeMenuPostId === post.id && post.user?.id === user?.id && (
+                        <div className="options-menu" ref={menuRef}>
+                          <button onClick={() => handleEdit(post)}>Sửa</button>
+                          <div className="slice slice1"></div>
+                          <div className="slice slice2"></div>
+                          <div className="slice slice3"></div>
+                          <div className="slice slice4"></div>
+                          <div className="slice slice5"></div>
+
+                          <button
+                            onClick={() => {
+                              if (!window.confirm("Bạn có chắc muốn xóa bài viết này không?")) {
+                                return;
+                              }
+                              const postElement = document.getElementById(`post-${post.id}`);
+
+                              if (postElement) {
+                                postElement.classList.add("sliced");
+                                postElement.addEventListener(
+                                  "animationend",
+                                  () => {
+                                    setLoading(true);
+                                    axios
+                                      .delete(`http://localhost:8000/api/posts/${post.id}`, {
+                                        data: { user_id: userIDCMT },
+                                      })
+                                      .then(() => {
+                                        setPosts((prevPosts) =>
+                                          prevPosts.filter((p) => p.id !== post.id)
+                                        );
+                                      })
+                                      .catch((err) => {
+                                        console.error("Lỗi khi xóa bài viết:", err);
+                                        setError("Không thể xóa bài viết, hãy load lại trang !");
+                                      })
+                                      .finally(() => setLoading(false));
+                                  },
+                                  { once: true }
+                                );
+
+                              }
+                            }}
+                          >
+                            Xóa
+                          </button>
                         </div>
-                        <div className="cm-comments">
-                          {comments[post.id]?.map((comment, index) => (
-                            <div key={index} className="cm-comment">
-                              <div className="cm-comment-content">
-                                <strong>{comment.user?.username || "Người dùng"}:</strong>{" "}
-                                {editingIndex === index ? (
-                                  <>
-                                    <input
-                                      type="text"
-                                      value={editContent}
-                                      onChange={(e) => setEditContent(e.target.value)}
-                                    />
-                                    <button onClick={handleSaveEdit}>Lưu</button>
-                                    <button onClick={() => setEditingIndex(null)}>Hủy</button>
-                                  </>
-                                ) : (
-                                  comment.content
-                                )}
+                      )}
+                    </div>
+                  </div>
+                  <p className="post-content">{post.content}</p>
+                  <div key={post.id} className="post-media">
+                    {Array.isArray(post.imageurl) && (
+                      <>
+                        {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 6)).map((img, index) => (
+                          <div key={index} className="image-wrapper">
+                            <div className="media-overlay-black"></div>
+                            <div className="media-overlay-hover"></div>
+                            <img
+                              src={`http://localhost:8000/storage/images/${img}`}
+                              alt={`Ảnh ${index + 1}`}
+                              className="media-image"
+                              onError={(e) => {
+                                e.target.onerror = null; // tránh lỗi vòng lặp
+                                e.target.src = '/images/image-default.jpg'; // đường dẫn ảnh mặc định trong public folder
+                              }}
+                            />
+
+                            {index === 5 && post.imageurl.length > 6 && !expandedPosts[post.id] && (
+                              <div
+                                className="image-overlay"
+                                onClick={() => toggleExpandImages(post.id)}
+                              >
+                                +{post.imageurl.length - 6} ảnh
                               </div>
+                            )}
+                          </div>
+                        ))}
+                        {expandedPosts[post.id] && (
+                          <button
+                            onClick={() => toggleExpandImages(post.id)}
+                            className="collapse-btn"
+                          >
+                            Thu gọn
+                          </button>
+                        )}
+                      </>
+                    )}
+                    {post.videourl && (
+                      <div className="video-wrapper">
+                        <div className="media-overlay-hover"></div>
+                        <video controls className="media-video">
+                          <source
+                            src={`http://localhost:8000/storage/videos/${post.videourl}`}
+                            type="video/mp4"
+                          />
+                          Trình duyệt của bạn không hỗ trợ video.
+                        </video>
+                      </div>
+                    )}
+                  </div>
+                  <div className="actions">
+                    {getTotalReactions(post.reaction_summary) > 0 && (
+                      <div className="reaction-summary">
+                        <span
+                          className="reaction-icon"
+                          onClick={() => handleReactionSummaryClick(post.id)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          {Object.keys(post.reaction_summary).map(
+                            (type) =>
+                              post.reaction_summary[type] > 0 && (
+                                <span key={type}>{renderReaction(type)}</span>
+                              )
+                          )}
+                        </span>
+                        <span
+                          onClick={() => handleReactionSummaryClick(post.id)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          {getTotalReactions(post.reaction_summary)}
+                        </span>
+                        {showReactionList === post.id && (
+                          <div className="reaction-list" ref={reactionListRef}>
+                            <div className="reaction-list-header">
+
+                              <span>
+                                {getTotalReactions(post.reaction_summary)} lượt thả cảm xúc
+                              </span>
+                              <button
+                                className="close-button"
+                                onClick={() => setShowReactionList(null)}
+                              >
+                                ×
+                              </button>
+                            </div>
+                            <div className="reaction-counts">
+                              {Object.keys(post.reaction_summary).map(
+                                (type) =>
+                                  post.reaction_summary[type] > 0 && (
+                                    <span key={type} className="reaction-count">
+                                      {renderReaction(type)} {post.reaction_summary[type]}
+                                    </span>
+                                  )
+                              )}
+                            </div>
+                            <div className="reaction-users">
+                              {reactionList[post.id]?.length > 0 ? (
+                                reactionList[post.id].map((reaction, index) => (
+                                  <div key={index} className="reaction-user">
+                                    <img
+                                      src={
+                                        reaction.user?.profilepicture
+                                          ? `http://localhost:8000/storage/images/${reaction.user.profilepicture}`
+                                          : "/default-avatar.png"
+                                      }
+                                      alt="Avatar"
+                                      className="reaction-user-avatar"
+                                    />
+                                    <span>{reaction.user?.username || reaction.username}</span>:{" "}
+                                    {renderReaction(reaction.type)}
+                                  </div>
+                                ))
+                              ) : (
+                                <p>Không có cảm xúc nào</p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div
+                      className="reaction-container"
+                      onMouseEnter={() => setShowReactions(post.id)}
+                      onMouseLeave={() => setShowReactions(null)}
+                    >
+                      <button
+                        className={`like-button ${post.user_reaction ? "reacted" : ""}`}
+                        onClick={() => handleReactionClick(post.id)}
+                      >
+                        {renderButtonLabel(post.user_reaction)}
+                      </button>
+                      {showReactions === post.id && (
+                        <div className="reaction-icons">
+                          {["like", "love", "haha", "wow", "sad", "angry"].map((type) => (
+                            <button
+                              key={type}
+                              className={`reaction-icon ${post.user_reaction?.type === type ? "selected" : ""
+                                }`}
+                              onClick={() => handleReactionClick(post.id, type)}
+                              title={type.charAt(0).toUpperCase() + type.slice(1)}
+                            >
+                              {renderReaction(type)}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (selectedCommentPostId === post.id) {
+                          setSelectedCommentPostId(null);
+                        } else {
+                          fetchComments(post.id);
+                          setSelectedCommentPostId(post.id);
+                        }
+                      }}
+                    >
+                      💬 Bình luận
+                    </button>
+                    <button onClick={() => alert("Chức năng chia sẻ chưa được triển khai")}>
+                      🔗 Chia sẻ
+                    </button>
+                  </div>
+                  {selectedCommentPostId === post.id && (
+                    <>
+                      <div className="cm-add-comment">
+                        <input
+                          type="text"
+                          placeholder="Viết bình luận..."
+                          value={commentInputs[post.id] || ""}
+                          onChange={(e) =>
+                            setCommentInputs({
+                              ...commentInputs,
+                              [post.id]: e.target.value,
+                            })
+                          }
+                        />
+                        <button onClick={() => handleCommentSubmit(post.id)}>Gửi</button>
+                      </div>
+
+                      <div className="cm-comments">
+                        {comments[post.id]?.map((comment, index) => (
+                          <div key={index} className="cm-comment">
+                            <div className="cm-comment-content">
+                              <strong>{comment.user?.username || "Người dùng"}:</strong>{" "}
+                              {editingIndex === index ? (
+                                <>
+                                  <input
+                                    type="text"
+                                    value={editContent}
+                                    onChange={(e) => setEditContent(e.target.value)}
+                                  />
+                                  <button onClick={handleSaveEdit}>Lưu</button>
+                                  <button onClick={() => setEditingIndex(null)}>Hủy</button>
+                                </>
+                              ) : (
+                                comment.content
+                              )}
+                            </div>
+
+                            <div className="cm-comment-actions">
                               {comment.user?.id === userIDCMT && (
-                                <div className="cm-comment-actions">
+                                <>
                                   <button className="cm-btn-more" onClick={() => toggleMenu(index)}>
                                     ...
                                   </button>
@@ -1074,60 +1127,57 @@ export default function Home() {
                                     className="cm-comment-menu"
                                     style={{ display: openMenuIndex === index ? "block" : "none" }}
                                   >
-                                    <button
-                                      onClick={() => handleEditClick(index, comment.content, comment.id)}
-                                    >
-                                      Sửa
-                                    </button>
+                                    <button onClick={() => handleEditClick(index, comment.content, comment.id)}>Sửa</button>
                                     <button onClick={() => handleDelete(comment.id)}>Xóa</button>
                                   </div>
-                                </div>
+                                </>
                               )}
                             </div>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ))}
-                <div
-                  className="pagination"
-                  style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "center", marginTop: 16 }}
-                >
-                  <button disabled={currentPage === 1 || loading} onClick={() => fetchPosts(currentPage - 1)}>
-                    ◀ Trang trước
-                  </button>
-                  {Array.from({ length: totalPages }, (_, index) => {
-                    const page = index + 1;
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => fetchPosts(page)}
-                        disabled={page === currentPage || loading}
-                        style={{
-                          fontWeight: page === currentPage ? "bold" : "normal",
-                          backgroundColor: page === currentPage ? "#007bff" : "#f0f0f0",
-                          color: page === currentPage ? "white" : "black",
-                          padding: "4px 10px",
-                          borderRadius: 4,
-                          border: "1px solid #ccc",
-                        }}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
-                  <button
-                    disabled={currentPage === totalPages || loading}
-                    onClick={() => fetchPosts(currentPage + 1)}
-                  >
-                    Trang sau ▶
-                  </button>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
-              </>
-            ) : (
-              <p>Không có bài viết nào để hiển thị.</p>
-            )}
+              ))}
+            <div className="pagination" style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', marginTop: 16 }}>
+              <button
+                disabled={currentPage === 1 || loading}
+                onClick={() => fetchPosts(currentPage - 1)}
+              >
+                ◀ Trang trước
+              </button>
+
+              {/* Danh sách số trang */}
+              {Array.from({ length: totalPages }, (_, index) => {
+                const page = index + 1;
+                return (
+                  <button
+                    key={page}
+                    onClick={() => fetchPosts(page)}
+                    disabled={page === currentPage || loading}
+                    style={{
+                      fontWeight: page === currentPage ? "bold" : "normal",
+                      backgroundColor: page === currentPage ? "#007bff" : "#f0f0f0",
+                      color: page === currentPage ? "white" : "black",
+                      padding: '4px 10px',
+                      borderRadius: 4,
+                      border: '1px solid #ccc',
+                    }}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+
+              <button
+                disabled={currentPage === totalPages || loading}
+                onClick={() => fetchPosts(currentPage + 1)}
+              >
+                Trang sau ▶
+              </button>
+            </div>
+
           </>
         )}
       </div>
