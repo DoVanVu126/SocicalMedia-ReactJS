@@ -1140,23 +1140,44 @@ export default function Home() {
                   )}
                 </div>
               ))}
-            <div className="pagination">
+            <div className="pagination" style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', marginTop: 16 }}>
               <button
                 disabled={currentPage === 1 || loading}
                 onClick={() => fetchPosts(currentPage - 1)}
               >
-                Trang trước
+                ◀ Trang trước
               </button>
-              <span>
-                Trang {currentPage} / {totalPages}
-              </span>
+
+              {/* Danh sách số trang */}
+              {Array.from({ length: totalPages }, (_, index) => {
+                const page = index + 1;
+                return (
+                  <button
+                    key={page}
+                    onClick={() => fetchPosts(page)}
+                    disabled={page === currentPage || loading}
+                    style={{
+                      fontWeight: page === currentPage ? "bold" : "normal",
+                      backgroundColor: page === currentPage ? "#007bff" : "#f0f0f0",
+                      color: page === currentPage ? "white" : "black",
+                      padding: '4px 10px',
+                      borderRadius: 4,
+                      border: '1px solid #ccc',
+                    }}
+                  >
+                    {page}
+                  </button>
+                );
+              })}
+
               <button
                 disabled={currentPage === totalPages || loading}
                 onClick={() => fetchPosts(currentPage + 1)}
               >
-                Trang sau
+                Trang sau ▶
               </button>
             </div>
+
           </>
         )}
       </div>
