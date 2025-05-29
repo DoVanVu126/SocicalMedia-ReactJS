@@ -1,12 +1,9 @@
-
-// src/pages/UserProfile.js
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import StoryViewer from '../components/StoryViewer';
-
 import '../style/UserProfile.css';
 import { initMagnetEffect } from '../script';
 
@@ -46,7 +43,7 @@ export default function UserProfile() {
     initMagnetEffect();
   }, []);
 
-  // Hide intro animation after 1 second
+  // Hide intro animation after 1.7 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowIntro(false);
@@ -100,7 +97,27 @@ export default function UserProfile() {
     }
   };
 
-  // Call both functions when userId changes
+  // Fetch user stories
+  const fetchUserStories = async () => {
+    if (!userId || !currentUserId) return;
+    try {
+      const res = await axios.get('http://localhost:8000/api/stories', {
+        params: { user_id: userId }, // Sử dụng userId để lấy story của người dùng hiện tại
+      });
+      const userStories = res.data.filter(
+        (story) => story.user_id === parseInt(userId, 10)
+      );
+      if (userStories.length === 0) {
+        setError('Không có story nào để hiển thị.');
+      }
+      setStories(userStories);
+    } catch (err) {
+      console.error('Lỗi khi lấy stories:', err);
+      setError('Không thể tải stories: ' + err.message);
+    }
+  };
+
+  // Call fetch functions when userId changes
   useEffect(() => {
     if (!showIntro) {
       fetchUserData();
@@ -111,7 +128,6 @@ export default function UserProfile() {
   // Check follow status
   useEffect(() => {
     if (!user || !currentUserId || user.id === currentUserId) return;
-
     axios
       .post('http://localhost:8000/api/follow-status', {
         follower_id: currentUserId,
@@ -123,32 +139,20 @@ export default function UserProfile() {
       .catch(() => setIsFollowing(false));
   }, [user, currentUserId]);
 
-  // Fetch user stories
-  const fetchUserStories = async () => {
-    if (!userId || !currentUserId) return;
-    try {
-      const res = await axios.get('http://localhost:8000/api/stories', {
-        params: { user_id: currentUserId },
-      });
-      const userStories = res.data.filter(
-        (story) => story.user_id === parseInt(userId, 10)
-      );
-      setStories(userStories);
-    } catch (err) {
-      console.error('Lỗi khi lấy stories:', err);
-      setError('Không thể tải stories');
+  // Open StoryViewer when stories are updated
+  useEffect(() => {
+    if (stories.length > 0) {
+      setIsViewerOpen(true);
     }
-  };
+  }, [stories]);
 
   // Follow or unfollow
   const toggleFollow = () => {
     if (processing || !currentUserId) return;
     setProcessing(true);
-
     const url = isFollowing
       ? 'http://localhost:8000/api/unfollow'
       : 'http://localhost:8000/api/follow';
-
     axios
       .post(url, {
         follower_id: currentUserId,
@@ -159,7 +163,7 @@ export default function UserProfile() {
         setFollowCount((prev) => (isFollowing ? prev - 1 : prev + 1));
       })
       .catch((err) => {
-        alert(err.response?.data?.message || 'Lỗi khi thao tác follow');
+        setError(err.response?.data?.message || 'Lỗi khi thao tác follow');
       })
       .finally(() => setProcessing(false));
   };
@@ -177,7 +181,7 @@ export default function UserProfile() {
         setIsEditingBio(false);
       })
       .catch(() => {
-        alert('Lỗi khi lưu tiểu sử');
+        setError('Lỗi khi lưu tiểu sử');
       })
       .finally(() => setProcessing(false));
   };
@@ -189,25 +193,18 @@ export default function UserProfile() {
     if (user?.has_active_stories && (currentUserId === user.id || isFollowing)) {
       fetchUserStories();
     } else if (currentUserId === user.id) {
+      fetchUserStories(); // Kiểm tra story của chính mình
       if (fileInputRef.current) {
-        fileInputRef.current.click();
+        fileInputRef.current.click(); // Cho phép chọn file ảnh
       }
     } else if (user?.has_active_stories && !isFollowing) {
-      alert('Hãy theo dõi người dùng này để xem tin của họ!');
+      setError('Hãy theo dõi người dùng này để xem tin của họ!');
     }
   };
-
-  // Open StoryViewer when stories are updated
-  useEffect(() => {
-    if (stories.length > 0) {
-      setIsViewerOpen(true);
-    }
-  }, [stories]);
 
   const handleAvatarUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
     const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
     if (!validTypes.includes(file.type)) {
       setError('Vui lòng chọn file ảnh (JPEG, PNG, JPG)');
@@ -217,27 +214,21 @@ export default function UserProfile() {
       setError('Ảnh phải nhỏ hơn 2MB');
       return;
     }
-
     const formData = new FormData();
     formData.append('profilepicture', file);
-
     setProcessing(true);
     try {
       const res = await axios.post(
         `http://localhost:8000/api/users/${user.id}/profile-picture`,
         formData,
-        {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        }
+        { headers: { 'Content-Type': 'multipart/form-data' } }
       );
       setUser((prev) => ({ ...prev, profilepicture: res.data.profilepicture }));
     } catch (err) {
       setError(err.response?.data?.message || 'Lỗi khi tải ảnh avatar');
     } finally {
       setProcessing(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -245,14 +236,12 @@ export default function UserProfile() {
   const handleCommentSubmit = async (postId) => {
     const content = commentInputs[postId];
     if (!content) return;
-
     try {
       const res = await fetch(`http://localhost:8000/api/posts/${postId}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: currentUserId, content }),
       });
-
       if (!res.ok) throw new Error('Lỗi khi gửi bình luận');
       await fetchComments(postId);
       setCommentInputs({ ...commentInputs, [postId]: '' });
@@ -291,11 +280,9 @@ export default function UserProfile() {
       setError('Vui lòng đăng nhập để thực hiện hành động này');
       return;
     }
-
     const post = posts.find((p) => p.id === postId);
     let newPosts = [...posts];
     let updatedPost = { ...post };
-
     if (post.user_reaction) {
       if (reactionType === null || post.user_reaction.type === reactionType) {
         updatedPost = {
@@ -328,11 +315,9 @@ export default function UserProfile() {
         },
       };
     }
-
     newPosts = newPosts.map((p) => (p.id === postId ? updatedPost : p));
     setPosts(newPosts);
     setShowReactions(null);
-
     try {
       if (post.user_reaction && (reactionType === null || post.user_reaction.type === reactionType)) {
         await axios.delete(`http://localhost:8000/api/posts/${postId}/react`, {
@@ -357,16 +342,16 @@ export default function UserProfile() {
   };
 
   const renderButtonLabel = (userReaction) => {
-    if (!userReaction) return '👍 Like';
+    if (!userReaction) return '👍 Thích';
     const labels = {
-      like: '👍 Like',
-      love: '❤️ Love',
+      like: '👍 Thích',
+      love: '❤️ Yêu thích',
       haha: '😂 Haha',
       wow: '😲 Wow',
-      sad: '😢 Sad',
-      angry: '😡 Angry',
+      sad: '😢 Buồn',
+      angry: '😡 Tức giận',
     };
-    return labels[userReaction.type] || '👍 Like';
+    return labels[userReaction.type] || '👍 Thích';
   };
 
   const getTotalReactions = (summary) => {
@@ -403,7 +388,6 @@ export default function UserProfile() {
         setShowReactionList(null);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [activeMenuPostId, showReactionList]);
@@ -431,7 +415,15 @@ export default function UserProfile() {
   }
 
   if (error) {
-    return <p className="text-center text-red-600 p-6 bg-red-50 rounded-lg">{error}</p>;
+    return (
+      <div className="app-container min-h-screen flex flex-col bg-gray-100">
+        <Header />
+        <Sidebar />
+        <p className="text-center text-red-600 p-6 bg-red-50 rounded-lg mx-auto max-w-2xl mt-6">
+          {error}
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -839,6 +831,7 @@ export default function UserProfile() {
               onClose={() => {
                 setIsViewerOpen(false);
                 setStories([]);
+                setError(null);
               }}
               initialIndex={0}
               onNextUser={() => setIsViewerOpen(false)}

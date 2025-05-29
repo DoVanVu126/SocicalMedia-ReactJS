@@ -214,7 +214,7 @@ const StoryViewer = ({
               className="story-media"
               alt="Story"
               onError={(e) => {
-                e.target.src = "/default-image.png";
+                e.target.src = "/default-story.jpg";
               }}
             />
           )}

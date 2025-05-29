@@ -10,10 +10,12 @@ export default function Search() {
   const [results, setResults] = useState([]);
   const [searchHistory, setSearchHistory] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
   const navigate = useNavigate();
   const inputRef = useRef(null);
   const historyRef = useRef(null);
+  const controllerRef = useRef(new AbortController()); // Reference to keep track of the current request
 
   // Initialize effects and history
   useEffect(() => {
@@ -46,19 +48,27 @@ export default function Search() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Search with debounce
+  // Search with debounce and AbortController to cancel previous requests
   useEffect(() => {
     if (keyword.trim().length < 2) {
       setResults([]);
       return;
     }
 
+    // Cancel previous request if there's one in progress
+    controllerRef.current.abort();
+    controllerRef.current = new AbortController(); // Reset the controller for the new request
+
     const delayDebounce = setTimeout(() => {
-      fetch(`http://localhost:8000/api/users/search?q=${encodeURIComponent(keyword)}`)
+      setIsLoading(true); // Show loading spinner
+
+      fetch(`http://localhost:8000/api/users/search?q=${encodeURIComponent(keyword)}`, {
+        signal: controllerRef.current.signal
+      })
         .then(res => res.json())
         .then(data => {
           setResults(data);
-          setIsFocused(false);
+          setIsLoading(false); // Hide loading spinner
 
           // Only save keyword if it doesn't match a result
           const matched = data.some(user => user.username === keyword);
@@ -68,7 +78,12 @@ export default function Search() {
             localStorage.setItem('searchHistory', JSON.stringify(updatedHistory));
           }
         })
-        .catch(err => console.error(err));
+        .catch(err => {
+          if (err.name !== 'AbortError') {
+            console.error(err);
+            setIsLoading(false); // Hide loading spinner in case of error
+          }
+        });
     }, 300);
 
     return () => clearTimeout(delayDebounce);
@@ -112,6 +127,12 @@ export default function Search() {
     );
   }
 
+  // Function to highlight matching parts of the username
+  const highlightMatch = (username) => {
+    const regex = new RegExp(`(${keyword})`, 'gi');
+    return username.replace(regex, '<span class="highlight">$1</span>');
+  };
+
   return (
     <div className="container">
       <Header />
@@ -134,6 +155,13 @@ export default function Search() {
               className="search-input"
             />
           </div>
+
+         {isLoading && (
+  <div className="l">
+  
+    Đang tìm kiếm...
+  </div>
+)}
 
           {isFocused && searchHistory.length > 0 && results.length === 0 && (
             <div className="history-container" ref={historyRef}>
@@ -170,7 +198,7 @@ export default function Search() {
                   className="search-avatar"
                 />
                 <div className="search-info">
-                  <div className="search-name">{user.username}</div>
+                  <div className="search-name" dangerouslySetInnerHTML={{ __html: highlightMatch(user.username) }} />
                   <div className="search-username">@{user.username}</div>
                 </div>
               </li>

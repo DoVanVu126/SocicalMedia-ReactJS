@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import "../style/Home.css";
@@ -10,15 +10,8 @@ import StoryViewer from "../components/StoryViewer";
 import { initBlinkText, sparkleMouseEffect, initRippleEffect } from "../script";
 
 export default function Home() {
+  // State quản lý UI và dữ liệu
   const [loading, setLoading] = useState(true);
-  // Loader 3 giây chỉ khi lần đầu load trang
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
   const [editingIndex, setEditingIndex] = useState(null);
   const [editContent, setEditContent] = useState("");
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
@@ -28,7 +21,8 @@ export default function Home() {
   const [comments, setComments] = useState({});
   const [commentInputs, setCommentInputs] = useState({});
   const [selectedCommentPostId, setSelectedCommentPostId] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [showReactions, setShowReactions] = useState(null);
   const [stories, setStories] = useState([]);
   const [showMenu, setShowMenu] = useState(null);
@@ -40,6 +34,8 @@ export default function Home() {
   const [deletingStoryId, setDeletingStoryId] = useState(null);
   const [showTrash, setShowTrash] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
+
+  // User và refs
   const user = JSON.parse(localStorage.getItem("user"));
   const userIDCMT = user?.id;
   const menuRef = useRef(null);
@@ -52,39 +48,80 @@ export default function Home() {
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Split intro text into letters for animation
+  // Intro text animation
   const introText = "SocialMediaApp".split("").map((letter, index) => ({
     letter,
     delay: index * 0.05,
   }));
 
+  // Fetch comments
+  const fetchComments = async (postId) => {
+    try {
+      const res = await axios.get(`http://localhost:8000/api/posts/${postId}/comments`);
+      setComments((prev) => ({ ...prev, [postId]: res.data }));
+    } catch (err) {
+      console.error("Lỗi khi tải bình luận:", err.message);
+      setError("Không thể tải bình luận.");
+      setTimeout(() => setError(""), 3000);
+    }
+  };
+
+  // Fetch reaction list
+  const fetchReactionList = async (postId) => {
+    try {
+      const res = await axios.get(`http://localhost:8000/api/posts/${postId}/reactions`);
+      setReactionList((prev) => ({ ...prev, [postId]: res.data }));
+    } catch (err) {
+      console.error("Lỗi khi tải danh sách cảm xúc:", err.message);
+      setError("Không thể tải danh sách cảm xúc.");
+      setTimeout(() => setError(""), 3000);
+    }
+  };
+
+  // Handle open comments khi tải trang
+  useEffect(() => {
+    if (location.state?.postId && location.state?.openComments) {
+      const postId = parseInt(location.state.postId);
+      if (postId) {
+        fetchComments(postId);
+        setSelectedCommentPostId(postId);
+        const postElement = document.getElementById(`post-${postId}`);
+        if (postElement) {
+          postElement.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    }
+  }, [location]);
+
+  // Loading timer
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 3000);
+    }, 2000);
     return () => clearTimeout(timer);
   }, []);
 
+  // Intro effect
+  useEffect(() => {
+    const introTimer = setTimeout(() => {
+      setShowIntro(false);
+    }, 3000);
+    return () => clearTimeout(introTimer);
+  }, []);
+
+  // Initialize effects
   useEffect(() => {
     initBlinkText();
     initRippleEffect();
-  }, []);
-
-  useEffect(() => {
     const removeSparkleListener = sparkleMouseEffect();
     return () => {
       if (typeof removeSparkleListener === "function") removeSparkleListener();
     };
   }, []);
 
-  useEffect(() => {
-    const introTimer = setTimeout(() => {
-      setShowIntro(false);
-    }, 1500);
-    return () => clearTimeout(introTimer);
-  }, []);
-
+  // Fetch stories
   useEffect(() => {
     const start = Date.now();
     setLoading(true);
@@ -93,22 +130,25 @@ export default function Home() {
       .get("http://localhost:8000/api/stories", { params })
       .then((res) => {
         const elapsed = Date.now() - start;
-        const remainingTime = Math.max(3000 - elapsed, 0);
+        const remainingTime = Math.max(2000 - elapsed, 0);
         setTimeout(() => {
           setStories(res.data);
           setLoading(false);
         }, remainingTime);
       })
       .catch((err) => {
-        console.error("Error fetching stories:", err);
-        setError("Không thể tải tin.");
+        console.error("Lỗi khi tải stories:", err.message);
+        setError("Không thể tải story.");
+        setTimeout(() => setError(""), 3000);
         setLoading(false);
       });
   }, [userIDCMT]);
 
+  // Fetch posts
   useEffect(() => {
     if (!userIDCMT) {
       setError("Vui lòng đăng nhập để xem bài viết.");
+      setTimeout(() => setError(""), 3000);
       return;
     }
     const start = Date.now();
@@ -117,19 +157,42 @@ export default function Home() {
       .get("http://localhost:8000/api/posts", { params: { user_id: userIDCMT } })
       .then((res) => {
         const elapsed = Date.now() - start;
-        const remainingTime = Math.max(3000 - elapsed, 0);
+        const remainingTime = Math.max(2000 - elapsed, 0);
         setTimeout(() => {
           setPosts(res.data);
           setLoading(false);
         }, remainingTime);
       })
       .catch((err) => {
-        console.error("Error fetching posts:", err);
+        console.error("Lỗi khi tải bài viết:", err.message);
         setError("Không thể tải bài viết.");
+        setTimeout(() => setError(""), 3000);
         setLoading(false);
       });
   }, [userIDCMT]);
 
+  // Làm mới dữ liệu khi tab được focus
+  useEffect(() => {
+    const handleFocus = () => {
+      if (!userIDCMT) return;
+      // Làm mới stories
+      axios
+        .get("http://localhost:8000/api/stories", { params: { user_id: userIDCMT } })
+        .then((res) => setStories(res.data))
+        .catch((err) => console.error("Lỗi khi làm mới stories:", err));
+
+      // Làm mới posts
+      axios
+        .get("http://localhost:8000/api/posts", { params: { user_id: userIDCMT } })
+        .then((res) => setPosts(res.data))
+        .catch((err) => console.error("Lỗi khi làm mới posts:", err));
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [userIDCMT]);
+
+  // Update navigation buttons cho story list
   useEffect(() => {
     const updateNavButtons = () => {
       if (storyListRef.current) {
@@ -152,6 +215,7 @@ export default function Home() {
     };
   }, [stories]);
 
+  // Handle story list dragging
   useEffect(() => {
     const storyList = storyListRef.current;
     if (!storyList) return;
@@ -178,7 +242,6 @@ export default function Home() {
       e.preventDefault();
       const x = (e.pageX || e.touches[0].pageX) - storyList.offsetLeft;
       const walk = (x - startX) * 1.5;
-
       animationFrameId = requestAnimationFrame(() => {
         storyList.scrollLeft = scrollLeft - walk;
       });
@@ -204,127 +267,99 @@ export default function Home() {
     };
   }, []);
 
+  // Scroll stories
   const scrollStories = (direction) => {
     if (storyListRef.current) {
-      const storyItemWidth =
-        storyListRef.current.querySelector(".story-item")?.offsetWidth || 120;
-      const scrollAmount =
-        direction === "left" ? -storyItemWidth * 3 : storyItemWidth * 3;
+      const storyItemWidth = storyListRef.current.querySelector(".story-item")?.offsetWidth || 120;
+      const scrollAmount = direction === "left" ? -storyItemWidth * 3 : storyItemWidth * 3;
       storyListRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
   };
 
+  // Toggle menu bình luận
   const toggleMenu = (index) => {
     setOpenMenuIndex(openMenuIndex === index ? null : index);
   };
 
+  // Chỉnh sửa bình luận
   const handleEditClick = (index, currentContent, commentId) => {
     setEditingIndex(index);
     setEditContent(currentContent);
     setOpenMenuIndex(null);
     setSelectedCommentId(commentId);
   };
+
   const handleSaveEdit = async () => {
-    if (
-      editingIndex === null ||
-      selectedCommentPostId === null ||
-      selectedCommentId === null
-    ) {
-      return;
-    }
+    if (!editingIndex || !selectedCommentPostId || !selectedCommentId) return;
 
     try {
       const response = await axios.put(
         `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${selectedCommentId}`,
-        {
-          content: editContent,
-          user_id: userIDCMT,
-        }
+        { content: editContent, user_id: userIDCMT }
       );
-
-      // Cập nhật comment sau khi sửa
       const updatedComment = response.data;
-
-      setComments((prevComments) => {
-        const updatedComments = { ...prevComments };
-        if (updatedComments[selectedCommentPostId]) {
-          const commentIndex = updatedComments[selectedCommentPostId].findIndex(
+      setComments((prev) => {
+        const updated = { ...prev };
+        if (updated[selectedCommentPostId]) {
+          const commentIndex = updated[selectedCommentPostId].findIndex(
             (cmt) => cmt.id === selectedCommentId
           );
           if (commentIndex !== -1) {
-            updatedComments[selectedCommentPostId][commentIndex] = updatedComment;
+            updated[selectedCommentPostId][commentIndex] = updatedComment;
           }
         }
-        return updatedComments;
+        return updated;
       });
-
-      // Reset các state
       setEditingIndex(null);
       setEditContent("");
       setSelectedCommentId(null);
-    } catch (error) {
-      console.error("Error editing comment:", error);
+    } catch (err) {
+      console.error("Lỗi khi sửa bình luận:", err.message);
       setError("Không thể sửa bình luận.");
+      setTimeout(() => setError(""), 3000);
     }
   };
 
+  // Xóa bình luận
   const handleDelete = async (commentId) => {
-    if (!window.confirm("Bạn có chắc muốn xóa bình luận này?")) {
-      return;
-    }
+    if (!window.confirm("Bạn có chắc muốn xóa bình luận này?")) return;
     try {
-      const response = await fetch(
+      await axios.delete(
         `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${commentId}`,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: userIDCMT }),
-        }
+        { data: { user_id: userIDCMT } }
       );
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error deleting comment:", errorData);
-        setError("Unable to delete comment.");
-        return;
-      }
-      setComments(prevComments => {
-
-        const updatedComments = { ...prevComments };
-        if (updatedComments[selectedCommentPostId]) {
-          updatedComments[selectedCommentPostId] = updatedComments[
-            selectedCommentPostId
-          ].filter((comment) => comment.id !== commentId);
+      setComments((prev) => {
+        const updated = { ...prev };
+        if (updated[selectedCommentPostId]) {
+          updated[selectedCommentPostId] = updated[selectedCommentPostId].filter(
+            (comment) => comment.id !== commentId
+          );
         }
-        return updatedComments;
+        return updated;
       });
       setOpenMenuIndex(null);
-    } catch (error) {
-      console.error("Error deleting comment:", error);
+    } catch (err) {
+      console.error("Lỗi khi xóa bình luận:", err.message);
       setError("Không thể xóa bình luận.");
+      setTimeout(() => setError(""), 3000);
     }
   };
 
+  // Mở rộng ảnh bài viết
   const toggleExpandImages = (postId) => {
     setExpandedPosts((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
+
+  // Chỉnh sửa bài viết
   const handleEdit = async (post) => {
     try {
-      // Gửi request GET để kiểm tra bài viết có tồn tại không
       const response = await axios.get(`http://localhost:8000/api/posts/${post.id}`);
       const latestPost = response.data;
       if (!latestPost) {
-        alert("Bài viết không còn tồn tại hoặc đã bị xóa. Hãy load lại trang!");
+        setError("Bài viết không còn tồn tại hoặc đã bị xóa.");
+        setTimeout(() => setError(""), 3000);
         return;
       }
-      // So sánh dữ liệu hiện tại với dữ liệu trong state
-      const isContentChanged = post.content !== latestPost.content;
-      const isImageChanged = post.imageurl !== latestPost.imageurl;
-      const isVideoChanged = post.videourl !== latestPost.videourl;
-      if (isContentChanged || isImageChanged || isVideoChanged) {
-        alert("Bài viết đã bị thay đổi. Vui lòng tải lại trang trước khi cập nhật.");
-        return;
-      }
-      // Nếu không thay đổi, điều hướng sang trang chỉnh sửa
       navigate(`/edit-post/${post.id}`, {
         state: {
           content: latestPost.content,
@@ -332,14 +367,18 @@ export default function Home() {
           videoUrl: latestPost.videourl,
         },
       });
-    } catch (error) {
-      console.error("Không thể sửa bài viết:", error);
-      alert("Bài viết không còn tồn tại hoặc đã bị xóa. Hãy load lại trang!");
+    } catch (err) {
+      console.error("Lỗi khi sửa bài viết:", err.message);
+      setError("Không thể sửa bài viết.");
+      setTimeout(() => setError(""), 3000);
     }
   };
+
+  // Chỉnh sửa story
   const handleEditStory = (story) => {
     if (!userIDCMT) {
-      setError("Vui lòng đăng nhập để sửa tin.");
+      setError("Vui lòng đăng nhập để sửa story.");
+      setTimeout(() => setError(""), 3000);
       return;
     }
     navigate(`/edit-story/${story.id}`, {
@@ -353,108 +392,131 @@ export default function Home() {
     });
   };
 
-  const handleDeleteStory = (id) => {
+  // Xóa story
+  const handleDeleteStory = async (id) => {
     if (!userIDCMT) {
-      setError("Vui lòng đăng nhập để xóa tin.");
+      setError("Vui lòng đăng nhập để xóa story.");
+      setTimeout(() => setError(""), 3000);
       return;
     }
-    if (!window.confirm("Bạn có chắc muốn xóa tin này?")) {
-      return;
-    }
+    if (!window.confirm("Bạn có chắc muốn xóa story này?")) return;
+
     setDeletingStoryId(id);
     setShowTrash(true);
-    setTimeout(() => {
-      axios
-        .delete(`http://localhost:8000/api/stories/${id}`, {
-          data: { user_id: userIDCMT },
-        })
-        .then(() => {
-          setStories(stories.filter((story) => story.id !== id));
-          setShowTrash(false);
-          setDeletingStoryId(null);
-        })
-        .catch((err) => {
-          console.error("Error deleting story:", err);
-          setError("Không thể xóa tin.");
-          setShowTrash(false);
-          setDeletingStoryId(null);
-        });
-    }, 1000);
+    try {
+      const response = await axios.delete(`http://localhost:8000/api/stories/${id}`, {
+        data: { user_id: userIDCMT },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, // Thêm token
+      });
+      setStories(stories.filter((story) => story.id !== id));
+      setSuccessMessage(response.data.message || "Story đã được xóa thành công");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      console.error("Lỗi khi xóa story:", err.response?.data || err.message);
+      const errorMessage =
+        err.response?.status === 404
+          ? "Story không tồn tại hoặc đã bị xóa"
+          : err.response?.status === 403
+          ? "Bạn không có quyền xóa story này"
+          : err.response?.status === 401
+          ? "Vui lòng đăng nhập lại"
+          : "Không thể xóa story. Vui lòng thử lại.";
+      setError(errorMessage);
+      setTimeout(() => setError(""), 3000);
+    } finally {
+      setTimeout(() => {
+        setShowTrash(false);
+        setDeletingStoryId(null);
+      }, 1000);
+    }
   };
 
+  // Xóa bài viết
+  const handleDeletePost = (postId) => {
+    if (!userIDCMT) {
+      setError("Vui lòng đăng nhập để xóa bài viết.");
+      setTimeout(() => setError(""), 3000);
+      return;
+    }
+    if (!window.confirm("Bạn có chắc muốn xóa bài viết này?")) return;
+
+    const postElement = document.getElementById(`post-${postId}`);
+    if (postElement) {
+      postElement.classList.add("sliced");
+      postElement.addEventListener(
+        "animationend",
+        async () => {
+          setLoading(true);
+          try {
+            await axios.delete(`http://localhost:8000/api/posts/${postId}`, {
+              data: { user_id: userIDCMT },
+              headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }, // Thêm token
+            });
+            setPosts((prev) => prev.filter((p) => p.id !== postId));
+            setSuccessMessage("Bài viết đã được xóa thành công");
+            setTimeout(() => setSuccessMessage(""), 3000);
+          } catch (err) {
+            console.error("Lỗi khi xóa bài viết:", err.response?.data || err.message);
+            const errorMessage =
+              err.response?.status === 404
+                ? "Bài viết không tồn tại hoặc đã bị xóa"
+                : err.response?.status === 403
+                ? "Bạn không có quyền xóa bài viết này"
+                : err.response?.status === 401
+                ? "Vui lòng đăng nhập lại"
+                : "Không thể xóa bài viết. Vui lòng thử lại.";
+            setError(errorMessage);
+            setTimeout(() => setError(""), 3000);
+          } finally {
+            setLoading(false);
+          }
+        },
+        { once: true }
+      );
+    }
+  };
+
+  // Toggle menu story
   const handleToggleMenu = (storyId) => {
     setShowMenu(showMenu === storyId ? null : storyId);
   };
 
+  // Format thời gian
   const formatTime = (createdAt) => {
     const date = new Date(createdAt);
     const now = new Date();
     const diffInSeconds = Math.floor((now - date) / 1000);
     if (diffInSeconds < 60) return `${diffInSeconds} giây trước`;
-    if (diffInSeconds < 3600)
-      return `${Math.floor(diffInSeconds / 60)} phút trước`;
-    if (diffInSeconds < 86400)
-      return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
-    return date.toLocaleString("vi-VN", {
-      dateStyle: "short",
-      timeStyle: "short",
-    });
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
+    return date.toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
   };
 
+  // Gửi bình luận
   const handleCommentSubmit = async (postId) => {
     if (!userIDCMT) {
       setError("Vui lòng đăng nhập để bình luận.");
+      setTimeout(() => setError(""), 3000);
       return;
     }
     const content = commentInputs[postId];
     if (!content) return;
     try {
-      const res = await fetch(
+      await axios.post(
         `http://localhost:8000/api/posts/${postId}/comments`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_id: userIDCMT,
-            content,
-          }),
-        }
+        { user_id: userIDCMT, content },
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Server error: ${res.status} - ${errorText}`);
-      }
       await fetchComments(postId);
       setCommentInputs({ ...commentInputs, [postId]: "" });
-    } catch (error) {
-      console.error("Error submitting comment:", error);
-      setError("Không thể gửi bình luận.");
-    }
-  };
-
-  const fetchComments = async (postId) => {
-    try {
-      const res = await axios.get(`http://localhost:8000/api/posts/${postId}/comments`);
-      setComments((prev) => ({ ...prev, [postId]: res.data }));
-    } catch (error) {
-      console.error("Error fetching comments:", error);
-      setError("Không thể tải bình luận.");
-    }
-  };
-
-  const fetchReactionList = async (postId) => {
-    try {
-      const res = await axios.get(`http://localhost:8000/api/posts/${postId}/reactions`);
-      setReactionList((prev) => ({ ...prev, [postId]: res.data }));
     } catch (err) {
-      console.error("Error fetching reaction list:", err);
-      setError("Không thể tải danh sách cảm xúc.");
+      console.error("Lỗi khi gửi bình luận:", err.message);
+      setError("Không thể gửi bình luận.");
+      setTimeout(() => setError(""), 3000);
     }
   };
 
+  // Xem danh sách reaction
   const handleReactionSummaryClick = (postId) => {
     if (showReactionList === postId) {
       setShowReactionList(null);
@@ -464,10 +526,11 @@ export default function Home() {
     }
   };
 
+  // Đóng menu khi click ngoài
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        activeMenuPostId !== null &&
+        activeMenuPostId &&
         menuRef.current &&
         !menuRef.current.contains(event.target) &&
         buttonRef.current &&
@@ -476,7 +539,7 @@ export default function Home() {
         setActiveMenuPostId(null);
       }
       if (
-        showReactionList !== null &&
+        showReactionList &&
         reactionListRef.current &&
         !reactionListRef.current.contains(event.target)
       ) {
@@ -484,11 +547,10 @@ export default function Home() {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [activeMenuPostId, showReactionList]);
 
+  // Render icon reaction
   const renderReaction = (type) => {
     const icons = {
       like: "👍",
@@ -501,6 +563,7 @@ export default function Home() {
     return icons[type] || "👍";
   };
 
+  // Render nút reaction
   const renderButtonLabel = (userReaction) => {
     if (!userReaction) return "👍 Like";
     const labels = {
@@ -514,9 +577,11 @@ export default function Home() {
     return labels[userReaction.type] || "👍 Like";
   };
 
+  // Xử lý reaction
   const handleReactionClick = async (postId, reactionType = null) => {
     if (!userIDCMT) {
-      setError("Vui lòng đăng nhập để thực hiện hành động này.");
+      setError("Vui lòng đăng nhập để thả cảm xúc.");
+      setTimeout(() => setError(""), 3000);
       return;
     }
     const post = posts.find((p) => p.id === postId);
@@ -538,16 +603,13 @@ export default function Home() {
         setPosts(newPosts);
         await axios.delete(`http://localhost:8000/api/posts/${postId}/react`, {
           data: { user_id: userIDCMT },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
       } else {
         const newReactionType = reactionType || "like";
         updatedPost = {
           ...updatedPost,
-          user_reaction: {
-            user_id: userIDCMT,
-            post_id: postId,
-            type: newReactionType,
-          },
+          user_reaction: { user_id: userIDCMT, post_id: postId, type: newReactionType },
           reaction_summary: {
             ...updatedPost.reaction_summary,
             [userReaction?.type]: userReaction
@@ -558,25 +620,31 @@ export default function Home() {
         };
         newPosts = newPosts.map((p) => (p.id === postId ? updatedPost : p));
         setPosts(newPosts);
-        await axios.post(`http://localhost:8000/api/posts/${postId}/react`, {
-          user_id: userIDCMT,
-          type: newReactionType,
-        });
+        await axios.post(
+          `http://localhost:8000/api/posts/${postId}/react`,
+          { user_id: userIDCMT, type: newReactionType },
+          { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+        );
       }
       setShowReactions(null);
     } catch (err) {
-      console.error("Error processing reaction:", err);
+      console.error("Lỗi khi xử lý cảm xúc:", err.message);
       setError("Không thể xử lý cảm xúc.");
+      setTimeout(() => setError(""), 3000);
       setPosts([...posts]);
     }
   };
 
+  // Tính tổng reactions
   const getTotalReactions = (summary) => {
     return Object.values(summary || {}).reduce((sum, count) => sum + count, 0);
   };
+
+  // Mở story viewer
   const handleOpenViewer = (userId) => {
     if (!userIDCMT) {
-      setError("Vui lòng đăng nhập để xem tin.");
+      setError("Vui lòng đăng nhập để xem story.");
+      setTimeout(() => setError(""), 3000);
       navigate("/login");
       return;
     }
@@ -584,6 +652,7 @@ export default function Home() {
     setIsViewerOpen(true);
   };
 
+  // Lấy story mới nhất của mỗi user
   const getLatestStories = () => {
     const userStories = {};
     stories.forEach((story) => {
@@ -598,14 +667,14 @@ export default function Home() {
     return Object.values(userStories);
   };
 
-  const filteredStories = getLatestStories();
-
+  // Lấy stories của một user
   const getUserStories = (userId) => {
     return stories
       .filter((story) => story.user?.id === userId)
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   };
 
+  // Chuyển user tiếp theo
   const handleNextUser = () => {
     const currentIndex = filteredStories.findIndex(
       (story) => story.user.id === selectedUserId
@@ -618,6 +687,7 @@ export default function Home() {
     }
   };
 
+  // Chuyển user trước
   const handlePrevUser = () => {
     const currentIndex = filteredStories.findIndex(
       (story) => story.user.id === selectedUserId
@@ -629,6 +699,9 @@ export default function Home() {
       setSelectedUserId(null);
     }
   };
+
+  const filteredStories = getLatestStories();
+
   return (
     <div className="container">
       {showIntro && (
@@ -638,10 +711,7 @@ export default function Home() {
               <span
                 key={index}
                 className="home-intro-letter"
-                style={{
-                  animationDelay: `${delay}s`,
-                  "--index": index,
-                }}
+                style={{ animationDelay: `${delay}s`, "--index": index }}
               >
                 {letter}
               </span>
@@ -655,6 +725,8 @@ export default function Home() {
         <div className="story-containers">
           <h3 className="story-header blink-text">Bảng tin</h3>
           {loading && <p className="loading">⏳ Đang tải...</p>}
+          {successMessage && <p className="success-message">{successMessage}</p>}
+          {error && <p className="error-message">{error}</p>}
           {!loading && !userIDCMT && (
             <p className="no-stories">Vui lòng đăng nhập để xem tin.</p>
           )}
@@ -672,15 +744,12 @@ export default function Home() {
                 className="story-nav-btn story-nav-next"
                 onClick={() => scrollStories("right")}
               >
-                ›
+                ❯
               </button>
             )}
             <div className="story-list" ref={storyListRef}>
               {userIDCMT && (
-                <div
-                  className="story-item create-story"
-                  onClick={() => navigate("/story")}
-                >
+                <div className="story-item create-story" onClick={() => navigate("/story")}>
                   <div className="story-user-info">
                     <img
                       src={
@@ -700,7 +769,7 @@ export default function Home() {
               {filteredStories.map((story) => (
                 <div
                   key={story.user.id}
-                  className={`story-item ${deletingStoryId === story.id ? 'deleting' : ''}`}
+                  className={`story-item ${deletingStoryId === story.id ? "deleting" : ""}`}
                   onClick={() => handleOpenViewer(story.user.id)}
                 >
                   <div className="story-user-info">
@@ -714,12 +783,8 @@ export default function Home() {
                       className="story-avatars"
                     />
                     <div className="story-user-details">
-                      <span className="story-username">
-                        {story.user?.username || "Người dùng"}
-                      </span>
-                      <span className="story-time">
-                        {formatTime(story.created_at)}
-                      </span>
+                      <span className="story-username">{story.user?.username || "Người dùng"}</span>
+                      <span className="story-time">{formatTime(story.created_at)}</span>
                     </div>
                   </div>
                   {userIDCMT && story.user?.id === userIDCMT && (
@@ -751,21 +816,28 @@ export default function Home() {
                       )}
                     </>
                   )}
-                  <div className="story-image-wrapper">
-                    {story.videourl?.match(/\.(mp4|webm)$/i) ? (
-                      <video
-                        src={`http://localhost:8000/storage/story_videos/${story.videourl}`}
-                        className="story-image"
-                        muted
-                      />
-                    ) : (
-                      <img
-                        src={`http://localhost:8000/storage/story_images/${story.imageurl}`}
-                        alt="Story"
-                        className="story-image"
-                      />
-                    )}
-                  </div>
+                 <div className="story-image-wrapper" style={{ background: !story.imageurl && !story.videourl ? 'linear-gradient(135deg, #1e3c72, #2a5298)' : 'none' }}>
+  {story.videourl?.match(/\.(mp4|webm)$/i) ? (
+    <video
+      src={`http://localhost:8000/storage/story_videos/${story.videourl}`}
+      className="story-image"
+      muted
+    />
+  ) : story.imageurl ? (
+    <img
+      src={`http://localhost:8000/storage/story_images/${story.imageurl}`}
+      alt="Story"
+      className="story-image"
+      onError={(e) => { e.target.src = '/default-story.jpg'; }}
+    />
+  ) : (
+    <img
+      src="/default-story.jpg"
+      alt="Default Story"
+      className="story-image"
+    />
+  )}
+</div>
                   <div className="story-content">
                     <p className="text">{story.content}</p>
                   </div>
@@ -804,9 +876,7 @@ export default function Home() {
           </div>
         ) : (
           <>
-            {error && <p className="error">{error}</p>}
-            {Array.isArray(posts) &&
-              posts.length > 0 &&
+            {Array.isArray(posts) && posts.length > 0 ? (
               posts.map((post) => (
                 <div className="post" id={`post-${post.id}`} key={post.id}>
                   <div className="slice slice1"></div>
@@ -853,70 +923,36 @@ export default function Home() {
                           <div className="slice slice3"></div>
                           <div className="slice slice4"></div>
                           <div className="slice slice5"></div>
-
-                          <button
-                            onClick={() => {
-                              if (!window.confirm("Bạn có chắc muốn xóa bài viết này không?")) {
-                                return;
-                              }
-                              const postElement = document.getElementById(`post-${post.id}`);
-
-                              if (postElement) {
-                                postElement.classList.add("sliced");
-                                postElement.addEventListener(
-                                  "animationend",
-                                  () => {
-                                    setLoading(true);
-                                    axios
-                                      .delete(`http://localhost:8000/api/posts/${post.id}`, {
-                                        data: { user_id: userIDCMT },
-                                      })
-                                      .then(() => {
-                                        setPosts((prevPosts) =>
-                                          prevPosts.filter((p) => p.id !== post.id)
-                                        );
-                                      })
-                                      .catch((err) => {
-                                        console.error("Lỗi khi xóa bài viết:", err);
-                                        setError("Không thể xóa bài viết");
-                                      })
-                                      .finally(() => setLoading(false));
-                                  },
-                                  { once: true }
-                                );
-
-                              }
-                            }}
-                          >
-                            Xóa
-                          </button>
+                          <button onClick={() => handleDeletePost(post.id)}>Xóa</button>
                         </div>
                       )}
                     </div>
                   </div>
                   <p className="post-content">{post.content}</p>
-                  <div key={post.id} className="post-media">
+                  <div className="post-media">
                     {Array.isArray(post.imageurl) && (
                       <>
-                        {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 6)).map((img, index) => (
-                          <div key={index} className="image-wrapper">
-                            <div className="media-overlay-black"></div>
-                            <div className="media-overlay-hover"></div>
-                            <img
-                              src={`http://localhost:8000/storage/images/${img}`}
-                              alt={`Ảnh ${index + 1}`}
-                              className="media-image"
-                            />
-                            {index === 5 && post.imageurl.length > 6 && !expandedPosts[post.id] && (
-                              <div
-                                className="image-overlay"
-                                onClick={() => toggleExpandImages(post.id)}
-                              >
-                                +{post.imageurl.length - 6} ảnh
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                        {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 6)).map(
+                          (img, index) => (
+                            <div key={index} className="image-wrapper">
+                              <div className="media-overlay-black"></div>
+                              <div className="media-overlay-hover"></div>
+                              <img
+                                src={`http://localhost:8000/storage/images/${img}`}
+                                alt={`Ảnh ${index + 1}`}
+                                className="media-image"
+                              />
+                              {index === 5 && post.imageurl.length > 6 && !expandedPosts[post.id] && (
+                                <div
+                                  className="image-overlay"
+                                  onClick={() => toggleExpandImages(post.id)}
+                                >
+                                  +{post.imageurl.length - 6} ảnh
+                                </div>
+                              )}
+                            </div>
+                          )
+                        )}
                         {expandedPosts[post.id] && (
                           <button
                             onClick={() => toggleExpandImages(post.id)}
@@ -935,7 +971,7 @@ export default function Home() {
                             src={`http://localhost:8000/storage/videos/${post.videourl}`}
                             type="video/mp4"
                           />
-                          Trình duyệt của bạn không hỗ trợ video.
+                          Trình duyệt không hỗ trợ video.
                         </video>
                       </div>
                     )}
@@ -964,10 +1000,7 @@ export default function Home() {
                         {showReactionList === post.id && (
                           <div className="reaction-list" ref={reactionListRef}>
                             <div className="reaction-list-header">
-
-                              <span>
-                                {getTotalReactions(post.reaction_summary)} lượt thả cảm xúc
-                              </span>
+                              <span>{getTotalReactions(post.reaction_summary)} lượt thả cảm xúc</span>
                               <button
                                 className="close-button"
                                 onClick={() => setShowReactionList(null)}
@@ -1026,8 +1059,9 @@ export default function Home() {
                           {["like", "love", "haha", "wow", "sad", "angry"].map((type) => (
                             <button
                               key={type}
-                              className={`reaction-icon ${post.user_reaction?.type === type ? "selected" : ""
-                                }`}
+                              className={`reaction-button ${
+                                post.user_reaction?.type === type ? "selected" : ""
+                              }`}
                               onClick={() => handleReactionClick(post.id, type)}
                               title={type.charAt(0).toUpperCase() + type.slice(1)}
                             >
@@ -1061,16 +1095,12 @@ export default function Home() {
                           placeholder="Viết bình luận..."
                           value={commentInputs[post.id] || ""}
                           onChange={(e) =>
-                            setCommentInputs({
-                              ...commentInputs,
-                              [post.id]: e.target.value,
-                            })
+                            setCommentInputs({ ...commentInputs, [post.id]: e.target.value })
                           }
                         />
                         <button onClick={() => handleCommentSubmit(post.id)}>Gửi</button>
                       </div>
-
-                      <div className="cm-comments">
+                      <div className="cm-list-comment">
                         {comments[post.id]?.map((comment, index) => (
                           <div key={index} className="cm-comment">
                             <div className="cm-comment-content">
@@ -1089,31 +1119,36 @@ export default function Home() {
                                 comment.content
                               )}
                             </div>
-
-                            <div className="cm-comment-actions">
-                              {comment.user?.id === userIDCMT && (
-                                <>
-                                  <button className="cm-btn-more" onClick={() => toggleMenu(index)}>
-                                    ...
-                                  </button>
-                                  <div
-                                    className="cm-comment-menu"
-                                    style={{ display: openMenuIndex === index ? "block" : "none" }}
+                            {comment.user?.id === userIDCMT && (
+                              <div className="cm-comment-actions">
+                                <button className="cm-btn-more" onClick={() => toggleMenu(index)}>
+                                  ...
+                                </button>
+                                <div
+                                  className="cm-comment-menu"
+                                  style={{ display: openMenuIndex === index ? "block" : "none" }}
+                                >
+                                  <button
+                                    onClick={() =>
+                                      handleEditClick(index, comment.content, comment.id)
+                                    }
                                   >
-                                    <button onClick={() => handleEditClick(index, comment.content, comment.id)}>Sửa</button>
-                                    <button onClick={() => handleDelete(comment.id)}>Xóa</button>
-                                  </div>
-                                </>
-                              )}
-                            </div>
+                                    Sửa
+                                  </button>
+                                  <button onClick={() => handleDelete(comment.id)}>Xóa</button>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
                     </>
                   )}
-
                 </div>
-              ))}
+              ))
+            ) : (
+              <p className="no-stories">Không có bài viết nào.</p>
+            )}
           </>
         )}
       </div>

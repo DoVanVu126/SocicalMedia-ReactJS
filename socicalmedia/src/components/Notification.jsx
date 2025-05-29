@@ -17,12 +17,10 @@ const NotificationComponent = () => {
   const user = JSON.parse(localStorage.getItem('user'));
   const userId = user?.id;
 
-  // Split "Notification" into individual letters for intro animation
   const title = "Notification";
   const letters = title.split('');
 
   useEffect(() => {
-    // Hide intro after 1.8 seconds (0.5s bell shake + 1s letters + 0.3s buffer)
     const introTimer = setTimeout(() => {
       setShowIntro(false);
     }, 1800);
@@ -40,6 +38,7 @@ const NotificationComponent = () => {
       setLoading(true);
       try {
         const response = await axios.get(`/notifications/${userId}`);
+        console.log('Notifications fetched:', response.data);
         setNotifications(response.data);
         setUnreadCount(response.data.filter(n => !n.is_read).length);
         setStatusMessage('');
@@ -166,19 +165,24 @@ const NotificationComponent = () => {
   };
 
   const handleNotificationClick = (notification) => {
+    if (!userId) {
+      setStatusMessage('Vui lòng đăng nhập để xem thông báo.');
+      navigate('/login');
+      return;
+    }
     if (notification.notifiable_id) {
-      if (
-        notification.notification_content.includes('bình luận') ||
-        notification.notification_content.includes('thả cảm xúc') ||
-        notification.notification_content.includes('mới trên bài viết')
-      ) {
-        navigate(`/posts/${notification.notifiable_id}`, {
-          state: { commentId: notification.comment_id || null },
+      if (notification.notifiable_type === 'post') {
+        navigate('/home', {
+          state: {
+            postId: notification.notifiable_id,
+            openComments: notification.notification_content.includes('bình luận')
+          }
         });
-      } else if (notification.notification_content.includes('theo dõi')) {
+        markAsRead(notification.id);
+      } else if (notification.notifiable_type === 'user') {
         navigate(`/users/${notification.notifiable_id}`);
+        markAsRead(notification.id);
       }
-      markAsRead(notification.id);
     }
   };
 
@@ -240,7 +244,7 @@ const NotificationComponent = () => {
                 >
                   <div className="notification-content">
                     <div className="notification-icon">
-                      {notification.notification_content.includes('thả cảm xúc') ? (
+                      {notification.notifiable_type === 'post' && notification.notification_content.includes('thả cảm xúc') ? (
                         {
                           like: '👍',
                           love: '❤️',
@@ -249,8 +253,8 @@ const NotificationComponent = () => {
                           sad: '😢',
                           angry: '😡',
                         }[notification.notification_content.match(/thả cảm xúc (\w+)/)?.[1]] || '😊'
-                      ) : notification.notification_content.includes('bình luận') ? '💬' : 
-                        notification.notification_content.includes('theo dõi') ? '👤' : '🔔'}
+                      ) : notification.notifiable_type === 'post' && notification.notification_content.includes('bình luận') ? '💬' : 
+                        notification.notifiable_type === 'user' ? '👤' : '🔔'}
                     </div>
                     <div className="notification-text">
                       <p>{notification.notification_content}</p>

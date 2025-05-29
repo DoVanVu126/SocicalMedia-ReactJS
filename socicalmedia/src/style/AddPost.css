@@ -145,6 +145,7 @@ textarea:focus {
 }
 
 input[type="file"] {
+  }
 
 .add-post-file-input {
   display: none;
