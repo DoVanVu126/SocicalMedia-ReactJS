@@ -1,16 +1,3 @@
-/* Reset and Base Styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-}
-
-body {
-  background: #f9fafb;
-  min-height: 100vh;
-  color: #1e293b;
-}
 
 /* Add Post Intro Animation */
 .add-post-intro-container {
