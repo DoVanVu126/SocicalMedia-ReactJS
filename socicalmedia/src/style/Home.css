@@ -23,8 +23,8 @@
 .home-intro-letter {
   display: inline-block;
   animation: home-scatter 0.6s ease-out forwards,
-    home-converge 0.6s 0.6s ease-in forwards, home-stay 1s 1.2s forwards,
-    home-fadeOut 0.3s 2.2s forwards;
+  home-converge 0.6s 0.6s ease-in forwards, home-stay 1s 1.2s forwards,
+  home-fadeOut 0.3s 2.2s forwards;
   transform-origin: center;
 }
 
@@ -151,11 +151,10 @@
 
 .media-overlay-hover {
   position: absolute;
-
   background-image: conic-gradient(black 50%,
-      turquoise 70%,
-      green 85%,
-      black 100%);
+  turquoise 70%,
+  green 85%,
+  black 100%);
   border-radius: 15px;
   opacity: 0;
   inset: -50%;
@@ -963,11 +962,11 @@
   padding: 4px;
   margin-left: -40px;
   background: linear-gradient(45deg,
-      #f09433,
-      #e6683c,
-      #dc2743,
-      #cc2366,
-      #bc1888);
+  #f09433,
+  #e6683c,
+  #dc2743,
+  #cc2366,
+  #bc1888);
   background-size: 400%;
   border-radius: 50%;
   animation: gradient 15s ease infinite;

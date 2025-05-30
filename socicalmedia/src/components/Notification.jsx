@@ -13,16 +13,14 @@ const NotificationComponent = () => {
   const [statusMessage, setStatusMessage] = useState('');
   const [showIntro, setShowIntro] = useState(true);
   const navigate = useNavigate();
-  
+
   const user = JSON.parse(localStorage.getItem('user'));
   const userId = user?.id;
 
-  // Split "Notification" into individual letters for intro animation
   const title = "Notification";
   const letters = title.split('');
 
   useEffect(() => {
-    // Hide intro after 1.8 seconds (0.5s bell shake + 1s letters + 0.3s buffer)
     const introTimer = setTimeout(() => {
       setShowIntro(false);
     }, 1800);
@@ -40,6 +38,7 @@ const NotificationComponent = () => {
       setLoading(true);
       try {
         const response = await axios.get(`/notifications/${userId}`);
+        console.log('Notifications fetched:', response.data);
         setNotifications(response.data);
         setUnreadCount(response.data.filter(n => !n.is_read).length);
         setStatusMessage('');
@@ -50,9 +49,9 @@ const NotificationComponent = () => {
           data: error.response?.data,
         });
         setStatusMessage(
-          error.response?.status === 404
-            ? 'Không tìm thấy thông báo.'
-            : 'Có lỗi xảy ra khi tải thông báo.'
+            error.response?.status === 404
+                ? 'Không tìm thấy thông báo.'
+                : 'Có lỗi xảy ra khi tải thông báo.'
         );
       } finally {
         setLoading(false);
@@ -79,7 +78,7 @@ const NotificationComponent = () => {
     try {
       await axios.post(`/notifications/${id}/read`, { user_id: userId });
       setNotifications(notifications.map(notification =>
-        notification.id === id ? { ...notification, is_read: true } : notification
+          notification.id === id ? { ...notification, is_read: true } : notification
       ));
       setUnreadCount(prev => prev - 1);
       setStatusMessage('Thông báo đã được đánh dấu đã đọc.');
@@ -135,11 +134,11 @@ const NotificationComponent = () => {
         data: error.response?.data,
       });
       setStatusMessage(
-        error.response?.status === 404
-          ? 'Không tìm thấy endpoint cài đặt thông báo.'
-          : error.response?.status === 401
-          ? 'Không có quyền thay đổi cài đặt thông báo.'
-          : 'Có lỗi khi thay đổi cài đặt thông báo.'
+          error.response?.status === 404
+              ? 'Không tìm thấy endpoint cài đặt thông báo.'
+              : error.response?.status === 401
+                  ? 'Không có quyền thay đổi cài đặt thông báo.'
+                  : 'Có lỗi khi thay đổi cài đặt thông báo.'
       );
     } finally {
       setLoading(false);
@@ -166,128 +165,133 @@ const NotificationComponent = () => {
   };
 
   const handleNotificationClick = (notification) => {
+    if (!userId) {
+      setStatusMessage('Vui lòng đăng nhập để xem thông báo.');
+      navigate('/login');
+      return;
+    }
     if (notification.notifiable_id) {
-      if (
-        notification.notification_content.includes('bình luận') ||
-        notification.notification_content.includes('thả cảm xúc') ||
-        notification.notification_content.includes('mới trên bài viết')
-      ) {
-        navigate(`/posts/${notification.notifiable_id}`, {
-          state: { commentId: notification.comment_id || null },
+      if (notification.notifiable_type === 'post') {
+        navigate('/home', {
+          state: {
+            postId: notification.notifiable_id,
+            openComments: notification.notification_content.includes('bình luận')
+          }
         });
-      } else if (notification.notification_content.includes('theo dõi')) {
+        markAsRead(notification.id);
+      } else if (notification.notifiable_type === 'user') {
         navigate(`/users/${notification.notifiable_id}`);
+        markAsRead(notification.id);
       }
-      markAsRead(notification.id);
     }
   };
 
   if (showIntro) {
     return (
-      <div className="notification-intro-container">
-        <div className="notification-bell">🔔</div>
-        <div className="notification-intro-text">
-          {letters.map((letter, index) => (
-            <span
-              key={index}
-              className="notification-intro-letter"
-              style={{ animationDelay: `${0.5 + index * 0.1}s` }}
-            >
+        <div className="notification-intro-container">
+          <div className="notification-bell">🔔</div>
+          <div className="notification-intro-text">
+            {letters.map((letter, index) => (
+                <span
+                    key={index}
+                    className="notification-intro-letter"
+                    style={{ animationDelay: `${0.5 + index * 0.1}s` }}
+                >
               {letter === ' ' ? '\u00A0' : letter}
             </span>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
     );
   }
 
   return (
-    <div className="container">
-      <Header />
-      <Sidebar />
-      <div className="notifications-wrapper">
-        <div className="notifications-container">
-          <div className="notifications-header">
-            <div className="fancy-container">
-              <div className="fancy-text">Thông báo</div>
-              {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}
-            </div>
-            <div className="header-actions">
-              <button
-                onClick={markAllAsRead}
-                className="action-btn mark-all-btn"
-                disabled={loading}
-              >
-                {loading ? 'Đang xử lý...' : 'Đánh dấu tất cả đã đọc'}
-              </button>
-              <button
-                onClick={toggleNotifications}
-                className="action-btn toggle-btn"
-                disabled={loading}
-              >
-                {loading ? 'Đang xử lý...' : isNotificationsEnabled ? 'Tắt thông báo' : 'Bật thông báo'}
-              </button>
-            </div>
-          </div>
-          {statusMessage && <div className="status-message">{statusMessage}</div>}
-          <ul className="notifications-list">
-            {notifications.length > 0 ? (
-              notifications.map(notification => (
-                <li
-                  key={notification.id}
-                  className={`notification-item ${notification.is_read ? 'read' : 'unread'}`}
-                  onClick={() => handleNotificationClick(notification)}
+      <div className="container">
+        <Header />
+        <Sidebar />
+        <div className="notifications-wrapper">
+          <div className="notifications-container">
+            <div className="notifications-header">
+              <div className="fancy-container">
+                <div className="fancy-text">Thông báo</div>
+                {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}
+              </div>
+              <div className="header-actions">
+                <button
+                    onClick={markAllAsRead}
+                    className="action-btn mark-all-btn"
+                    disabled={loading}
                 >
-                  <div className="notification-content">
-                    <div className="notification-icon">
-                      {notification.notification_content.includes('thả cảm xúc') ? (
-                        {
-                          like: '👍',
-                          love: '❤️',
-                          haha: '😂',
-                          wow: '😲',
-                          sad: '😢',
-                          angry: '😡',
-                        }[notification.notification_content.match(/thả cảm xúc (\w+)/)?.[1]] || '😊'
-                      ) : notification.notification_content.includes('bình luận') ? '💬' : 
-                        notification.notification_content.includes('theo dõi') ? '👤' : '🔔'}
-                    </div>
-                    <div className="notification-text">
-                      <p>{notification.notification_content}</p>
-                      <span className="notification-time">{formatTime(notification.created_at)}</span>
-                    </div>
-                  </div>
-                  <div className="notification-actions">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        markAsRead(notification.id);
-                      }}
-                      className="action-btn mark-read-btn"
-                      disabled={loading}
-                    >
-                      {notification.is_read ? 'Đã đọc' : 'Đánh dấu đã đọc'}
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteNotification(notification.id);
-                      }}
-                      className="action-btn delete-btn"
-                      disabled={loading}
-                    >
-                      Xóa
-                    </button>
-                  </div>
-                </li>
-              ))
-            ) : (
-              <p className="no-notifications">Không có thông báo mới</p>
-            )}
-          </ul>
+                  {loading ? 'Đang xử lý...' : 'Đánh dấu tất cả đã đọc'}
+                </button>
+                <button
+                    onClick={toggleNotifications}
+                    className="action-btn toggle-btn"
+                    disabled={loading}
+                >
+                  {loading ? 'Đang xử lý...' : isNotificationsEnabled ? 'Tắt thông báo' : 'Bật thông báo'}
+                </button>
+              </div>
+            </div>
+            {statusMessage && <div className="status-message">{statusMessage}</div>}
+            <ul className="notifications-list">
+              {notifications.length > 0 ? (
+                  notifications.map(notification => (
+                      <li
+                          key={notification.id}
+                          className={`notification-item ${notification.is_read ? 'read' : 'unread'}`}
+                          onClick={() => handleNotificationClick(notification)}
+                      >
+                        <div className="notification-content">
+                          <div className="notification-icon">
+                            {notification.notifiable_type === 'post' && notification.notification_content.includes('thả cảm xúc') ? (
+                                {
+                                  like: '👍',
+                                  love: '❤️',
+                                  haha: '😂',
+                                  wow: '😲',
+                                  sad: '😢',
+                                  angry: '😡',
+                                }[notification.notification_content.match(/thả cảm xúc (\w+)/)?.[1]] || '😊'
+                            ) : notification.notifiable_type === 'post' && notification.notification_content.includes('bình luận') ? '💬' :
+                                notification.notifiable_type === 'user' ? '👤' : '🔔'}
+                          </div>
+                          <div className="notification-text">
+                            <p>{notification.notification_content}</p>
+                            <span className="notification-time">{formatTime(notification.created_at)}</span>
+                          </div>
+                        </div>
+                        <div className="notification-actions">
+                          <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                markAsRead(notification.id);
+                              }}
+                              className="action-btn mark-read-btn"
+                              disabled={loading}
+                          >
+                            {notification.is_read ? 'Đã đọc' : 'Đánh dấu đã đọc'}
+                          </button>
+                          <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteNotification(notification.id);
+                              }}
+                              className="action-btn delete-btn"
+                              disabled={loading}
+                          >
+                            Xóa
+                          </button>
+                        </div>
+                      </li>
+                  ))
+              ) : (
+                  <p className="no-notifications">Không có thông báo mới</p>
+              )}
+            </ul>
+          </div>
         </div>
       </div>
-    </div>
   );
 };
 

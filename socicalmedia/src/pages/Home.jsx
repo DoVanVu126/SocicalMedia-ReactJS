@@ -126,20 +126,20 @@ export default function Home() {
     setLoading(true);
     const params = userIDCMT ? { user_id: userIDCMT } : {};
     axios
-      .get("http://localhost:8000/api/stories", { params })
-      .then((res) => {
-        const elapsed = Date.now() - start;
-        const remainingTime = Math.max(3000 - elapsed, 0);
-        setTimeout(() => {
-          setStories(res.data);
+        .get("http://localhost:8000/api/stories", { params })
+        .then((res) => {
+          const elapsed = Date.now() - start;
+          const remainingTime = Math.max(3000 - elapsed, 0);
+          setTimeout(() => {
+            setStories(res.data);
+            setLoading(false);
+          }, remainingTime);
+        })
+        .catch((err) => {
+          console.error("Error fetching stories:", err);
+          setError("Không thể tải tin.");
           setLoading(false);
-        }, remainingTime);
-      })
-      .catch((err) => {
-        console.error("Error fetching stories:", err);
-        setError("Không thể tải tin.");
-        setLoading(false);
-      });
+        });
   }, [userIDCMT]);
 
   useEffect(() => {
@@ -233,9 +233,9 @@ export default function Home() {
   const scrollStories = (direction) => {
     if (storyListRef.current) {
       const storyItemWidth =
-        storyListRef.current.querySelector(".story-item")?.offsetWidth || 120;
+          storyListRef.current.querySelector(".story-item")?.offsetWidth || 120;
       const scrollAmount =
-        direction === "left" ? -storyItemWidth * 3 : storyItemWidth * 3;
+          direction === "left" ? -storyItemWidth * 3 : storyItemWidth * 3;
       storyListRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
   };
@@ -252,20 +252,20 @@ export default function Home() {
   };
   const handleSaveEdit = async () => {
     if (
-      editingIndex === null ||
-      selectedCommentPostId === null ||
-      selectedCommentId === null
+        editingIndex === null ||
+        selectedCommentPostId === null ||
+        selectedCommentId === null
     ) {
       return;
     }
 
     try {
       const response = await axios.put(
-        `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${selectedCommentId}`,
-        {
-          content: editContent,
-          user_id: userIDCMT,
-        }
+          `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${selectedCommentId}`,
+          {
+            content: editContent,
+            user_id: userIDCMT,
+          }
       );
 
       // Cập nhật comment sau khi sửa
@@ -275,7 +275,7 @@ export default function Home() {
         const updatedComments = { ...prevComments };
         if (updatedComments[selectedCommentPostId]) {
           const commentIndex = updatedComments[selectedCommentPostId].findIndex(
-            (cmt) => cmt.id === selectedCommentId
+              (cmt) => cmt.id === selectedCommentId
           );
           if (commentIndex !== -1) {
             updatedComments[selectedCommentPostId][commentIndex] = updatedComment;
@@ -300,12 +300,12 @@ export default function Home() {
     }
     try {
       const response = await fetch(
-        `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${commentId}`,
-        {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: userIDCMT }),
-        }
+          `http://localhost:8000/api/posts/${selectedCommentPostId}/comments/${commentId}`,
+          {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: userIDCMT }),
+          }
       );
       if (!response.ok) {
         const errorData = await response.json();
@@ -318,8 +318,8 @@ export default function Home() {
         const updatedComments = { ...prevComments };
         if (updatedComments[selectedCommentPostId]) {
           updatedComments[selectedCommentPostId] = updatedComments[
-            selectedCommentPostId
-          ].filter((comment) => comment.id !== commentId);
+              selectedCommentPostId
+              ].filter((comment) => comment.id !== commentId);
         }
         return updatedComments;
       });
@@ -385,20 +385,20 @@ export default function Home() {
     setShowTrash(true);
     setTimeout(() => {
       axios
-        .delete(`http://localhost:8000/api/stories/${id}`, {
-          data: { user_id: userIDCMT },
-        })
-        .then(() => {
-          setStories(stories.filter((story) => story.id !== id));
-          setShowTrash(false);
-          setDeletingStoryId(null);
-        })
-        .catch((err) => {
-          console.error("Error deleting story:", err);
-          setError("Không thể xóa tin.");
-          setShowTrash(false);
-          setDeletingStoryId(null);
-        });
+          .delete(`http://localhost:8000/api/stories/${id}`, {
+            data: { user_id: userIDCMT },
+          })
+          .then(() => {
+            setStories(stories.filter((story) => story.id !== id));
+            setShowTrash(false);
+            setDeletingStoryId(null);
+          })
+          .catch((err) => {
+            console.error("Error deleting story:", err);
+            setError("Không thể xóa tin.");
+            setShowTrash(false);
+            setDeletingStoryId(null);
+          });
     }, 1000);
   };
 
@@ -430,17 +430,17 @@ export default function Home() {
     if (!content) return;
     try {
       const res = await fetch(
-        `http://localhost:8000/api/posts/${postId}/comments`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_id: userIDCMT,
-            content,
-          }),
-        }
+          `http://localhost:8000/api/posts/${postId}/comments`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_id: userIDCMT,
+              content,
+            }),
+          }
       );
 
       if (!res.ok) {
@@ -487,18 +487,18 @@ export default function Home() {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        activeMenuPostId !== null &&
-        menuRef.current &&
-        !menuRef.current.contains(event.target) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target)
+          activeMenuPostId !== null &&
+          menuRef.current &&
+          !menuRef.current.contains(event.target) &&
+          buttonRef.current &&
+          !buttonRef.current.contains(event.target)
       ) {
         setActiveMenuPostId(null);
       }
       if (
-        showReactionList !== null &&
-        reactionListRef.current &&
-        !reactionListRef.current.contains(event.target)
+          showReactionList !== null &&
+          reactionListRef.current &&
+          !reactionListRef.current.contains(event.target)
       ) {
         setShowReactionList(null);
       }
@@ -571,8 +571,8 @@ export default function Home() {
           reaction_summary: {
             ...updatedPost.reaction_summary,
             [userReaction?.type]: userReaction
-              ? (updatedPost.reaction_summary[userReaction.type] || 1) - 1
-              : updatedPost.reaction_summary[userReaction?.type] || 0,
+                ? (updatedPost.reaction_summary[userReaction.type] || 1) - 1
+                : updatedPost.reaction_summary[userReaction?.type] || 0,
             [newReactionType]: (updatedPost.reaction_summary[newReactionType] || 0) + 1,
           },
         };
@@ -609,8 +609,8 @@ export default function Home() {
     stories.forEach((story) => {
       const userId = story.user?.id;
       if (
-        !userStories[userId] ||
-        new Date(story.created_at) > new Date(userStories[userId].created_at)
+          !userStories[userId] ||
+          new Date(story.created_at) > new Date(userStories[userId].created_at)
       ) {
         userStories[userId] = story;
       }
@@ -622,13 +622,13 @@ export default function Home() {
 
   const getUserStories = (userId) => {
     return stories
-      .filter((story) => story.user?.id === userId)
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        .filter((story) => story.user?.id === userId)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   };
 
   const handleNextUser = () => {
     const currentIndex = filteredStories.findIndex(
-      (story) => story.user.id === selectedUserId
+        (story) => story.user.id === selectedUserId
     );
     if (currentIndex < filteredStories.length - 1) {
       setSelectedUserId(filteredStories[currentIndex + 1].user.id);
@@ -640,7 +640,7 @@ export default function Home() {
 
   const handlePrevUser = () => {
     const currentIndex = filteredStories.findIndex(
-      (story) => story.user.id === selectedUserId
+        (story) => story.user.id === selectedUserId
     );
     if (currentIndex > 0) {
       setSelectedUserId(filteredStories[currentIndex - 1].user.id);
@@ -710,569 +710,564 @@ export default function Home() {
   }
 
   return (
-    <div className="container">
-      {showIntro && (
-        <div className="home-intro-overlay">
-          <div className="home-intro-text">
-            {introText.map(({ letter, delay }, index) => (
-              <span
-                key={index}
-                className="home-intro-letter"
-                style={{
-                  animationDelay: `${delay}s`,
-                  "--index": index,
-                }}
-              >
+      <div className="container">
+        {showIntro && (
+            <div className="home-intro-overlay">
+              <div className="home-intro-text">
+                {introText.map(({ letter, delay }, index) => (
+                    <span
+                        key={index}
+                        className="home-intro-letter"
+                        style={{
+                          animationDelay: `${delay}s`,
+                          "--index": index,
+                        }}
+                    >
                 {letter}
               </span>
-            ))}
-          </div>
-        </div>
-      )}
-      <Header />
-      <Sidebar />
-      <div className="main">
-        <div className="story-containers">
-          <h3 className="story-header blink-text">Bảng tin</h3>
-          {loading && <p className="loading">⏳ Đang tải...</p>}
-          {!loading && !userIDCMT && (
-            <p className="no-stories">Vui lòng đăng nhập để xem tin.</p>
-          )}
-          <div className="story-list-container">
-            {showNavButtons.left && (
-              <button
-                className="story-nav-btn story-nav-prev"
-                onClick={() => scrollStories("left")}
-              >
-                ❮
-              </button>
+                ))}
+              </div>
+            </div>
+        )}
+        <Header />
+        <Sidebar />
+        <div className="main">
+          <div className="story-containers">
+            <h3 className="story-header blink-text">Bảng tin</h3>
+            {loading && <p className="loading">⏳ Đang tải...</p>}
+            {!loading && !userIDCMT && (
+                <p className="no-stories">Vui lòng đăng nhập để xem tin.</p>
             )}
-            {showNavButtons.right && (
-              <button
-                className="story-nav-btn story-nav-next"
-                onClick={() => scrollStories("right")}
-              >
-                ›
-              </button>
-            )}
-            <div className="story-list" ref={storyListRef}>
-              {userIDCMT && (
-                <div
-                  className="story-item create-story"
-                  onClick={() => navigate("/story")}
-                >
-                  <div className="story-user-info">
-                    <img
-                      src={
-                        user?.profilepicture
-                          ? `http://localhost:8000/storage/images/${user.profilepicture}`
-                          : "/default-avatar.png"
-                      }
-                      alt="Avatar"
-                      className="story-avatarst"
-                    />
-                    <div className="story-user-details">
-                      <span className="story-username">Tạo tin ➕</span>
-                    </div>
-                  </div>
-                </div>
+            <div className="story-list-container">
+              {showNavButtons.left && (
+                  <button
+                      className="story-nav-btn story-nav-prev"
+                      onClick={() => scrollStories("left")}
+                  >
+                    ❮
+                  </button>
               )}
-              {filteredStories.map((story) => (
-                <div
-                  key={story.user.id}
-                  className={`story-item ${deletingStoryId === story.id ? 'deleting' : ''}`}
-                  onClick={() => handleOpenViewer(story.user.id)}
-                >
-                  <div className="story-user-info">
-                    <img
-                      src={
-                        story.user?.profilepicture
-                          ? `http://localhost:8000/storage/images/${story.user.profilepicture}`
-                          : "/default-avatar.png"
-                      }
-                      alt="Avatar"
-                      className="story-avatars"
-                    />
-                    <div className="story-user-details">
+              {showNavButtons.right && (
+                  <button
+                      className="story-nav-btn story-nav-next"
+                      onClick={() => scrollStories("right")}
+                  >
+                    ›
+                  </button>
+              )}
+              <div className="story-list" ref={storyListRef}>
+                {userIDCMT && (
+                    <div
+                        className="story-item create-story"
+                        onClick={() => navigate("/story")}
+                    >
+                      <div className="story-user-info">
+                        <img
+                            src={
+                              user?.profilepicture
+                                  ? `http://localhost:8000/storage/images/${user.profilepicture}`
+                                  : "/default-avatar.png"
+                            }
+                            alt="Avatar"
+                            className="story-avatarst"
+                        />
+                        <div className="story-user-details">
+                          <span className="story-username">Tạo tin ➕</span>
+                        </div>
+                      </div>
+                    </div>
+                )}
+                {filteredStories.map((story) => (
+                    <div
+                        key={story.user.id}
+                        className={`story-item ${deletingStoryId === story.id ? 'deleting' : ''}`}
+                        onClick={() => handleOpenViewer(story.user.id)}
+                    >
+                      <div className="story-user-info">
+                        <img
+                            src={
+                              story.user?.profilepicture
+                                  ? `http://localhost:8000/storage/images/${story.user.profilepicture}`
+                                  : "/default-avatar.png"
+                            }
+                            alt="Avatar"
+                            className="story-avatars"
+                        />
+                        <div className="story-user-details">
                       <span className="story-username">
                         {story.user?.username || "Người dùng"}
                       </span>
-                      <span className="story-time">
+                          <span className="story-time">
                         {formatTime(story.created_at)}
                       </span>
-                    </div>
-                  </div>
-                  {userIDCMT && story.user?.id === userIDCMT && (
-                    <>
-                      <button
-                        className="story-menus-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleToggleMenu(story.id);
-                        }}
-                      >
-                        ⋮
-                      </button>
-                      {showMenu === story.id && (
-                        <div className="story-menu" ref={menuRef}>
-                          <button
-                            className="story-menu-item"
-                            onClick={() => handleEditStory(story)}
-                          >
-                            📝 Sửa
-                          </button>
-                          <button
-                            className="story-menu-item"
-                            onClick={() => handleDeleteStory(story.id)}
-                          >
-                            🗑️ Xóa Story
-                          </button>
                         </div>
-                      )}
-                    </>
-                  )}
-                  <div className="story-image-wrapper">
-                    {story.videourl?.match(/\.(mp4|webm)$/i) ? (
-                      <video
-                        src={`http://localhost:8000/storage/story_videos/${story.videourl}`}
-                        className="story-image"
-                        muted
-                      />
-                    ) : (
-                      <img
-                        src={`http://localhost:8000/storage/story_images/${story.imageurl}`}
-                        alt="Story"
-                        className="story-image"
-                      />
-                    )}
-                  </div>
-                  <div className="story-content">
-                    <p className="text">{story.content}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {showTrash && (
-              <div className="trash-container">
-                <div className="trash-bin">🗑️</div>
-              </div>
-            )}
-          </div>
-          {isViewerOpen && selectedUserId && (
-            <StoryViewer
-              stories={getUserStories(selectedUserId)}
-              onClose={() => {
-                setIsViewerOpen(false);
-                setSelectedUserId(null);
-              }}
-              initialIndex={0}
-              onNextUser={handleNextUser}
-              onPrevUser={handlePrevUser}
-              onDeleteStory={handleDeleteStory}
-              currentUserId={userIDCMT}
-            />
-          )}
-        </div>
-
-        {loading ? (
-          <div className="neon-loader-home">
-            <div className="circle-loader-home"></div>
-            <div className="bar-loader-home">
-              <div className="progress-home"></div>
-            </div>
-            <p className="text-loading-home">LOADING ...</p>
-          </div>
-        ) : (
-          <>
-            {error && <p className="error">{error}</p>}
-            {Array.isArray(posts) &&
-              posts.length > 0 &&
-              posts.map((post) => (
-                <div className="post" id={`post-${post.id}`} key={post.id}>
-                  <div className="slice slice1"></div>
-                  <div className="slice slice2"></div>
-                  <div className="slice slice3"></div>
-                  <div className="slice slice4"></div>
-                  <div className="slice slice5"></div>
-                  <div className="post-header">
-                    <div
-                      className="user-info"
-                      onClick={() => navigate(`/users/${post.user?.id}`)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <img
-                        src={
-                          post.user?.profilepicture
-                            ? `http://localhost:8000/storage/images/${post.user.profilepicture}`
-                            : "/images/image-default.jpg"
-                        }
-                        alt="Avatar"
-                        className="avatar"
-                        onError={(e) => {
-                          e.target.onerror = null; // tránh lỗi vòng lặp
-                          e.target.src = "/images/image-default.jpg"; // fallback ảnh mặc định
-                        }}
-                      />
-
-                      <div>
-                        <strong>{post.user?.username || "Người dùng"}</strong>
-                        <br />
-                        <small>{new Date(post.created_at).toLocaleString()}</small>
                       </div>
-                    </div>
-                    <div className="post-options">
-                      <div className="dropdown">
-                        <a className="" href="#" role="button"
-                           data-bs-toggle="dropdown" aria-expanded="false">
-                          <i className="bi bi-three-dots"></i>
-                        </a>
-
-                        <ul className="dropdown-menu small">
-                          <li>
-                            <a className="dropdown-item" href="#"
-                               onClick={() => setActiveMenuPostId(activeMenuPostId === post.id ? null : post.id)}>
-                              <i className="bi bi-pencil-square"></i> Hành động
-                            </a>
-                          </li>
-                          <li>
-                            <a className="dropdown-item" href="#"
-                               onClick={() => addOrUpdateSave(post.id)}>
-                              <i className="bi bi-bookmarks"></i> Lưu trữ
-                            </a>
-                          </li>
-                          <li>
-                            <a className="dropdown-item" href="#" onClick={() => addOrUpdateFavourite(post.id)}>
-                              <i className="bi bi-heart"></i> Yêu thích
-                            </a>
-                          </li>
-                          <li>
-                            <a className="dropdown-item" href="#"
-                               onClick={() => sharePost(post.id)}>
-                              <i className="bi bi-share"></i> Chia sẻ nhanh
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
-
-                      {activeMenuPostId === post.id && post.user?.id === user?.id && (
-                          <div className="options-menu" ref={menuRef}>
-                            <button onClick={() => handleEdit(post)}>Sửa</button>
-                            <div className="slice slice1"></div>
-                            <div className="slice slice2"></div>
-                            <div className="slice slice3"></div>
-                            <div className="slice slice4"></div>
-                            <div className="slice slice5"></div>
-
+                      {userIDCMT && story.user?.id === userIDCMT && (
+                          <>
                             <button
-                                onClick={() => {
-
-                                  if (!window.confirm("Bạn có chắc muốn xóa bài viết này không?")) {
-                                    return;
-                                  }
-                                  const postElement = document.getElementById(`post-${post.id}`);
-
-                                  if (postElement) {
-                                    // Thêm class kích hoạt animation chém
-                                    postElement.classList.add("sliced");
-
-                                    // Sau khi animation kết thúc, gọi API xóa
-                                    postElement.addEventListener(
-                                        "animationend",
-                                        () => {
-                                          setLoading(true);
-                                          axios
-                                              .delete(`http://localhost:8000/api/posts/${post.id}`, {
-                                                data: {user_id: userIDCMT},
-                                              })
-                                              .then(() => {
-                                                setPosts((prevPosts) =>
-                                                    prevPosts.filter((p) => p.id !== post.id)
-                                                );
-                                              })
-                                              .catch((err) => {
-                                                console.error("Lỗi khi xóa bài viết:", err);
-                                                setError("Không thể xóa bài viết");
-                                              })
-                                              .finally(() => setLoading(false));
-                                        },
-                                        {once: true}
-                                    );
-
-                                  }
+                                className="story-menus-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleMenu(story.id);
                                 }}
                             >
-                              Xóa
+                              ⋮
                             </button>
-                          </div>
+                            {showMenu === story.id && (
+                                <div className="story-menu" ref={menuRef}>
+                                  <button
+                                      className="story-menu-item"
+                                      onClick={() => handleEditStory(story)}
+                                  >
+                                    📝 Sửa
+                                  </button>
+                                  <button
+                                      className="story-menu-item"
+                                      onClick={() => handleDeleteStory(story.id)}
+                                  >
+                                    🗑️ Xóa Story
+                                  </button>
+                                </div>
+                            )}
+                          </>
                       )}
-
-                    </div>
-                  </div>
-                  <p className="post-content">{post.content}</p>
-                  <div key={post.id} className="post-media">
-                    {Array.isArray(post.imageurl) && (
-                      <>
-                        {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 6)).map((img, index) => (
-                          <div key={index} className="image-wrapper">
-                            <div className="media-overlay-black"></div>
-                            <div className="media-overlay-hover"></div>
-                            <img
-                              src={`http://localhost:8000/storage/images/${img}`}
-                              alt={`Ảnh ${index + 1}`}
-                              className="media-image"
-                              onError={(e) => {
-                                e.target.onerror = null; // tránh lỗi vòng lặp
-                                e.target.src = '/images/image-default.jpg'; // đường dẫn ảnh mặc định trong public folder
-                              }}
+                      <div className="story-image-wrapper">
+                        {story.videourl?.match(/\.(mp4|webm)$/i) ? (
+                            <video
+                                src={`http://localhost:8000/storage/story_videos/${story.videourl}`}
+                                className="story-image"
+                                muted
                             />
+                        ) : (
+                            <img
+                                src={`http://localhost:8000/storage/story_images/${story.imageurl}`}
+                                alt="Story"
+                                className="story-image"
+                            />
+                        )}
+                      </div>
+                      <div className="story-content">
+                        <p className="text">{story.content}</p>
+                      </div>
+                    </div>
+                ))}
+              </div>
+              {showTrash && (
+                  <div className="trash-container">
+                    <div className="trash-bin">🗑️</div>
+                  </div>
+              )}
+            </div>
+            {isViewerOpen && selectedUserId && (
+                <StoryViewer
+                    stories={getUserStories(selectedUserId)}
+                    onClose={() => {
+                      setIsViewerOpen(false);
+                      setSelectedUserId(null);
+                    }}
+                    initialIndex={0}
+                    onNextUser={handleNextUser}
+                    onPrevUser={handlePrevUser}
+                    onDeleteStory={handleDeleteStory}
+                    currentUserId={userIDCMT}
+                />
+            )}
+          </div>
 
-                            {index === 5 && post.imageurl.length > 6 && !expandedPosts[post.id] && (
-                              <div
-                                className="image-overlay"
-                                onClick={() => toggleExpandImages(post.id)}
-                              >
-                                +{post.imageurl.length - 6} ảnh
+          {loading ? (
+              <div className="neon-loader-home">
+                <div className="circle-loader-home"></div>
+                <div className="bar-loader-home">
+                  <div className="progress-home"></div>
+                </div>
+                <p className="text-loading-home">LOADING ...</p>
+              </div>
+          ) : (
+              <>
+                {error && <p className="error">{error}</p>}
+                {Array.isArray(posts) &&
+                    posts.length > 0 &&
+                    posts.map((post) => (
+                        <div className="post" id={`post-${post.id}`} key={post.id}>
+                          <div className="slice slice1"></div>
+                          <div className="slice slice2"></div>
+                          <div className="slice slice3"></div>
+                          <div className="slice slice4"></div>
+                          <div className="slice slice5"></div>
+                          <div className="post-header">
+                            <div
+                                className="user-info"
+                                onClick={() => navigate(`/users/${post.user?.id}`)}
+                                style={{ cursor: "pointer" }}
+                            >
+                              <img
+                                  src={
+                                    post.user?.profilepicture
+                                        ? `http://localhost:8000/storage/images/${post.user.profilepicture}`
+                                        : "/images/image-default.jpg"
+                                  }
+                                  alt="Avatar"
+                                  className="avatar"
+                                  onError={(e) => {
+                                    e.target.onerror = null; // tránh lỗi vòng lặp
+                                    e.target.src = "/images/image-default.jpg"; // fallback ảnh mặc định
+                                  }}
+                              />
+
+                              <div>
+                                <strong>{post.user?.username || "Người dùng"}</strong>
+                                <br />
+                                <small>{new Date(post.created_at).toLocaleString()}</small>
                               </div>
+                            </div>
+                            <div className="post-options">
+                              <div className="dropdown">
+                                <a className="" href="#" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                  <i className="bi bi-three-dots"></i>
+                                </a>
+
+                                <ul className="dropdown-menu small">
+                                  <li>
+                                    <a className="dropdown-item" href="#"
+                                       onClick={() => setActiveMenuPostId(activeMenuPostId === post.id ? null : post.id)}>
+                                      <i className="bi bi-pencil-square"></i> Hành động
+                                    </a>
+                                  </li>
+                                  <li>
+                                    <a className="dropdown-item" href="#"
+                                       onClick={() => addOrUpdateSave(post.id)}>
+                                      <i className="bi bi-bookmarks"></i> Lưu trữ
+                                    </a>
+                                  </li>
+                                  <li>
+                                    <a className="dropdown-item" href="#" onClick={() => addOrUpdateFavourite(post.id)}>
+                                      <i className="bi bi-heart"></i> Yêu thích
+                                    </a>
+                                  </li>
+                                  <li>
+                                    <a className="dropdown-item" href="#"
+                                       onClick={() => sharePost(post.id)}>
+                                      <i className="bi bi-share"></i> Chia sẻ nhanh
+                                    </a>
+                                  </li>
+                                </ul>
+                              </div>
+
+                              {activeMenuPostId === post.id && post.user?.id === user?.id && (
+                                  <div className="options-menu" ref={menuRef}>
+                                    <button onClick={() => handleEdit(post)}>Sửa</button>
+                                    <div className="slice slice1"></div>
+                                    <div className="slice slice2"></div>
+                                    <div className="slice slice3"></div>
+                                    <div className="slice slice4"></div>
+                                    <div className="slice slice5"></div>
+
+                                    <button
+                                        onClick={() => {
+                                          if (!window.confirm("Bạn có chắc muốn xóa bài viết này không?")) {
+                                            return;
+                                          }
+                                          const postElement = document.getElementById(`post-${post.id}`);
+
+                                          if (postElement) {
+                                            postElement.classList.add("sliced");
+                                            postElement.addEventListener(
+                                                "animationend",
+                                                () => {
+                                                  setLoading(true);
+                                                  axios
+                                                      .delete(`http://localhost:8000/api/posts/${post.id}`, {
+                                                        data: { user_id: userIDCMT },
+                                                      })
+                                                      .then(() => {
+                                                        setPosts((prevPosts) =>
+                                                            prevPosts.filter((p) => p.id !== post.id)
+                                                        );
+                                                      })
+                                                      .catch((err) => {
+                                                        console.error("Lỗi khi xóa bài viết:", err);
+                                                        setError("Không thể xóa bài viết, hãy load lại trang !");
+                                                      })
+                                                      .finally(() => setLoading(false));
+                                                },
+                                                { once: true }
+                                            );
+
+                                          }
+                                        }}
+                                    >
+                                      Xóa
+                                    </button>
+                                  </div>
+                              )}
+                            </div>
+                          </div>
+                          <p className="post-content">{post.content}</p>
+                          <div key={post.id} className="post-media">
+                            {Array.isArray(post.imageurl) && (
+                                <>
+                                  {(expandedPosts[post.id] ? post.imageurl : post.imageurl.slice(0, 6)).map((img, index) => (
+                                      <div key={index} className="image-wrapper">
+                                        <div className="media-overlay-black"></div>
+                                        <div className="media-overlay-hover"></div>
+                                        <img
+                                            src={`http://localhost:8000/storage/images/${img}`}
+                                            alt={`Ảnh ${index + 1}`}
+                                            className="media-image"
+                                            onError={(e) => {
+                                              e.target.onerror = null; // tránh lỗi vòng lặp
+                                              e.target.src = '/images/image-default.jpg'; // đường dẫn ảnh mặc định trong public folder
+                                            }}
+                                        />
+
+                                        {index === 5 && post.imageurl.length > 6 && !expandedPosts[post.id] && (
+                                            <div
+                                                className="image-overlay"
+                                                onClick={() => toggleExpandImages(post.id)}
+                                            >
+                                              +{post.imageurl.length - 6} ảnh
+                                            </div>
+                                        )}
+                                      </div>
+                                  ))}
+                                  {expandedPosts[post.id] && (
+                                      <button
+                                          onClick={() => toggleExpandImages(post.id)}
+                                          className="collapse-btn"
+                                      >
+                                        Thu gọn
+                                      </button>
+                                  )}
+                                </>
+                            )}
+                            {post.videourl && (
+                                <div className="video-wrapper">
+                                  <div className="media-overlay-hover"></div>
+                                  <video controls className="media-video">
+                                    <source
+                                        src={`http://localhost:8000/storage/videos/${post.videourl}`}
+                                        type="video/mp4"
+                                    />
+                                    Trình duyệt của bạn không hỗ trợ video.
+                                  </video>
+                                </div>
                             )}
                           </div>
-                        ))}
-                        {expandedPosts[post.id] && (
-                          <button
-                            onClick={() => toggleExpandImages(post.id)}
-                            className="collapse-btn"
-                          >
-                            Thu gọn
-                          </button>
-                        )}
-                      </>
-                    )}
-                    {post.videourl && (
-                      <div className="video-wrapper">
-                        <div className="media-overlay-hover"></div>
-                        <video controls className="media-video">
-                          <source
-                            src={`http://localhost:8000/storage/videos/${post.videourl}`}
-                            type="video/mp4"
-                          />
-                          Trình duyệt của bạn không hỗ trợ video.
-                        </video>
-                      </div>
-                    )}
-                  </div>
-                  <div className="actions">
-                    {getTotalReactions(post.reaction_summary) > 0 && (
-                      <div className="reaction-summary">
+                          <div className="actions">
+                            {getTotalReactions(post.reaction_summary) > 0 && (
+                                <div className="reaction-summary">
                         <span
-                          className="reaction-icon"
-                          onClick={() => handleReactionSummaryClick(post.id)}
-                          style={{ cursor: "pointer" }}
+                            className="reaction-icon"
+                            onClick={() => handleReactionSummaryClick(post.id)}
+                            style={{ cursor: "pointer" }}
                         >
                           {Object.keys(post.reaction_summary).map(
-                            (type) =>
-                              post.reaction_summary[type] > 0 && (
-                                <span key={type}>{renderReaction(type)}</span>
-                              )
+                              (type) =>
+                                  post.reaction_summary[type] > 0 && (
+                                      <span key={type}>{renderReaction(type)}</span>
+                                  )
                           )}
                         </span>
-                        <span
-                          onClick={() => handleReactionSummaryClick(post.id)}
-                          style={{ cursor: "pointer" }}
-                        >
+                                  <span
+                                      onClick={() => handleReactionSummaryClick(post.id)}
+                                      style={{ cursor: "pointer" }}
+                                  >
                           {getTotalReactions(post.reaction_summary)}
                         </span>
-                        {showReactionList === post.id && (
-                          <div className="reaction-list" ref={reactionListRef}>
-                            <div className="reaction-list-header">
+                                  {showReactionList === post.id && (
+                                      <div className="reaction-list" ref={reactionListRef}>
+                                        <div className="reaction-list-header">
 
                               <span>
                                 {getTotalReactions(post.reaction_summary)} lượt thả cảm xúc
                               </span>
-                              <button
-                                className="close-button"
-                                onClick={() => setShowReactionList(null)}
-                              >
-                                ×
-                              </button>
-                            </div>
-                            <div className="reaction-counts">
-                              {Object.keys(post.reaction_summary).map(
-                                (type) =>
-                                  post.reaction_summary[type] > 0 && (
-                                    <span key={type} className="reaction-count">
+                                          <button
+                                              className="close-button"
+                                              onClick={() => setShowReactionList(null)}
+                                          >
+                                            ×
+                                          </button>
+                                        </div>
+                                        <div className="reaction-counts">
+                                          {Object.keys(post.reaction_summary).map(
+                                              (type) =>
+                                                  post.reaction_summary[type] > 0 && (
+                                                      <span key={type} className="reaction-count">
                                       {renderReaction(type)} {post.reaction_summary[type]}
                                     </span>
-                                  )
-                              )}
-                            </div>
-                            <div className="reaction-users">
-                              {reactionList[post.id]?.length > 0 ? (
-                                reactionList[post.id].map((reaction, index) => (
-                                  <div key={index} className="reaction-user">
-                                    <img
-                                      src={
-                                        reaction.user?.profilepicture
-                                          ? `http://localhost:8000/storage/images/${reaction.user.profilepicture}`
-                                          : "/default-avatar.png"
-                                      }
-                                      alt="Avatar"
-                                      className="reaction-user-avatar"
-                                    />
-                                    <span>{reaction.user?.username || reaction.username}</span>:{" "}
-                                    {renderReaction(reaction.type)}
-                                  </div>
-                                ))
-                              ) : (
-                                <p>Không có cảm xúc nào</p>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    <div
-                      className="reaction-container"
-                      onMouseEnter={() => setShowReactions(post.id)}
-                      onMouseLeave={() => setShowReactions(null)}
-                    >
-                      <button
-                        className={`like-button ${post.user_reaction ? "reacted" : ""}`}
-                        onClick={() => handleReactionClick(post.id)}
-                      >
-                        {renderButtonLabel(post.user_reaction)}
-                      </button>
-                      {showReactions === post.id && (
-                        <div className="reaction-icons">
-                          {["like", "love", "haha", "wow", "sad", "angry"].map((type) => (
-                            <button
-                              key={type}
-                              className={`reaction-icon ${post.user_reaction?.type === type ? "selected" : ""
-                                }`}
-                              onClick={() => handleReactionClick(post.id, type)}
-                              title={type.charAt(0).toUpperCase() + type.slice(1)}
+                                                  )
+                                          )}
+                                        </div>
+                                        <div className="reaction-users">
+                                          {reactionList[post.id]?.length > 0 ? (
+                                              reactionList[post.id].map((reaction, index) => (
+                                                  <div key={index} className="reaction-user">
+                                                    <img
+                                                        src={
+                                                          reaction.user?.profilepicture
+                                                              ? `http://localhost:8000/storage/images/${reaction.user.profilepicture}`
+                                                              : "/default-avatar.png"
+                                                        }
+                                                        alt="Avatar"
+                                                        className="reaction-user-avatar"
+                                                    />
+                                                    <span>{reaction.user?.username || reaction.username}</span>:{" "}
+                                                    {renderReaction(reaction.type)}
+                                                  </div>
+                                              ))
+                                          ) : (
+                                              <p>Không có cảm xúc nào</p>
+                                          )}
+                                        </div>
+                                      </div>
+                                  )}
+                                </div>
+                            )}
+                            <div
+                                className="reaction-container"
+                                onMouseEnter={() => setShowReactions(post.id)}
+                                onMouseLeave={() => setShowReactions(null)}
                             >
-                              {renderReaction(type)}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => {
-                        if (selectedCommentPostId === post.id) {
-                          setSelectedCommentPostId(null);
-                        } else {
-                          fetchComments(post.id);
-                          setSelectedCommentPostId(post.id);
-                        }
-                      }}
-                    >
-                      💬 Bình luận
-                    </button>
-                    <button onClick={() => alert("Chức năng chia sẻ chưa được triển khai")}>
-                      🔗 Chia sẻ
-                    </button>
-                  </div>
-                  {selectedCommentPostId === post.id && (
-                    <>
-                      <div className="cm-add-comment">
-                        <input
-                          type="text"
-                          placeholder="Viết bình luận..."
-                          value={commentInputs[post.id] || ""}
-                          onChange={(e) =>
-                            setCommentInputs({
-                              ...commentInputs,
-                              [post.id]: e.target.value,
-                            })
-                          }
-                        />
-                        <button onClick={() => handleCommentSubmit(post.id)}>Gửi</button>
-                      </div>
-
-                      <div className="cm-comments">
-                        {comments[post.id]?.map((comment, index) => (
-                          <div key={index} className="cm-comment">
-                            <div className="cm-comment-content">
-                              <strong>{comment.user?.username || "Người dùng"}:</strong>{" "}
-                              {editingIndex === index ? (
-                                <>
-                                  <input
-                                    type="text"
-                                    value={editContent}
-                                    onChange={(e) => setEditContent(e.target.value)}
-                                  />
-                                  <button onClick={handleSaveEdit}>Lưu</button>
-                                  <button onClick={() => setEditingIndex(null)}>Hủy</button>
-                                </>
-                              ) : (
-                                comment.content
-                              )}
-                            </div>
-
-                            <div className="cm-comment-actions">
-                              {comment.user?.id === userIDCMT && (
-                                <>
-                                  <button className="cm-btn-more" onClick={() => toggleMenu(index)}>
-                                    ...
-                                  </button>
-                                  <div
-                                    className="cm-comment-menu"
-                                    style={{ display: openMenuIndex === index ? "block" : "none" }}
-                                  >
-                                    <button onClick={() => handleEditClick(index, comment.content, comment.id)}>Sửa</button>
-                                    <button onClick={() => handleDelete(comment.id)}>Xóa</button>
+                              <button
+                                  className={`like-button ${post.user_reaction ? "reacted" : ""}`}
+                                  onClick={() => handleReactionClick(post.id)}
+                              >
+                                {renderButtonLabel(post.user_reaction)}
+                              </button>
+                              {showReactions === post.id && (
+                                  <div className="reaction-icons">
+                                    {["like", "love", "haha", "wow", "sad", "angry"].map((type) => (
+                                        <button
+                                            key={type}
+                                            className={`reaction-icon ${post.user_reaction?.type === type ? "selected" : ""
+                                            }`}
+                                            onClick={() => handleReactionClick(post.id, type)}
+                                            title={type.charAt(0).toUpperCase() + type.slice(1)}
+                                        >
+                                          {renderReaction(type)}
+                                        </button>
+                                    ))}
                                   </div>
-                                </>
                               )}
                             </div>
+                            <button
+                                onClick={() => {
+                                  if (selectedCommentPostId === post.id) {
+                                    setSelectedCommentPostId(null);
+                                  } else {
+                                    fetchComments(post.id);
+                                    setSelectedCommentPostId(post.id);
+                                  }
+                                }}
+                            >
+                              💬 Bình luận
+                            </button>
+                            <button onClick={() => alert("Chức năng chia sẻ chưa được triển khai")}>
+                              🔗 Chia sẻ
+                            </button>
                           </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            <div className="pagination" style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', marginTop: 16 }}>
-              <button
-                disabled={currentPage === 1 || loading}
-                onClick={() => fetchPosts(currentPage - 1)}
-              >
-                ◀ Trang trước
-              </button>
+                          {selectedCommentPostId === post.id && (
+                              <>
+                                <div className="cm-add-comment">
+                                  <input
+                                      type="text"
+                                      placeholder="Viết bình luận..."
+                                      value={commentInputs[post.id] || ""}
+                                      onChange={(e) =>
+                                          setCommentInputs({
+                                            ...commentInputs,
+                                            [post.id]: e.target.value,
+                                          })
+                                      }
+                                  />
+                                  <button onClick={() => handleCommentSubmit(post.id)}>Gửi</button>
+                                </div>
 
-              {/* Danh sách số trang */}
-              {Array.from({ length: totalPages }, (_, index) => {
-                const page = index + 1;
-                return (
+                                <div className="cm-comments">
+                                  {comments[post.id]?.map((comment, index) => (
+                                      <div key={index} className="cm-comment">
+                                        <div className="cm-comment-content">
+                                          <strong>{comment.user?.username || "Người dùng"}:</strong>{" "}
+                                          {editingIndex === index ? (
+                                              <>
+                                                <input
+                                                    type="text"
+                                                    value={editContent}
+                                                    onChange={(e) => setEditContent(e.target.value)}
+                                                />
+                                                <button onClick={handleSaveEdit}>Lưu</button>
+                                                <button onClick={() => setEditingIndex(null)}>Hủy</button>
+                                              </>
+                                          ) : (
+                                              comment.content
+                                          )}
+                                        </div>
+
+                                        <div className="cm-comment-actions">
+                                          {comment.user?.id === userIDCMT && (
+                                              <>
+                                                <button className="cm-btn-more" onClick={() => toggleMenu(index)}>
+                                                  ...
+                                                </button>
+                                                <div
+                                                    className="cm-comment-menu"
+                                                    style={{ display: openMenuIndex === index ? "block" : "none" }}
+                                                >
+                                                  <button onClick={() => handleEditClick(index, comment.content, comment.id)}>Sửa</button>
+                                                  <button onClick={() => handleDelete(comment.id)}>Xóa</button>
+                                                </div>
+                                              </>
+                                          )}
+                                        </div>
+                                      </div>
+                                  ))}
+                                </div>
+                              </>
+                          )}
+                        </div>
+                    ))}
+                <div className="pagination" style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center', marginTop: 16 }}>
                   <button
-                    key={page}
-                    onClick={() => fetchPosts(page)}
-                    disabled={page === currentPage || loading}
-                    style={{
-                      fontWeight: page === currentPage ? "bold" : "normal",
-                      backgroundColor: page === currentPage ? "#007bff" : "#f0f0f0",
-                      color: page === currentPage ? "white" : "black",
-                      padding: '4px 10px',
-                      borderRadius: 4,
-                      border: '1px solid #ccc',
-                    }}
+                      disabled={currentPage === 1 || loading}
+                      onClick={() => fetchPosts(currentPage - 1)}
                   >
-                    {page}
+                    ◀ Trang trước
                   </button>
-                );
-              })}
 
-              <button
-                disabled={currentPage === totalPages || loading}
-                onClick={() => fetchPosts(currentPage + 1)}
-              >
-                Trang sau ▶
-              </button>
-            </div>
+                  {/* Danh sách số trang */}
+                  {Array.from({ length: totalPages }, (_, index) => {
+                    const page = index + 1;
+                    return (
+                        <button
+                            key={page}
+                            onClick={() => fetchPosts(page)}
+                            disabled={page === currentPage || loading}
+                            style={{
+                              fontWeight: page === currentPage ? "bold" : "normal",
+                              backgroundColor: page === currentPage ? "#007bff" : "#f0f0f0",
+                              color: page === currentPage ? "white" : "black",
+                              padding: '4px 10px',
+                              borderRadius: 4,
+                              border: '1px solid #ccc',
+                            }}
+                        >
+                          {page}
+                        </button>
+                    );
+                  })}
 
-          </>
-        )}
+                  <button
+                      disabled={currentPage === totalPages || loading}
+                      onClick={() => fetchPosts(currentPage + 1)}
+                  >
+                    Trang sau ▶
+                  </button>
+                </div>
+
+              </>
+          )}
+        </div>
       </div>
-    </div>
   );
 }

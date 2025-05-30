@@ -36,7 +36,11 @@ import SavePost from "./pages/saves/Index";
 axios.defaults.baseURL = 'http://localhost:8000/api';
 axios.defaults.withCredentials = true;
 
-// Fetch CSRF cookie on app load
+
+await axios.get('http://localhost:8000/sanctum/csrf-cookie');
+
+axios.defaults.baseURL = 'http://localhost:8000/api';
+axios.defaults.withCredentials = true;
 
 await axios.get('http://localhost:8000/sanctum/csrf-cookie');
 
