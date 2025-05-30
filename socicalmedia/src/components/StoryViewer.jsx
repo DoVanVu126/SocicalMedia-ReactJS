@@ -2,14 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import "../style/StoryViewer.css";
 
 const StoryViewer = ({
-  stories,
-  onClose,
-  initialIndex = 0,
-  onNextUser,
-  onPrevUser,
-  onDeleteStory,
-  currentUserId,
-}) => {
+                       stories,
+                       onClose,
+                       initialIndex = 0,
+                       onNextUser,
+                       onPrevUser,
+                       onDeleteStory,
+                       currentUserId,
+                     }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [direction, setDirection] = useState(null);
   const [progress, setProgress] = useState(0);
@@ -157,95 +157,95 @@ const StoryViewer = ({
   }
 
   return (
-    <div className="story-viewer-overlay" onClick={onClose}>
-      <div className="story-viewer" ref={containerRef}>
-        <div className="progress-bar-container">
-          {stories.map((_, index) => (
-            <div
-              key={index}
-              className={`progress-segment ${index < currentIndex ? "completed" : index === currentIndex ? "active" : ""}`}
-            >
-              <div className="progress-fill" style={handleProgressStyle(index)}></div>
-            </div>
-          ))}
-        </div>
+      <div className="story-viewer-overlay" onClick={onClose}>
+        <div className="story-viewer" ref={containerRef}>
+          <div className="progress-bar-container">
+            {stories.map((_, index) => (
+                <div
+                    key={index}
+                    className={`progress-segment ${index < currentIndex ? "completed" : index === currentIndex ? "active" : ""}`}
+                >
+                  <div className="progress-fill" style={handleProgressStyle(index)}></div>
+                </div>
+            ))}
+          </div>
 
-        <div
-          className={`story-content-display ${direction ? `slide-${direction}` : ""} ${isDeleting ? "shatter" : ""}`}
-          onClick={handleContainerClick}
-        >
-          <div className="story-user-info">
-            <img
-              src={
-                currentStory.user?.profilepicture
-                  ? `http://localhost:8000/storage/images/${currentStory.user.profilepicture}`
-                  : "/default-avatar.png"
-              }
-              alt="Avatar"
-              className="story-avatar"
-              onError={(e) => {
-                e.target.src = "/default-avatar.png";
-              }}
-            />
-            <div className="story-user-details">
-              <span className="story-username">{currentStory.user?.username || "Người dùng"}</span>
-              <span className="story-time">
+          <div
+              className={`story-content-display ${direction ? `slide-${direction}` : ""} ${isDeleting ? "shatter" : ""}`}
+              onClick={handleContainerClick}
+          >
+            <div className="story-user-info">
+              <img
+                  src={
+                    currentStory.user?.profilepicture
+                        ? `http://localhost:8000/storage/images/${currentStory.user.profilepicture}`
+                        : "/default-avatar.png"
+                  }
+                  alt="Avatar"
+                  className="story-avatar"
+                  onError={(e) => {
+                    e.target.src = "/default-avatar.png";
+                  }}
+              />
+              <div className="story-user-details">
+                <span className="story-username">{currentStory.user?.username || "Người dùng"}</span>
+                <span className="story-time">
                 {new Date(currentStory.created_at).toLocaleString("vi-VN", {
                   timeStyle: "short",
                   dateStyle: "short",
                 })}
               </span>
+              </div>
             </div>
+
+            {currentStory.videourl?.match(/\.(mp4|webm)$/i) ? (
+                <video
+                    ref={videoRef}
+                    src={`http://localhost:8000/storage/story_videos/${currentStory.videourl}`}
+                    className="story-media"
+                    autoPlay
+                    muted
+                    playsInline
+                    onError={() => goToNext()}
+                />
+            ) : (
+                <img
+                    src={`http://localhost:8000/storage/story_images/${currentStory.imageurl}`}
+                    className="story-media"
+                    alt="Story"
+                    onError={(e) => {
+                      e.target.src = "/default-story.jpg";
+                    }}
+                />
+            )}
+            <div className="story-text">{currentStory.content}</div>
+
+            {currentStory.user?.id === currentUserId && (
+                <div className="story-menu-wrapper">
+                  <button
+                      className="close-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete();
+                      }}
+                  >
+                    🗑️
+                  </button>
+                </div>
+            )}
           </div>
 
-          {currentStory.videourl?.match(/\.(mp4|webm)$/i) ? (
-            <video
-              ref={videoRef}
-              src={`http://localhost:8000/storage/story_videos/${currentStory.videourl}`}
-              className="story-media"
-              autoPlay
-              muted
-              playsInline
-              onError={() => goToNext()}
-            />
-          ) : (
-            <img
-              src={`http://localhost:8000/storage/story_images/${currentStory.imageurl}`}
-              className="story-media"
-              alt="Story"
-              onError={(e) => {
-                e.target.src = "/default-story.jpg";
+          <button
+              className="close-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
               }}
-            />
-          )}
-          <div className="story-text">{currentStory.content}</div>
-
-          {currentStory.user?.id === currentUserId && (
-            <div className="story-menu-wrapper">
-              <button
-                className="close-btn"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete();
-                }}
-              >
-                🗑️
-              </button>
-            </div>
-          )}
+          >
+            ✕
+          </button>
         </div>
-
-        <button
-          className="close-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-        >
-          ✕
-        </button>
       </div>
-    </div>
   );
 };
 

@@ -42,15 +42,15 @@ const EditStory = () => {
   const [preview, setPreview] = useState({
     type: story.videourl ? "video" : story.imageurl ? "image" : null,
     url: story.videourl
-      ? story.videourl
-      : story.imageurl
-      ? getImageUrl(story.imageurl)
-      : "/default-image.jpg",
+        ? story.videourl
+        : story.imageurl
+            ? getImageUrl(story.imageurl)
+            : "/default-image.jpg",
   });
 
   const [errors, setErrors] = useState({});
   const [currentImageUrl, setCurrentImageUrl] = useState(
-    story.imageurl ? getImageUrl(story.imageurl) : null
+      story.imageurl ? getImageUrl(story.imageurl) : null
   );
   const currentPreviewUrl = useRef(null);
   const imageRef = useRef(null);
@@ -77,8 +77,8 @@ const EditStory = () => {
           setPreview({
             type: fetchedStory.videourl ? "video" : fetchedStory.imageurl ? "image" : null,
             url: fetchedStory.videourl
-              ? fetchedStory.videourl
-              : getImageUrl(fetchedStory.imageurl) || "/default-image.jpg",
+                ? fetchedStory.videourl
+                : getImageUrl(fetchedStory.imageurl) || "/default-image.jpg",
           });
           setCurrentImageUrl(getImageUrl(fetchedStory.imageurl));
           story.id = fetchedStory.id;
@@ -100,7 +100,7 @@ const EditStory = () => {
   useEffect(() => {
     if (story.id) {
       broadcastChannelRef.current = new BroadcastChannel(`story-${story.id}`);
-      
+
       broadcastChannelRef.current.onmessage = (event) => {
         const updatedStory = event.data;
         if (updatedStory.id === story.id) {
@@ -190,10 +190,10 @@ const EditStory = () => {
       setPreview({
         type: story.videourl ? "video" : currentImageUrl ? "image" : null,
         url: story.videourl
-          ? story.videourl
-          : currentImageUrl
-          ? currentImageUrl
-          : "/default-image.jpg",
+            ? story.videourl
+            : currentImageUrl
+                ? currentImageUrl
+                : "/default-image.jpg",
       });
     }
 
@@ -220,7 +220,7 @@ const EditStory = () => {
       particle.style.background = `url(${img.src})`;
       particle.style.backgroundSize = `${rect.width}px ${rect.height}px`;
       particle.style.backgroundPosition = `${-Math.random() * rect.width}px ${
-        -Math.random() * rect.height
+          -Math.random() * rect.height
       }px`;
       particle.style.position = "absolute";
       particle.style.left = `${Math.random() * rect.width}px`;
@@ -234,7 +234,7 @@ const EditStory = () => {
 
     particles.forEach((particle, index) => {
       particle.style.animation = `disintegrate 0.8s ease forwards ${
-        index * 0.02
+          index * 0.02
       }s`;
     });
 
@@ -342,11 +342,11 @@ const EditStory = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:8000/api/stories/${story.id}?_method=PUT`,
-        data,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
+          `http://localhost:8000/api/stories/${story.id}?_method=PUT`,
+          data,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+          }
       );
 
       const updatedStory = response.data;
@@ -408,146 +408,146 @@ const EditStory = () => {
 
   if (errors.general) {
     return (
-      <div className="edit-story-container">
-        <Header />
-        <Sidebar />
-        <div className="error-container">
-          <p className="error">{errors.general}</p>
+        <div className="edit-story-container">
+          <Header />
+          <Sidebar />
+          <div className="error-container">
+            <p className="error">{errors.general}</p>
+          </div>
         </div>
-      </div>
     );
   }
 
   const titleText = "Sửa Story";
 
   return (
-    <div className="edit-story-container">
-      <Header />
-      <Sidebar />
-      <h1 className="edit-story-header netflix-text">
-        {titleText.split("").map((char, index) => (
-          <span key={index} style={{ "--i": index }}>
+      <div className="edit-story-container">
+        <Header />
+        <Sidebar />
+        <h1 className="edit-story-header netflix-text">
+          {titleText.split("").map((char, index) => (
+              <span key={index} style={{ "--i": index }}>
             {char}
           </span>
-        ))}
-      </h1>
-      <form onSubmit={handleUpdateStory} className="edit-story-form">
-        <label htmlFor="content" className="visually-hidden">
-          Nội dung story
-        </label>
-        <textarea
-          id="content"
-          name="content"
-          value={formData.content}
-          onChange={handleInputChange}
-          placeholder="Nội dung"
-          className="story-input"
-          required
-        />
-        {errors.content && <p className="error">{errors.content}</p>}
-
-        <div className="visibility-container">
-          <label htmlFor="visibility" className="visibility-label">
-            Chế độ hiển thị:
+          ))}
+        </h1>
+        <form onSubmit={handleUpdateStory} className="edit-story-form">
+          <label htmlFor="content" className="visually-hidden">
+            Nội dung story
           </label>
-          <select
-            id="visibility"
-            name="visibility"
-            value={formData.visibility}
-            onChange={handleInputChange}
-            className="visibility-select"
-          >
-            <option value="public">Công khai</option>
-            <option value="private">Riêng tư</option>
-          </select>
-          {errors.visibility && <p className="error">{errors.visibility}</p>}
-        </div>
+          <textarea
+              id="content"
+              name="content"
+              value={formData.content}
+              onChange={handleInputChange}
+              placeholder="Nội dung"
+              className="story-input"
+              required
+          />
+          {errors.content && <p className="error">{errors.content}</p>}
 
-        {preview.url && (
-          <div className="media-preview">
-            <h5 className="preview-title">Xem trước</h5>
-            {preview.type === "video" ? (
-              <video
-                src={preview.url}
-                className="preview-media"
-                controls
-                muted
-                aria-label="Video story hiện tại"
-              />
-            ) : (
-              <img
-                src={preview.url}
-                alt="Story preview"
-                className="preview-media"
-                ref={imageRef}
-                onError={(e) => {
-                  console.error("Image load error:", preview.url);
-                  e.target.src = "/default-image.jpg";
-                }}
-              />
-            )}
-          </div>
-        )}
-
-        <div className="file-inputs">
-          <div className="file-input-group">
-            <label className="file-label" htmlFor="image">
-              {formData.image ? formData.image.name : "Chọn ảnh mới"}
+          <div className="visibility-container">
+            <label htmlFor="visibility" className="visibility-label">
+              Chế độ hiển thị:
             </label>
-            <input
-              type="file"
-              id="image"
-              name="image"
-              onChange={handleFileChange}
-              accept="image/jpeg,image/png,image/jpg"
-              className="file-input"
-            />
-            {formData.image && (
-              <button
-                type="button"
-                className="clear-file-btn"
-                onClick={() => clearFile("image")}
-              >
-                ✕
-              </button>
-            )}
-            {errors.image && <p className="error">{errors.image}</p>}
+            <select
+                id="visibility"
+                name="visibility"
+                value={formData.visibility}
+                onChange={handleInputChange}
+                className="visibility-select"
+            >
+              <option value="public">Công khai</option>
+              <option value="private">Riêng tư</option>
+            </select>
+            {errors.visibility && <p className="error">{errors.visibility}</p>}
           </div>
-          <div className="file-input-group">
-            <label className="file-label" htmlFor="video">
-              {formData.video ? formData.video.name : "Chọn video mới"}
-            </label>
-            <input
-              type="file"
-              id="video"
-              name="video"
-              onChange={handleFileChange}
-              accept="video/mp4,video/avi,video/x-matroska"
-              className="file-input"
-            />
-            {formData.video && (
-              <button
-                type="button"
-                className="clear-file-btn"
-                onClick={() => clearFile("video")}
-              >
-                ✕
-              </button>
-            )}
-            {errors.video && <p className="error">{errors.video}</p>}
-          </div>
-        </div>
 
-        <div className="form-actions">
-          <button type="submit" className="submit-button">
-            Cập nhật Story
-          </button>
-          <button type="button" className="cancel-button" onClick={handleCancel}>
-            Hủy
-          </button>
-        </div>
-      </form>
-    </div>
+          {preview.url && (
+              <div className="media-preview">
+                <h5 className="preview-title">Xem trước</h5>
+                {preview.type === "video" ? (
+                    <video
+                        src={preview.url}
+                        className="preview-media"
+                        controls
+                        muted
+                        aria-label="Video story hiện tại"
+                    />
+                ) : (
+                    <img
+                        src={preview.url}
+                        alt="Story preview"
+                        className="preview-media"
+                        ref={imageRef}
+                        onError={(e) => {
+                          console.error("Image load error:", preview.url);
+                          e.target.src = "/default-image.jpg";
+                        }}
+                    />
+                )}
+              </div>
+          )}
+
+          <div className="file-inputs">
+            <div className="file-input-group">
+              <label className="file-label" htmlFor="image">
+                {formData.image ? formData.image.name : "Chọn ảnh mới"}
+              </label>
+              <input
+                  type="file"
+                  id="image"
+                  name="image"
+                  onChange={handleFileChange}
+                  accept="image/jpeg,image/png,image/jpg"
+                  className="file-input"
+              />
+              {formData.image && (
+                  <button
+                      type="button"
+                      className="clear-file-btn"
+                      onClick={() => clearFile("image")}
+                  >
+                    ✕
+                  </button>
+              )}
+              {errors.image && <p className="error">{errors.image}</p>}
+            </div>
+            <div className="file-input-group">
+              <label className="file-label" htmlFor="video">
+                {formData.video ? formData.video.name : "Chọn video mới"}
+              </label>
+              <input
+                  type="file"
+                  id="video"
+                  name="video"
+                  onChange={handleFileChange}
+                  accept="video/mp4,video/avi,video/x-matroska"
+                  className="file-input"
+              />
+              {formData.video && (
+                  <button
+                      type="button"
+                      className="clear-file-btn"
+                      onClick={() => clearFile("video")}
+                  >
+                    ✕
+                  </button>
+              )}
+              {errors.video && <p className="error">{errors.video}</p>}
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <button type="submit" className="submit-button">
+              Cập nhật Story
+            </button>
+            <button type="button" className="cancel-button" onClick={handleCancel}>
+              Hủy
+            </button>
+          </div>
+        </form>
+      </div>
   );
 };
 

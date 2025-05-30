@@ -6,6 +6,9 @@ import "../../style/home-custom.css";
 import friendService from "../../services/FriendService";
 import {BASE_URL_SERVER} from "../../config/server";
 import Loading from "../../components/Loading";
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/vi';
 
 export default function ShowPage() {
     const [dataFriend, setDataFriend] = useState([]);
@@ -14,6 +17,12 @@ export default function ShowPage() {
     const [dataNoFriend, setDataNoFriend] = useState([]);
     const [loading, setLoading] = useState(true);
     const user = JSON.parse(localStorage.getItem('user'));
+    dayjs.extend(relativeTime);
+    dayjs.locale('vi');
+
+    const changeTime = (lastOnline) => {
+        return dayjs(lastOnline).fromNow();
+    }
 
     const getListFriend = async () => {
         await friendService.showListFriend(user.id)
@@ -248,7 +257,7 @@ export default function ShowPage() {
                                                                 <li key={index}
                                                                     className="d-flex justify-content-between align-items-center mb-3">
                                                                     <div className="d-flex gap-2">
-                                                                        <figure>
+                                                                        <figure className="position-relative">
                                                                             <img
                                                                                 style={{
                                                                                     width: '50px',
@@ -258,9 +267,24 @@ export default function ShowPage() {
                                                                                 src={avatarUrl}
                                                                                 alt=""
                                                                             />
+                                                                            {item.is_online ? (
+                                                                                <span className="position-absolute top-0 start-100 translate-middle p-2 bg-success border border-light rounded-circle">
+                                                                                    <span className="visually-hidden">---</span>
+                                                                                </span>
+                                                                            ) : (
+                                                                                <span className="position-absolute top-0 start-100 translate-middle p-2 bg-secondary border border-light rounded-circle">
+                                                                                    <span className="visually-hidden">Offline</span>
+                                                                                </span>
+                                                                            )}
+
                                                                         </figure>
-                                                                        <div className="friend-meta">
+                                                                        <div className="friend-meta ">
                                                                             <h4 className="h6 mb-2 ">{item.username}</h4>
+                                                                            {item.is_online ? (
+                                                                                <p className="small">Đang hoạt động</p>
+                                                                            ) : (
+                                                                                <p className="small">Hoạt động {changeTime(item.last_online_at)}</p>
+                                                                            )}
                                                                         </div>
                                                                     </div>
 
@@ -307,7 +331,7 @@ export default function ShowPage() {
 
                                                             return (
                                                                 <li key={index}>
-                                                                    <figure>
+                                                                    <figure className="position-relative">
                                                                         <img
                                                                             style={{
                                                                                 width: '50px',
@@ -317,6 +341,16 @@ export default function ShowPage() {
                                                                             src={avatarUrl}
                                                                             alt=""
                                                                         />
+                                                                        {item.is_online ? (
+                                                                            <span className="position-absolute top-0 start-100 translate-middle p-2 bg-success border border-light rounded-circle">
+                                                                                    <span className="visually-hidden">---</span>
+                                                                                </span>
+                                                                        ) : (
+                                                                            <span className="position-absolute top-0 start-100 translate-middle p-2 bg-secondary border border-light rounded-circle">
+                                                                                    <span className="visually-hidden">Offline</span>
+                                                                                </span>
+                                                                        )}
+
                                                                     </figure>
                                                                     <div className="friend-meta mx-3">
                                                                         <h4 className="h6 mb-2 ">{item.username}</h4>
@@ -355,7 +389,7 @@ export default function ShowPage() {
                                                                 <li key={index}
                                                                     className="d-flex justify-content-between align-items-center mb-3">
                                                                     <div className="d-flex gap-2">
-                                                                        <figure>
+                                                                        <figure className="position-relative">
                                                                             <img
                                                                                 style={{
                                                                                     width: '50px',
@@ -365,6 +399,16 @@ export default function ShowPage() {
                                                                                 src={avatarUrl}
                                                                                 alt=""
                                                                             />
+                                                                            {item.is_online ? (
+                                                                                <span className="position-absolute top-0 start-100 translate-middle p-2 bg-success border border-light rounded-circle">
+                                                                                    <span className="visually-hidden">---</span>
+                                                                                </span>
+                                                                            ) : (
+                                                                                <span className="position-absolute top-0 start-100 translate-middle p-2 bg-secondary border border-light rounded-circle">
+                                                                                    <span className="visually-hidden">Offline</span>
+                                                                                </span>
+                                                                            )}
+
                                                                         </figure>
                                                                         <div className="friend-meta">
                                                                             <h4 className="h6 mb-2 ">{item.username}</h4>
@@ -398,7 +442,7 @@ export default function ShowPage() {
 
                                                             return (
                                                                 <li key={index}>
-                                                                    <figure>
+                                                                    <figure className="position-relative">
                                                                         <img
                                                                             style={{
                                                                                 width: '50px',
@@ -408,6 +452,16 @@ export default function ShowPage() {
                                                                             src={avatarUrl}
                                                                             alt=""
                                                                         />
+                                                                        {item.is_online ? (
+                                                                            <span className="position-absolute top-0 start-100 translate-middle p-2 bg-success border border-light rounded-circle">
+                                                                                    <span className="visually-hidden">---</span>
+                                                                                </span>
+                                                                        ) : (
+                                                                            <span className="position-absolute top-0 start-100 translate-middle p-2 bg-secondary border border-light rounded-circle">
+                                                                                    <span className="visually-hidden">Offline</span>
+                                                                                </span>
+                                                                        )}
+
                                                                     </figure>
                                                                     <div className="friend-meta mx-3">
                                                                         <h4 className="h6 mb-2 ">{item.username}</h4>

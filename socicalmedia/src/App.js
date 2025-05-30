@@ -29,13 +29,18 @@ import CreateUser from "./pages/users/CreateUser";
 import axios from 'axios';
 import EditStory from "./pages/EditStory";
 import FriendRequest from "./pages/friends/Index";
-
+import Favourites from "./pages/favourites/Index";
+import SavePost from "./pages/saves/Index";
 
 // Set base URL and credentials
 axios.defaults.baseURL = 'http://localhost:8000/api';
 axios.defaults.withCredentials = true;
 
-// Fetch CSRF cookie on app load
+
+await axios.get('http://localhost:8000/sanctum/csrf-cookie');
+
+axios.defaults.baseURL = 'http://localhost:8000/api';
+axios.defaults.withCredentials = true;
 
 await axios.get('http://localhost:8000/sanctum/csrf-cookie');
 
@@ -74,6 +79,8 @@ function AppLayout() {
             <Route path="/admin/users/detail/:id" element={<DetailUser />} />
 
             <Route path="/friends" element={<FriendRequest />} />
+            <Route path="/favourites" element={<Favourites />} />
+            <Route path="/saves-post" element={<SavePost />} />
             {/* End admin user */}
             <Route path="/dinogame" element={<DinoGame />} />
             <Route path="/minigame" element={<MiniGame />} />

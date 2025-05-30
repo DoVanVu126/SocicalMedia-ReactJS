@@ -3,10 +3,12 @@ import {useNavigate} from 'react-router-dom'
 import {BASE_URL_SERVER} from "../config/server";
 import {initBlinkText} from '../script';
 import "../style/Home.css";
+import authService from "../services/AuthService";
 
-const handleLogout = () => {
+const handleLogout = async () => {
     localStorage.clear();
     sessionStorage.clear();
+    await authService.logout();
     alert('Đăng xuất thành công!')
     window.location.href = `/`;
 }
